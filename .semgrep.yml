@@ -1,0 +1,56 @@
+rules:
+  - id: hardcoded-secrets
+    patterns:
+      - pattern: |
+          const $VAR = "$SECRET"
+      - pattern: |
+          let $VAR = "$SECRET"
+      - pattern: |
+          var $VAR = "$SECRET"
+    message: Potential hardcoded secret detected
+    languages: [typescript, javascript]
+    severity: ERROR
+    metadata:
+      category: security
+      subcategory: [vuln]
+      confidence: HIGH
+
+  - id: unsafe-regex
+    patterns:
+      - pattern: |
+          new RegExp($PATTERN)
+      - pattern: |
+          /$PATTERN/
+    message: Potentially unsafe regex pattern - check for ReDoS vulnerabilities
+    languages: [typescript, javascript]
+    severity: WARNING
+    metadata:
+      category: security
+      subcategory: [vuln]
+      confidence: MEDIUM
+
+  - id: eval-usage
+    patterns:
+      - pattern: eval($CODE)
+      - pattern: Function($CODE)
+      - pattern: setTimeout($CODE, ...)
+      - pattern: setInterval($CODE, ...)
+    message: Dangerous use of eval or Function constructor
+    languages: [typescript, javascript]
+    severity: ERROR
+    metadata:
+      category: security
+      subcategory: [vuln]
+      confidence: HIGH
+
+  - id: buffer-overflow
+    patterns:
+      - pattern: Buffer.from($DATA, 'base64')
+      - pattern: Buffer.alloc($SIZE)
+    message: Buffer operations should be validated for size limits
+    languages: [typescript, javascript]
+    severity: INFO
+    metadata:
+      category: security
+      subcategory: [audit]
+      confidence: LOW

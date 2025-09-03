@@ -1,0 +1,31 @@
+{
+  "name": "@prompt-chainmail/pro",
+  "version": "0.5.0",
+  "description": "Professional AI prompt security with advanced features and support",
+  "type": "module",
+  "main": "./dist/prompt-chainmail-pro.cjs",
+  "module": "./dist/prompt-chainmail-pro.js",
+  "types": "./dist/index.d.ts",
+  "license": "Commercial",
+  "private": true,
+  "keywords": [
+    "prompt-injection",
+    "security",
+    "ai-security",
+    "enterprise",
+    "commercial"
+  ],
+  "author": "alexandrughinea <alexandrughinea.dev+prompt-chainmail@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alexandrughinea/prompt-chainmail.git",
+    "directory": "packages/pro"
+  },
+  "dependencies": {
+    "prompt-chainmail": "^0.5.0",
+    "@prompt-chainmail/shared": "^0.5.0"
+  },
+  "peerDependencies": {
+    "prompt-chainmail": "^0.5.0"
+  }
+}

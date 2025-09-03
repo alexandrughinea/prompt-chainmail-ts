@@ -1,0 +1,28 @@
+# Semgrep ignore file
+# Ignore common directories and files that don't need security scanning
+
+# Dependencies
+node_modules/
+dist/
+build/
+
+# Test files (may contain intentional security test cases)
+*.test.ts
+*.test.js
+*.spec.ts
+*.spec.js
+examples.ts
+
+# Configuration files
+*.config.js
+*.config.ts
+vite.config.ts
+vitest.config.ts
+
+# Documentation
+*.md
+CHANGELOG.md
+
+# Git and CI
+.git/
+.github/

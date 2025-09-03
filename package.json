@@ -1,0 +1,73 @@
+{
+    "name": "prompt-chainmail",
+    "version": "0.5.0",
+    "description": "Composable defense framework protecting your AI prompts from prompt injection, role confusion, and encoded attacks with enterprise monitoring.",
+    "type": "module",
+    "main": "./dist/prompt-chainmail.cjs.js",
+    "module": "./dist/prompt-chainmail.es.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "import": {
+                "types": "./dist/index.d.ts",
+                "default": "./dist/prompt-chainmail.es.js"
+            },
+            "require": {
+                "types": "./dist/index.d.ts",
+                "default": "./dist/prompt-chainmail.cjs.js"
+            }
+        }
+    },
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "build": "vite build && npm run build:types",
+        "build:types": "tsc --emitDeclarationOnly --outDir dist",
+        "dev": "vite build --watch",
+        "test": "vitest",
+        "test:ui": "vitest --ui",
+        "coverage": "vitest --coverage",
+        "lint": "eslint src --ext .ts",
+        "format": "prettier --write src/**/*.ts",
+        "security": "semgrep --config=.semgrep.yml src/",
+        "prepublishOnly": "npm run build && npm test"
+    },
+    "keywords": [
+        "prompt-injection",
+        "security",
+        "middleware",
+        "chainmail",
+        "ai-security",
+        "llm-protection",
+        "pipeline",
+        "rivets",
+        "typescript"
+    ],
+    "author": "alexandrughinea <alexandrughinea.dev+prompt-chainmail@gmail.com>",
+    "license": "BSL-1.1",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/alexandrughinea/prompt-chainmail-ts.git"
+    },
+    "bugs": {
+        "url": "https://github.com/alexandrughinea/prompt-chainmail-ts/issues"
+    },
+    "homepage": "https://github.com/alexandrughinea/prompt-chainmail-ts#readme",
+    "devDependencies": {
+        "@types/node": "^20.0.0",
+        "@typescript-eslint/eslint-plugin": "^6.0.0",
+        "@typescript-eslint/parser": "^6.0.0",
+        "@vitest/coverage-v8": "^0.34.0",
+        "@vitest/ui": "^0.34.0",
+        "eslint": "^8.0.0",
+        "prettier": "^3.0.0",
+        "typescript": "^5.0.0",
+        "vite": "^5.0.0",
+        "vite-plugin-dts": "^3.0.0",
+        "vitest": "^0.34.0"
+    },
+    "engines": {
+        "node": ">=16.0.0"
+    }
+}
