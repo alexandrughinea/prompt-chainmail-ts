@@ -1,117 +1,13 @@
 import { Rivets } from "./rivets/index";
-export { Rivets };
+import { Chainmails } from "./chainmails/index";
+import { toChunks } from "./utils";
+import { ChainmailContext, ChainmailResult, ChainmailRivet } from "./types";
 
-/**
- * Context object passed through the rivet chain during input processing.
- * Contains the current state of input analysis and security assessment.
- *
- * @public
- * @example Processing Context
- * ```typescript
- * const rivet: ChainmailRivet = async (context, next) => {
- *   // Check confidence level
- *   if (context.confidence < 0.5) {
- *     context.blocked = true;
- *     context.flags.push('low_confidence');
- *     context.metadata.reason = 'Confidence below threshold';
- *   }
- *   return next();
- * };
- * ```
- */
-export interface ChainmailContext {
-  /** Original input text before any processing */
-  readonly input: string;
-  /** Sanitized/processed text after rivet processing */
-  sanitized: string;
-  /** Array of security flags raised during processing */
-  flags: string[];
-  /**
-   * Confidence score between 0-1, where:
-   * - 1.0 = Completely safe
-   * - 0.5 = Moderate risk
-   * - 0.0 = High risk/malicious
-   */
-  confidence: number;
-  /** Custom metadata for extensions and debugging */
-  metadata: Record<string, unknown>;
-  /** Whether the input should be blocked based on security analysis */
-  blocked: boolean;
-  /** Processing start timestamp */
-  readonly start_time: number;
-  /** Unique identifier for this processing session */
-  readonly session_id: string;
-}
+export { Rivets, Chainmails };
+export type { ChainmailRivet };
 
-/**
- * Result object returned after processing input through the chainmail.
- * Contains success status, processing context, and any errors encountered.
- *
- * @public
- * @example Handling Results
- * ```typescript
- * const result = await chainmail.protect(userInput);
- *
- * if (result.success) {
- *   // Safe to process
- *   await processInput(result.context.sanitized);
- * } else {
- *   // Handle security violation
- *   logger.warn('Security violation', {
- *     flags: result.context.flags,
- *     confidence: result.context.confidence
- *   });
- * }
- * ```
- */
-export interface ChainmailResult {
-  /** Whether the input passed all security checks */
-  success: boolean;
-  /** Processing context containing analysis results */
-  context: ChainmailContext;
-  /** Error message if processing failed */
-  error?: string;
-  /** Processing duration in milliseconds */
-  processing_time: number;
-  /** Memory usage during processing in bytes */
-  memory_usage?: number;
-}
-
-/**
- * A rivet function that processes input context and can modify it.
- * Rivets are chained together to form a complete security pipeline.
- *
- * @param context - The current processing context
- * @param next - Function to call the next rivet in the chain
- * @returns Promise resolving to the processing result
- *
- * @public
- * @example Custom Rivet
- * ```typescript
- * const customRivet: ChainmailRivet = async (context, next) => {
- *   // Pre-processing logic
- *   if (context.sanitized.includes('forbidden')) {
- *     context.flags.push('forbidden_content');
- *     context.confidence *= 0.5;
- *   }
- *
- *   // Continue to next rivet
- *   const result = await next();
- *
- *   // Post-processing logic
- *   if (!result.success) {
- *     context.metadata.failureReason = 'Custom rivet detected issue';
- *   }
- *
- *   return result;
- * };
- * ```
- */
-export type ChainmailRivet = (
-  context: ChainmailContext,
-  next: () => Promise<ChainmailResult>
-) => Promise<ChainmailResult>;
-
+const MAX_INPUT_SIZE_IN_MB   = 1024 * 1024 * 10; // 10MB
+const STRING_CHUNK_THRESHOLD = 1024 * 1024; // 1MB
 
 /**
  * Core chainmail class for forging security rivets
@@ -140,23 +36,76 @@ export class PromptChainmail {
   /**
    * Protect input by running it through all forged rivets
    */
-  async protect(input: string): Promise<ChainmailResult> {
+  async protect(input: string | ReadableStream | ArrayBuffer | Uint8Array): Promise<ChainmailResult> {
     const startTime = Date.now();
-    const sessionId = `chainmail_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const sessionId = `chainmail_${Date.now()}_${crypto.randomUUID().replace(/-/g, '').substring(0, 9)}`;
 
+    if (input == null) {
+      const processingTime = Date.now() - startTime;
+      return {
+        success: false,
+        context: {
+          input: "",
+          sanitized: "",
+          flags: ["invalid_input"],
+          blocked: true,
+          start_time: startTime,
+          session_id: sessionId,
+          confidence: 1,
+          metadata: Object.create(null),
+        },
+        error: `Invalid input: ${input}`,
+        processing_time: processingTime,
+      };
+    }
+
+    if (typeof input === 'string') {
+
+      if (input.length > STRING_CHUNK_THRESHOLD) {
+        const stream = this.stringToStream(input);
+        return this.protectStream(stream, startTime, sessionId);
+      }
+
+      return this.protectString(input, startTime, sessionId);
+    }
+    return this.protectStream(input, startTime, sessionId);
+  }
+
+  /**
+   * Convert large string to ReadableStream for chunked processing
+   */
+  private stringToStream(input: string): ReadableStream<Uint8Array> {
+    return new ReadableStream({
+      start(controller) {
+        const encoder = new TextEncoder();
+        const chunkSize = 8192;
+        let offset = 0;
+        
+        while (offset < input.length) {
+          const chunk = input.slice(offset, offset + chunkSize);
+          controller.enqueue(encoder.encode(chunk));
+          offset += chunkSize;
+        }
+        controller.close();
+      }
+    });
+  }
+
+  /**
+   * Protect string input (original implementation)
+   */
+  private async protectString(input: string, startTime: number, sessionId: string): Promise<ChainmailResult> {
+    let index = 0;
     const context: ChainmailContext = {
       input,
       sanitized: input,
       flags: [],
       confidence: 1.0,
-      metadata: {},
+      metadata: Object.create(null),
       blocked: false,
       start_time: startTime,
       session_id: sessionId,
     };
-
-    let index = 0;
-
     const next = async (): Promise<ChainmailResult> => {
       if (index >= this.rivets.length) {
         const processingTime = Date.now() - startTime;
@@ -185,6 +134,106 @@ export class PromptChainmail {
   }
 
   /**
+   * Protect streaming input by processing chunks
+   */
+  private async protectStream(input: ReadableStream | ArrayBuffer | Uint8Array, startTime: number, sessionId: string): Promise<ChainmailResult> {
+    let chunkCount = 0;
+    let totalLength = 0;
+    const maxChunkSize = 8192;
+    const streamFlags: string[] = [];
+    const streamMetadata: Record<string, unknown> = Object.create(null);
+    let minConfidence = 1.0;
+
+    try {
+      for await (const chunk of toChunks(input, maxChunkSize)) {
+        chunkCount++;
+        totalLength += chunk.length;
+        
+        if (totalLength > MAX_INPUT_SIZE_IN_MB) {
+          streamFlags.push('stream_size_exceeded');
+          streamMetadata.streamSizeLimit = MAX_INPUT_SIZE_IN_MB;
+          return this.createStreamResult(true, chunkCount, totalLength, streamFlags, streamMetadata, 0, startTime, sessionId);
+        }
+
+        const chunkContext: ChainmailContext = {
+          input: chunk,
+          sanitized: chunk,
+          flags: [],
+          confidence: 1.0,
+          metadata: Object.create(null),
+          blocked: false,
+          start_time: startTime,
+          session_id: sessionId,
+        };
+        
+        const chunkResult = await this.processChunkThroughRivets(chunkContext, startTime);
+        
+        streamFlags.push(...chunkResult.context.flags);
+        Object.assign(streamMetadata, chunkResult.context.metadata);
+        minConfidence = Math.min(minConfidence, chunkResult.context.confidence);
+
+        if (chunkResult.context.blocked) {
+          return this.createStreamResult(true, chunkCount, totalLength, streamFlags, streamMetadata, minConfidence, startTime, sessionId);
+        }
+      }
+
+      return this.createStreamResult(false, chunkCount, totalLength, streamFlags, streamMetadata, minConfidence, startTime, sessionId);
+
+    } catch (error) {
+      streamFlags.push('stream_processing_error');
+      streamMetadata.streamError = error instanceof Error ? error.message : 'Unknown stream error';
+      return this.createStreamResult(true, chunkCount, totalLength, streamFlags, streamMetadata, 0, startTime, sessionId);
+    }
+  }
+
+  private async processChunkThroughRivets(chunkContext: ChainmailContext, startTime: number): Promise<ChainmailResult> {
+    let index = 0;
+    const next = async (): Promise<ChainmailResult> => {
+      if (index >= this.rivets.length) {
+        return {
+          success: !chunkContext.blocked,
+          context: chunkContext,
+          processing_time: Date.now() - startTime,
+        };
+      }
+      const rivet = this.rivets[index++];
+      return rivet(chunkContext, next);
+    };
+    return next();
+  }
+
+  private createStreamResult(
+    blocked: boolean,
+    chunkCount: number,
+    totalLength: number,
+    streamFlags: string[],
+    streamMetadata: Record<string, unknown>,
+    confidence: number,
+    startTime: number,
+    sessionId: string
+  ): ChainmailResult {
+    streamMetadata.chunkCount = chunkCount;
+    streamMetadata.totalLength = totalLength;
+
+    const finalContext: ChainmailContext = {
+      input: `[Stream: ${chunkCount} chunks, ${totalLength} chars]`,
+      sanitized: `[Stream: ${chunkCount} chunks, ${totalLength} chars]`,
+      flags: [...new Set(streamFlags)],
+      confidence,
+      metadata: streamMetadata,
+      blocked,
+      start_time: startTime,
+      session_id: sessionId,
+    };
+
+    return {
+      success: !blocked,
+      context: finalContext,
+      processing_time: Date.now() - startTime,
+    };
+  }
+
+  /**
    * Create a new chainmail with the same rivets
    */
   clone(): PromptChainmail {
@@ -201,65 +250,4 @@ export class PromptChainmail {
   }
 }
 
-/**
- * Pre-forged chainmail configurations
- */
-export const Chainmails: Record<string, () => PromptChainmail> = {
-  /**
-   * Basic protection chainmail
-   */
-  basic(maxLength = 8000, confidenceFilter = 0.6): PromptChainmail {
-    return new PromptChainmail()
-      .forge(Rivets.sanitize(maxLength))
-      .forge(Rivets.patternDetection())
-      .forge(Rivets.roleConfusion())
-      .forge(Rivets.delimiterConfusion())
-      .forge(Rivets.confidenceFilter(confidenceFilter))
-  },
-
-  /**
-   * Advanced protection chainmail with encoding detection
-   */
-  advanced(): PromptChainmail {
-    return new PromptChainmail()
-      .forge(Rivets.sanitize())
-      .forge(Rivets.patternDetection())
-      .forge(Rivets.roleConfusion())
-      .forge(Rivets.delimiterConfusion())
-      .forge(Rivets.instructionHijacking())
-      .forge(Rivets.codeInjection())
-      .forge(Rivets.sqlInjection())
-      .forge(Rivets.templateInjection())
-      .forge(Rivets.encodingDetection())
-      .forge(Rivets.structureAnalysis())
-      .forge(Rivets.confidenceFilter(0.5))
-      .forge(Rivets.rateLimit());
-  },
-
-  /**
-   * Development chainmail with logging
-   */
-  development(): PromptChainmail {
-    return Chainmails.advanced().forge(Rivets.logger());
-  },
-
-  /**
-   * Stricter chainmail for high-security environments
-   */
-  strict(maxLength = 8000, confidenceFilter = 0.8): PromptChainmail {
-    return new PromptChainmail()
-      .forge(Rivets.sanitize(maxLength))
-      .forge(Rivets.patternDetection())
-      .forge(Rivets.roleConfusion())
-      .forge(Rivets.delimiterConfusion())
-      .forge(Rivets.instructionHijacking())
-      .forge(Rivets.codeInjection())
-      .forge(Rivets.sqlInjection())
-      .forge(Rivets.templateInjection())
-      .forge(Rivets.encodingDetection())
-      .forge(Rivets.structureAnalysis())
-      .forge(Rivets.confidenceFilter(confidenceFilter))
-      .forge(Rivets.rateLimit(50, 60000));
-  },
-};
 

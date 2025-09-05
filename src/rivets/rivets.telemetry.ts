@@ -1,4 +1,4 @@
-import { ChainmailRivet } from "../index";
+import type { ChainmailRivet } from "../index";
 
 type LogLevel = "debug" | "info" | "warn" | "error";
 export type TelemetryData = {
@@ -99,11 +99,23 @@ export const createSentryProvider = (sentry: {
 });
 
 export const createDatadogProvider = (
-  tracer?: any,
-  logger?: {
-    info?: (message: string, data: Record<string, unknown>) => void;
-    error?: (message: string, data: Record<string, unknown>) => void;
-    debug?: (message: string, data: Record<string, unknown>) => void;
+  tracer: {
+    scope: () => {
+      active: () => {
+        setTag: (key: string, value: unknown) => void;
+        log: (data: Record<string, unknown>) => void;
+      } | null;
+    };
+    dogstatsd?: {
+      increment: (name: string, value: number, tags?: string[]) => void;
+      gauge: (name: string, value: number, tags?: string[]) => void;
+    };
+  },
+  logger: {
+    info?: (message: string, data?: Record<string, unknown>) => void;
+    warn?: (message: string, data?: Record<string, unknown>) => void;
+    error?: (message: string, data?: Record<string, unknown>) => void;
+    debug?: (message: string, data?: Record<string, unknown>) => void;
   }
 ): TelemetryProvider => ({
   logSecurityEvent: (event) => {
@@ -172,7 +184,15 @@ export const createDatadogProvider = (
   },
 });
 
-export const createNewRelicProvider = (newrelic: any): TelemetryProvider => ({
+export const createNewRelicProvider = (newrelic: {
+  recordCustomEvent: (name: string, data: Record<string, unknown>) => void;
+  recordMetric: (name: string, value: number) => void;
+  noticeError?: (
+    error: Error,
+    customAttributes?: Record<string, unknown>
+  ) => void;
+  addCustomAttribute?: (key: string, value: unknown) => void;
+}): TelemetryProvider => ({
   logSecurityEvent: (event) => {
     newrelic.recordCustomEvent("ChainmailSecurityEvent", {
       type: event.type,
@@ -184,7 +204,7 @@ export const createNewRelicProvider = (newrelic: any): TelemetryProvider => ({
       session_id: event.context.session_id,
     });
     if (event.severity === "high" || event.severity === "critical") {
-      newrelic.noticeError(new Error(event.message), {
+      newrelic.noticeError?.(new Error(event.message), {
         customAttributes: {
           chainmailEvent: true,
           eventType: event.type,
@@ -197,12 +217,12 @@ export const createNewRelicProvider = (newrelic: any): TelemetryProvider => ({
     newrelic.recordMetric(`Custom/Chainmail/${name}`, value);
     if (tags) {
       Object.entries(tags).forEach(([key, val]) => {
-        newrelic.addCustomAttribute(`chainmail.${key}`, String(val));
+        newrelic.addCustomAttribute?.(`chainmail.${key}`, String(val));
       });
     }
   },
   captureError: (error, context) => {
-    newrelic.noticeError(error, {
+    newrelic.noticeError?.(error, {
       customAttributes: {
         chainmailContext: JSON.stringify(context),
         errorSource: "prompt-chainmail",
@@ -210,9 +230,9 @@ export const createNewRelicProvider = (newrelic: any): TelemetryProvider => ({
     });
   },
   addBreadcrumb: (message, data) => {
-    newrelic.addCustomAttribute("chainmail.lastAction", message);
+    newrelic.addCustomAttribute?.("chainmail.lastAction", message);
     if (data && Object.keys(data).length > 0) {
-      newrelic.addCustomAttribute(
+      newrelic.addCustomAttribute?.(
         "chainmail.lastActionData",
         JSON.stringify(data)
       );

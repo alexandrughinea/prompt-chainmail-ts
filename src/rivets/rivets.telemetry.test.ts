@@ -7,7 +7,7 @@ import {
   createConsoleProvider,
   TelemetryData,
 } from "./rivets.telemetry";
-import type { ChainmailContext, ChainmailResult } from "../index";
+import type { ChainmailContext, ChainmailResult } from "../types";
 
 const createMockContext = (
   overrides: Partial<ChainmailContext> = {}
@@ -33,7 +33,7 @@ const createMockResult = (
   ...overrides,
 });
 
-describe("Telemetry Rivet", () => {
+describe("telemetry()", () => {
   let mockNext: ReturnType<typeof vi.fn<[], Promise<ChainmailResult>>>;
   let consoleSpy: ReturnType<typeof vi.spyOn>;
 
@@ -204,11 +204,13 @@ describe("Telemetry Rivet", () => {
       it("should create provider with tracer and logger integration", () => {
         const mockSpan = {
           setTag: vi.fn(),
+          log: vi.fn(),
         };
         const mockTracer = {
           scope: () => ({ active: () => mockSpan }),
           dogstatsd: {
             increment: vi.fn(),
+            gauge: vi.fn(),
           },
         };
         const mockLogger = {
@@ -254,6 +256,7 @@ describe("Telemetry Rivet", () => {
         const mockTracer = {
           scope: () => ({ active: () => null }),
           dogstatsd: {
+            increment: vi.fn(),
             gauge: vi.fn(),
           },
         };
@@ -284,7 +287,10 @@ describe("Telemetry Rivet", () => {
           debug: vi.fn(),
         };
 
-        const provider = createDatadogProvider(undefined, mockLogger);
+        const provider = createDatadogProvider(
+          { scope: () => ({ active: () => null }) },
+          mockLogger
+        );
 
         expect(() => {
           provider.logSecurityEvent(mockSecurityEvent);
