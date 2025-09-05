@@ -6,7 +6,32 @@ import { applyThreatPenalty } from "./rivets.utils";
 /**
  * Collection of security rivets for prompt protection
  */
-export const Rivets = (() => {
+export const Rivets: {
+  sanitize: (maxLength?: number) => ChainmailRivet;
+  patternDetection: (customPatterns?: RegExp[]) => ChainmailRivet;
+  roleConfusion: () => ChainmailRivet;
+  encodingDetection: () => ChainmailRivet;
+  structureAnalysis: () => ChainmailRivet;
+  confidenceFilter: (threshold?: number) => ChainmailRivet;
+  rateLimit: (maxRequests?: number, windowMs?: number, keyFn?: (context: ChainmailContext) => string) => ChainmailRivet;
+  logger: (logFn?: (context: ChainmailContext) => void) => ChainmailRivet;
+  sqlInjection: () => ChainmailRivet;
+  codeInjection: () => ChainmailRivet;
+  delimiterConfusion: () => ChainmailRivet;
+  instructionHijacking: () => ChainmailRivet;
+  templateInjection: () => ChainmailRivet;
+  untrustedWrapper: (tagName?: string, preserveOriginal?: boolean) => ChainmailRivet;
+  httpFetch: (url: string, options?: {
+    method?: string;
+    headers?: Record<string, string>;
+    timeoutMs?: number;
+    validateResponse?: (response: Response, data: any) => boolean;
+    onSuccess?: (context: ChainmailContext, data: any) => void;
+    onError?: (context: ChainmailContext, error: Error) => void;
+  }) => ChainmailRivet;
+  condition: (predicate: (context: ChainmailContext) => boolean, flagName?: string, confidenceMultiplier?: number) => ChainmailRivet;
+  telemetry: (options?: import('./rivets.telemetry').TelemetryOptions) => ChainmailRivet;
+} = (() => {
   return {
     /**
      * Sanitize input and normalize whitespace
