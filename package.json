@@ -26,12 +26,13 @@
         "build:types": "tsc --emitDeclarationOnly --outDir dist",
         "dev": "vite build --watch",
         "test": "vitest",
+        "test:ci": "vitest run",
         "test:ui": "vitest --ui",
         "coverage": "vitest --coverage",
         "lint": "eslint src --ext .ts",
         "format": "prettier --write src/**/*.ts",
         "security": "semgrep --config=.semgrep.yml src/",
-        "prepublishOnly": "npm run build && npm test"
+        "prepublishOnly": "npm run build && npm run test:ci"
     },
     "keywords": [
         "prompt-injection",

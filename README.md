@@ -30,7 +30,17 @@ Composable defense framework protecting your AI prompts from prompt injection, r
 npm install prompt-chainmail
 ```
 
-### Basic Usage
+**Note:** `Chainmails` provides a security preset for quick setup. For complete control over your protection chain, use `new PromptChainmail()` and compose your own rivets.
+
+### Basic Usage (Security Preset)
+
+Other security presets are also available for a tiered approach to security:
+
+- `Chainmails.basic(maxLength, confidenceFilter)` - Basic security preset
+- `Chainmails.advanced(maxLength, confidenceFilter)` - Advanced security preset
+- `Chainmails.development(maxLength, confidenceFilter)` - Development security preset with logging
+- `Chainmails.strict(maxLength, confidenceFilter)` - Stricter security preset
+
 ```typescript
 import { Chainmails } from 'prompt-chainmail';
 
@@ -119,7 +129,29 @@ async function secureChat(userMessage: string) {
 }
 ```
 
-## Available Rivets
+## Rivets
+
+**Rivets** are composable security middleware functions that process input sequentially. Each rivet can inspect, modify, or block content before passing it to the next rivet in the chain. They execute in the order they are forged, allowing you to build layered security defenses.
+
+### Rivet Signature
+```typescript
+export type ChainmailRivet = (
+  context: ChainmailContext,
+  next: () => Promise<ChainmailResult>
+) => Promise<ChainmailResult>;
+```
+
+Rivets are **sequential** - each rivet processes the output of the previous rivet:
+```typescript
+const chainmail = new PromptChainmail()
+  .forge(Rivets.sanitize())                 // 1st: Clean HTML/whitespace
+  .forge(Rivets.patternDetection())         // 2nd: Detect injection patterns
+  .forge(Rivets.confidenceFilter(0.8));     // 3rd: Block low confidence
+
+// Input flows: sanitize → patternDetection → confidenceFilter → result
+```
+
+### Built-in security rivets
 
 - `Rivets.sanitize()` - HTML removal, whitespace normalization
 - `Rivets.patternDetection()` - Common injection patterns
@@ -208,7 +240,16 @@ chainmail.forge(Rivets.telemetry({
 }));
 ```
 
+## Examples
 
+For comprehensive usage scenarios and custom rivet implementations, see [`examples.ts`](examples.ts) which includes:
+
+- **Custom Rivet Development** - Building domain-specific security rivets
+- **Advanced Chainmail Composition** - Complex protection workflows
+- **Enterprise Integration Patterns** - Production deployment examples
+- **Performance Optimization** - Efficient rivet ordering and configuration
+- **Error Handling Strategies** - Robust failure management
+- **Testing Approaches** - Unit and integration testing patterns
 
 ## License
 

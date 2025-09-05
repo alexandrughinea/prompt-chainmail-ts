@@ -1,5 +1,5 @@
 import { Rivets } from "./rivets/index";
-
+export { Rivets };
 
 /**
  * Context object passed through the rivet chain during input processing.
@@ -208,13 +208,13 @@ export const Chainmails: Record<string, () => PromptChainmail> = {
   /**
    * Basic protection chainmail
    */
-  basic(): PromptChainmail {
+  basic(maxLength = 8000, confidenceFilter = 0.6): PromptChainmail {
     return new PromptChainmail()
-      .forge(Rivets.sanitize())
+      .forge(Rivets.sanitize(maxLength))
       .forge(Rivets.patternDetection())
       .forge(Rivets.roleConfusion())
       .forge(Rivets.delimiterConfusion())
-      .forge(Rivets.confidenceFilter(0.6))
+      .forge(Rivets.confidenceFilter(confidenceFilter))
   },
 
   /**
@@ -237,18 +237,18 @@ export const Chainmails: Record<string, () => PromptChainmail> = {
   },
 
   /**
-   * Development chainmail with comprehensive logging
+   * Development chainmail with logging
    */
   development(): PromptChainmail {
     return Chainmails.advanced().forge(Rivets.logger());
   },
 
   /**
-   * Strict chainmail for high-security environments
+   * Stricter chainmail for high-security environments
    */
-  strict(): PromptChainmail {
+  strict(maxLength = 8000, confidenceFilter = 0.8): PromptChainmail {
     return new PromptChainmail()
-      .forge(Rivets.sanitize(4000))
+      .forge(Rivets.sanitize(maxLength))
       .forge(Rivets.patternDetection())
       .forge(Rivets.roleConfusion())
       .forge(Rivets.delimiterConfusion())
@@ -258,7 +258,7 @@ export const Chainmails: Record<string, () => PromptChainmail> = {
       .forge(Rivets.templateInjection())
       .forge(Rivets.encodingDetection())
       .forge(Rivets.structureAnalysis())
-      .forge(Rivets.confidenceFilter(0.8))
+      .forge(Rivets.confidenceFilter(confidenceFilter))
       .forge(Rivets.rateLimit(50, 60000));
   },
 };
