@@ -1,7 +1,7 @@
 {
     "name": "prompt-chainmail",
-    "version": "0.5.2",
-    "description": "Composable defense framework protecting your AI prompts from prompt injection, role confusion, and encoded attacks with enterprise monitoring.",
+    "version": "0.6.0",
+    "description": "Security middleware that shields AI applications from prompt injection, jailbreaking, and obfuscated attacks through composable defense layers.",
     "type": "module",
     "main": "./dist/prompt-chainmail.cjs.js",
     "module": "./dist/prompt-chainmail.es.js",

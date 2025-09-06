@@ -8,6 +8,7 @@ export type { ChainmailRivet };
 
 const MAX_INPUT_SIZE_IN_MB   = 1024 * 1024 * 10; // 10MB
 const STRING_CHUNK_THRESHOLD = 1024 * 1024; // 1MB
+const MAX_CHUNK_SIZE         = 8192; // 8KB
 
 /**
  * Core chainmail class for forging security rivets
@@ -78,13 +79,12 @@ export class PromptChainmail {
     return new ReadableStream({
       start(controller) {
         const encoder = new TextEncoder();
-        const chunkSize = 8192;
         let offset = 0;
         
         while (offset < input.length) {
-          const chunk = input.slice(offset, offset + chunkSize);
+          const chunk = input.slice(offset, offset + MAX_CHUNK_SIZE);
           controller.enqueue(encoder.encode(chunk));
-          offset += chunkSize;
+          offset += MAX_CHUNK_SIZE;
         }
         controller.close();
       }
@@ -139,13 +139,12 @@ export class PromptChainmail {
   private async protectStream(input: ReadableStream | ArrayBuffer | Uint8Array, startTime: number, sessionId: string): Promise<ChainmailResult> {
     let chunkCount = 0;
     let totalLength = 0;
-    const maxChunkSize = 8192;
     const streamFlags: string[] = [];
     const streamMetadata: Record<string, unknown> = Object.create(null);
     let minConfidence = 1.0;
 
     try {
-      for await (const chunk of toChunks(input, maxChunkSize)) {
+      for await (const chunk of toChunks(input, MAX_CHUNK_SIZE)) {
         chunkCount++;
         totalLength += chunk.length;
         

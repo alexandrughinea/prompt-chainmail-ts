@@ -1,4 +1,4 @@
-import type { ChainmailRivet } from "../index";
+import type { ChainmailRivet } from "../../index";
 
 type LogLevel = "debug" | "info" | "warn" | "error";
 export type TelemetryData = {
@@ -133,7 +133,6 @@ export const createDatadogProvider = (
         span.setTag("security.event.severity", event.severity);
         span.setTag("security.blocked", event.context.blocked);
       }
-      // Use DogStatsD client if available
       if (tracer.dogstatsd) {
         tracer.dogstatsd.increment("chainmail.security.event", 1, [
           `type:${event.type}`,
