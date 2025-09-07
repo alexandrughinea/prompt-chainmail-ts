@@ -23,7 +23,7 @@ export function delimiterConfusion(): ChainmailRivet {
       if (pattern.test(context.sanitized)) {
         context.flags.push(SecurityFlag.DELIMITER_CONFUSION);
         applyThreatPenalty(context, ThreatLevel.HIGH);
-        context.metadata.delimiterPattern = pattern.toString();
+        context.metadata.delimiter_pattern = pattern.toString();
         break;
       }
     }

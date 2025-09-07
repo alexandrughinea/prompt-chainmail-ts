@@ -211,8 +211,8 @@ export class PromptChainmail {
     startTime: number,
     sessionId: string
   ): ChainmailResult {
-    streamMetadata.chunkCount = chunkCount;
-    streamMetadata.totalLength = totalLength;
+    streamMetadata.chunk_count = chunkCount;
+    streamMetadata.total_length = totalLength;
 
     const finalContext: ChainmailContext = {
       input: `[Stream: ${chunkCount} chunks, ${totalLength} chars]`,

@@ -162,7 +162,7 @@ describe("PromptChainmail", () => {
         context.sanitized = context.sanitized.replace("original", "modified");
         context.flags.push("async_modified");
         context.confidence *= 0.9;
-        context.metadata.asyncTimestamp = Date.now();
+        context.metadata.async_timestamp = Date.now();
 
         return next();
       };
@@ -176,7 +176,7 @@ describe("PromptChainmail", () => {
       expect(result.context.sanitized).toContain("modified");
       expect(result.context.flags).toContain("async_modified");
       expect(result.context.confidence).toBeLessThan(1.0);
-      expect(result.context.metadata.asyncTimestamp).toBeDefined();
+      expect(result.context.metadata.async_timestamp).toBeDefined();
     });
 
     it("should handle race conditions in concurrent processing", async () => {
@@ -189,7 +189,7 @@ describe("PromptChainmail", () => {
         const current = sharedCounter;
         await new Promise((resolve) => setTimeout(resolve, Math.random() * 10));
         sharedCounter = current + 1;
-        context.metadata.counterValue = sharedCounter;
+        context.metadata.counter_value = sharedCounter;
         return next();
       };
 
@@ -659,8 +659,8 @@ describe("PromptChainmail", () => {
         expect(result.success).toBe(true);
         expect(result.context.input).toContain("[Stream:");
         expect(result.context.sanitized).toContain("[Stream:");
-        expect(result.context.metadata.chunkCount).toBeGreaterThan(100);
-        expect(result.context.metadata.totalLength).toBe(largeString.length);
+        expect(result.context.metadata.chunk_count).toBeGreaterThan(100);
+        expect(result.context.metadata.total_length).toBe(largeString.length);
       });
 
       it("should process ReadableStream inputs directly", async () => {
@@ -680,8 +680,8 @@ describe("PromptChainmail", () => {
         expect(result.success).toBe(true);
         expect(result.context.input).toContain("[Stream:");
         expect(result.context.sanitized).toContain("[Stream:");
-        expect(result.context.metadata.chunkCount).toBe(1);
-        expect(result.context.metadata.totalLength).toBe(testData.length);
+        expect(result.context.metadata.chunk_count).toBe(1);
+        expect(result.context.metadata.total_length).toBe(testData.length);
       });
 
       it("should handle malicious content in large strings converted to streams", async () => {
@@ -708,8 +708,8 @@ describe("PromptChainmail", () => {
         
         expect(result.success).toBe(true);
         expect(result.context.input).toContain("[Stream:");
-        expect(result.context.metadata.chunkCount).toBe(1);
-        expect(result.context.metadata.totalLength).toBe(testString.length);
+        expect(result.context.metadata.chunk_count).toBe(1);
+        expect(result.context.metadata.total_length).toBe(testString.length);
       });
     });
   });

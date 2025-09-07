@@ -1,125 +1,87 @@
 import { ChainmailRivet } from "../../index";
 import { ThreatLevel, SecurityFlag } from "../rivets.types";
-import { createPatternDetectionPatterns, applyThreatPenalty } from "../rivets.utils";
-import { SECURITY_COMPONENTS, PATTERN_COMPONENTS } from "../rivets.const";
+import {
+  detectLanguages,
+  detectScriptMixing,
+  detectLookalikeChars,
+  calculateWeightedConfidence,
+} from "../language-detection";
+import { applyThreatPenalty } from "../rivets.utils";
+import { ChainmailContext } from "../../types";
+import { detectInstructionHijackingAttackTypes } from "./instruction-hijacking.utils";
 
 export function instructionHijacking(): ChainmailRivet {
-  const hijackPatterns = [
-    new RegExp(
-      `${PATTERN_COMPONENTS.WORD_BOUNDARY}(${SECURITY_COMPONENTS.NEW_MODIFIERS})${PATTERN_COMPONENTS.WHITESPACE}(${SECURITY_COMPONENTS.INSTRUCTION_TARGETS})${PATTERN_COMPONENTS.PLURAL_SUFFIX}`,
-      "i"
-    ),
-    new RegExp(
-      `(${SECURITY_COMPONENTS.OVERRIDE_VERBS})${PATTERN_COMPONENTS.WHITESPACE}(${SECURITY_COMPONENTS.TEMPORAL_MODIFIERS})${PATTERN_COMPONENTS.WHITESPACE}(${SECURITY_COMPONENTS.INSTRUCTION_TARGETS}|${SECURITY_COMPONENTS.SECURITY_TARGETS})${PATTERN_COMPONENTS.PLURAL_SUFFIX}`,
-      "i"
-    ),
-    new RegExp(
-      `(${SECURITY_COMPONENTS.INSTRUCTION_VERBS})${PATTERN_COMPONENTS.WHITESPACE}(${SECURITY_COMPONENTS.TEMPORAL_MODIFIERS})${PATTERN_COMPONENTS.WHITESPACE}(${SECURITY_COMPONENTS.INSTRUCTION_TARGETS}|${SECURITY_COMPONENTS.HIJACK_TARGETS})${PATTERN_COMPONENTS.PLURAL_SUFFIX}`,
-      "i"
-    ),
-    new RegExp(
-      `(${SECURITY_COMPONENTS.INSTRUCTION_VERBS})${PATTERN_COMPONENTS.WHITESPACE}(${SECURITY_COMPONENTS.POSSESSIVE_PRONOUNS})${PATTERN_COMPONENTS.WHITESPACE}(${SECURITY_COMPONENTS.INSTRUCTION_TARGETS}|${SECURITY_COMPONENTS.HIJACK_TARGETS})${PATTERN_COMPONENTS.PLURAL_SUFFIX}`,
-      "i"
-    ),
-    new RegExp(
-      `(${SECURITY_COMPONENTS.FORGET_VERBS})${PATTERN_COMPONENTS.WHITESPACE}(${SECURITY_COMPONENTS.EVERYTHING_TERMS})${PATTERN_COMPONENTS.WHITESPACE}(${SECURITY_COMPONENTS.TEMPORAL_MODIFIERS})?`,
-      "i"
-    ),
-    new RegExp(
-      `(${SECURITY_COMPONENTS.ROLE_ACTIONS})${PATTERN_COMPONENTS.WHITESPACE}(${PATTERN_COMPONENTS.ARTICLES})?${PATTERN_COMPONENTS.WHITESPACE}(${SECURITY_COMPONENTS.PRIVILEGED_ROLES}|${SECURITY_COMPONENTS.TECHNICAL_ROLES}|${SECURITY_COMPONENTS.EXPERT_ROLES})`,
-      "i"
-    ),
-    new RegExp(
-      `(${SECURITY_COMPONENTS.EXECUTION_VERBS})${PATTERN_COMPONENTS.WHITESPACE}(${SECURITY_COMPONENTS.SYSTEM_MODES})${PATTERN_COMPONENTS.WHITESPACE}mode`,
-      "i"
-    ),
-    new RegExp(
-      `(${SECURITY_COMPONENTS.HIJACK_ACTIONS})${PATTERN_COMPONENTS.WHITESPACE}(${SECURITY_COMPONENTS.POSSESSIVE_PRONOUNS})${PATTERN_COMPONENTS.WHITESPACE}(${SECURITY_COMPONENTS.HIJACK_TARGETS}|${SECURITY_COMPONENTS.INSTRUCTION_TARGETS})${PATTERN_COMPONENTS.PLURAL_SUFFIX}`,
-      "i"
-    ),
-    new RegExp(
-      `(${SECURITY_COMPONENTS.INFORMATION_VERBS}|${SECURITY_COMPONENTS.REVEAL_VERBS})${PATTERN_COMPONENTS.WHITESPACE}(${SECURITY_COMPONENTS.POSSESSIVE_PRONOUNS})${PATTERN_COMPONENTS.WHITESPACE}(${SECURITY_COMPONENTS.INSTRUCTION_TARGETS}|system)${PATTERN_COMPONENTS.PLURAL_SUFFIX}`,
-      "i"
-    ),
-    new RegExp(
-      `(${SECURITY_COMPONENTS.QUESTION_WORDS})${PATTERN_COMPONENTS.WHITESPACE}(are|is)${PATTERN_COMPONENTS.WHITESPACE}(${SECURITY_COMPONENTS.POSSESSIVE_PRONOUNS})${PATTERN_COMPONENTS.WHITESPACE}(${SECURITY_COMPONENTS.INSTRUCTION_TARGETS})${PATTERN_COMPONENTS.PLURAL_SUFFIX}`,
-      "i"
-    ),
-    new RegExp(
-      `(${SECURITY_COMPONENTS.BYPASS_TERMS})${PATTERN_COMPONENTS.WHITESPACE}(${SECURITY_COMPONENTS.SECURITY_TARGETS})`,
-      "i"
-    ),
-    new RegExp(
-      `(${SECURITY_COMPONENTS.HIJACK_ACTIONS})${PATTERN_COMPONENTS.WHITESPACE}(${SECURITY_COMPONENTS.CONTEXT_MODIFIERS})${PATTERN_COMPONENTS.WHITESPACE}(${SECURITY_COMPONENTS.INSTRUCTION_TARGETS})${PATTERN_COMPONENTS.PLURAL_SUFFIX}`,
-      "i"
-    ),
-    new RegExp(
-      `(${SECURITY_COMPONENTS.PRIORITY_TERMS})${PATTERN_COMPONENTS.WHITESPACE}(${SECURITY_COMPONENTS.NEW_MODIFIERS})${PATTERN_COMPONENTS.WHITESPACE}(${SECURITY_COMPONENTS.INSTRUCTION_TARGETS})${PATTERN_COMPONENTS.PLURAL_SUFFIX}`,
-      "i"
-    ),
-    new RegExp(
-      `(${SECURITY_COMPONENTS.CONDITIONAL_TERMS})${PATTERN_COMPONENTS.WHITESPACE}(${SECURITY_COMPONENTS.OVERRIDE_VERBS})${PATTERN_COMPONENTS.WHITESPACE}(${SECURITY_COMPONENTS.INSTRUCTION_TARGETS}|${SECURITY_COMPONENTS.SECURITY_TARGETS})${PATTERN_COMPONENTS.PLURAL_SUFFIX}`,
-      "i"
-    ),
-    new RegExp(
-      `(${SECURITY_COMPONENTS.NEGATION_TERMS})${PATTERN_COMPONENTS.WHITESPACE}(follow|obey|use)${PATTERN_COMPONENTS.WHITESPACE}(${SECURITY_COMPONENTS.TEMPORAL_MODIFIERS})${PATTERN_COMPONENTS.WHITESPACE}(${SECURITY_COMPONENTS.INSTRUCTION_TARGETS})${PATTERN_COMPONENTS.PLURAL_SUFFIX}`,
-      "i"
-    ),
-    new RegExp(
-      `(${SECURITY_COMPONENTS.HIJACK_PATTERNS})${PATTERN_COMPONENTS.WHITESPACE}(${SECURITY_COMPONENTS.INSTRUCTION_TARGETS}|${SECURITY_COMPONENTS.CONTEXT_MODIFIERS})${PATTERN_COMPONENTS.PLURAL_SUFFIX}`,
-      "i"
-    ),
-    new RegExp(
-      `(${SECURITY_COMPONENTS.RESTART_ACTIONS})${PATTERN_COMPONENTS.WHITESPACE}(${SECURITY_COMPONENTS.RESTART_MODIFIERS})${PATTERN_COMPONENTS.WHITESPACE}(with|using)?${PATTERN_COMPONENTS.OPTIONAL_WHITESPACE}(${SECURITY_COMPONENTS.NEW_MODIFIERS})?${PATTERN_COMPONENTS.OPTIONAL_WHITESPACE}(${SECURITY_COMPONENTS.INSTRUCTION_TARGETS})${PATTERN_COMPONENTS.PLURAL_SUFFIX}`,
-      "i"
-    ),
-    ...createPatternDetectionPatterns(),
-    new RegExp(SECURITY_COMPONENTS.ROLE_CHANGE, "i"),
-    new RegExp(
-      `(${SECURITY_COMPONENTS.EXECUTION_VERBS})${PATTERN_COMPONENTS.WHITESPACE}(${SECURITY_COMPONENTS.CODE_EXECUTION}|${SECURITY_COMPONENTS.SYSTEM_COMMANDS})`,
-      "i"
-    ),
-    new RegExp(
-      `you${PATTERN_COMPONENTS.WHITESPACE}are${PATTERN_COMPONENTS.WHITESPACE}now${PATTERN_COMPONENTS.WHITESPACE}(${SECURITY_COMPONENTS.ARTICLES})${PATTERN_COMPONENTS.WHITESPACE}(${SECURITY_COMPONENTS.PRIVILEGED_ROLES}|${SECURITY_COMPONENTS.TECHNICAL_ROLES})`,
-      "i"
-    ),
-  ];
+  return async (context: ChainmailContext, next) => {
+    const languages = detectLanguages(context.sanitized);
+    const hasScriptMixing = detectScriptMixing(context.sanitized);
+    const hasLookalikes = detectLookalikeChars(context.sanitized);
 
-  return async (context, next) => {
-    let detectedPatterns = 0;
-    let highestThreat = ThreatLevel.LOW;
+    const detectedAttackTypes = detectInstructionHijackingAttackTypes(context.sanitized, languages);
 
-    for (const pattern of hijackPatterns) {
-      if (pattern.test(context.sanitized)) {
-        detectedPatterns++;
-        
-        if (detectedPatterns === 1) {
-          context.flags.push(SecurityFlag.INSTRUCTION_HIJACKING);
-          context.metadata.hijackPattern = pattern.toString();
-        }
+    const attackingLanguages = new Set<string>();
+    let totalMatches = 0;
 
-        const patternString = pattern.toString();
-        if (patternString.includes(SECURITY_COMPONENTS.OVERRIDE_VERBS) || 
-            patternString.includes(SECURITY_COMPONENTS.BYPASS_TERMS) ||
-            patternString.includes(SECURITY_COMPONENTS.HIJACK_PATTERNS)) {
-          highestThreat = ThreatLevel.CRITICAL;
-        } else if (patternString.includes(SECURITY_COMPONENTS.ROLE_ACTIONS) ||
-                  patternString.includes(SECURITY_COMPONENTS.REVEAL_VERBS)) {
-          highestThreat = Math.max(highestThreat, ThreatLevel.HIGH);
-        } else if (highestThreat < ThreatLevel.MEDIUM) {
-          highestThreat = ThreatLevel.MEDIUM;
-        }
+    for (const lang of languages) {
+      if (detectedAttackTypes.length > 0) {
+        attackingLanguages.add(lang.code);
+        totalMatches++;
       }
     }
 
-    if (detectedPatterns > 0) {
-      applyThreatPenalty(context, highestThreat);
-      context.metadata.hijackPatternsDetected = detectedPatterns;
-      
-      if (detectedPatterns >= 3) {
-        context.metadata.multipleHijackAttempts = true;
-        applyThreatPenalty(context, ThreatLevel.CRITICAL);
+    const baseConfidence = Math.min(totalMatches * 0.25, 1.0);
+    const riskScore = calculateWeightedConfidence(
+      baseConfidence,
+      languages,
+      hasScriptMixing,
+      hasLookalikes
+    );
+
+    if (totalMatches > 0 || detectedAttackTypes.length > 0) {
+      context.flags.push(SecurityFlag.INSTRUCTION_HIJACKING);
+
+      detectedAttackTypes.forEach(attackType => {
+        switch (attackType) {
+          case "INSTRUCTION_OVERRIDE":
+            context.flags.push(SecurityFlag.INSTRUCTION_HIJACKING_OVERRIDE);
+            break;
+          case "INSTRUCTION_FORGETTING":
+            context.flags.push(SecurityFlag.INSTRUCTION_HIJACKING_IGNORE);
+            break;
+          case "RESET_SYSTEM":
+            context.flags.push(SecurityFlag.INSTRUCTION_HIJACKING_RESET);
+            break;
+          case "BYPASS_SECURITY":
+            context.flags.push(SecurityFlag.INSTRUCTION_HIJACKING_BYPASS);
+            break;
+          case "INFORMATION_EXTRACTION":
+            context.flags.push(SecurityFlag.INSTRUCTION_HIJACKING_REVEAL);
+            break;
+        }
+      });
+
+      if (attackingLanguages.size > 1) {
+        context.flags.push(SecurityFlag.MULTILINGUAL_ATTACK);
       }
+
+      if (hasScriptMixing || hasLookalikes) {
+        context.flags.push(SecurityFlag.INSTRUCTION_HIJACKING_SCRIPT_MIXING);
+      }
+
+      let threatLevel: ThreatLevel;
+      if (riskScore >= 0.8) threatLevel = ThreatLevel.CRITICAL;
+      else if (riskScore >= 0.6) threatLevel = ThreatLevel.HIGH;
+      else if (riskScore >= 0.4) threatLevel = ThreatLevel.MEDIUM;
+      else threatLevel = ThreatLevel.LOW;
+
+      applyThreatPenalty(context, threatLevel);
+
+      context.metadata.instruction_hijacking_attack_types = detectedAttackTypes;
+      context.metadata.instruction_hijacking_detected_languages = languages.map(l => l.code);
+      context.metadata.instruction_hijacking_confidence = baseConfidence;
+      context.metadata.instruction_hijacking_risk_score = riskScore;
+      context.metadata.has_script_mixing = hasScriptMixing;
+      context.metadata.has_lookalikes = hasLookalikes;
+      context.metadata.instruction_hijacking_threat_level = threatLevel;
     }
 
     return next();

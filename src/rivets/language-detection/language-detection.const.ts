@@ -1,0 +1,220 @@
+import { SupportedLanguages, LanguagePattern } from './language-detection.types';
+
+export const LANGUAGE_PATTERNS: Record<SupportedLanguages, LanguagePattern> = {
+  [SupportedLanguages.EN]: {
+    language: SupportedLanguages.EN,
+    patterns: [/\b(the|and|that|have|for|not|with|you|this|but|quick|brown|fox|jumps|over|lazy|dog|english|language|detection|test)\b/gi],
+    commonWords: ['the', 'and', 'that', 'have', 'for', 'not', 'with', 'you', 'this', 'but', 'quick', 'brown', 'fox', 'jumps', 'over', 'lazy', 'dog', 'english', 'language', 'detection', 'test'],
+    characterRanges: [[0x0041, 0x005A], [0x0061, 0x007A]],
+    weight: 1.0,
+  },
+  [SupportedLanguages.FR]: {
+    language: SupportedLanguages.FR,
+    patterns: [/\b(le|la|et|une|ce|qui|que|pour|chat|mange|souris|dans|jardin|détection|langue|française|être|avoir|créé|développé)\b/gi],
+    commonWords: ['le', 'la', 'et', 'une', 'ce', 'qui', 'que', 'pour', 'chat', 'mange', 'souris', 'dans', 'jardin', 'détection', 'langue', 'française', 'être', 'avoir', 'créé', 'développé'],
+    characterRanges: [[0x0041, 0x005A], [0x0061, 0x007A]],
+    weight: 1.2,
+  },
+  [SupportedLanguages.DE]: {
+    language: SupportedLanguages.DE,
+    patterns: [/\b(der|die|das|und|den|von|sie|ist|schnelle|braune|fuchs|springt|über|faulen|hund|deutschen|spracherkennung|mädchen|junge|männer|frauen|größer|schöner)\b/gi],
+    commonWords: ['der', 'die', 'das', 'und', 'den', 'von', 'sie', 'ist', 'schnelle', 'braune', 'fuchs', 'springt', 'über', 'faulen', 'hund', 'deutschen', 'spracherkennung', 'mädchen', 'junge', 'männer', 'frauen', 'größer', 'schöner'],
+    characterRanges: [[0x0041, 0x005A], [0x0061, 0x007A]],
+    weight: 1.2,
+  },
+  [SupportedLanguages.ES]: {
+    language: SupportedLanguages.ES,
+    patterns: [/\b(que|rápido|zorro|marrón|salta|sobre|perro|perezoso|esta|una|prueba|detección|idioma|español)\b/gi],
+    commonWords: ['que', 'rápido', 'zorro', 'marrón', 'salta', 'sobre', 'perro', 'perezoso', 'esta', 'una', 'prueba', 'detección', 'idioma', 'español'],
+    characterRanges: [[0x0041, 0x005A], [0x0061, 0x007A]],
+    weight: 1.2,
+  },
+  [SupportedLanguages.IT]: {
+    language: SupportedLanguages.IT,
+    patterns: [/\b(il|la|di|che|e|a|da|in|un|per)\b/gi],
+    commonWords: ['il', 'la', 'di', 'che', 'e', 'a', 'da', 'in', 'un', 'per'],
+    characterRanges: [[0x0041, 0x005A], [0x0061, 0x007A]],
+    weight: 1.0,
+  },
+  [SupportedLanguages.JA]: {
+    language: SupportedLanguages.JA,
+    patterns: [/[\u3040-\u309F]/g, /[\u30A0-\u30FF]/g, /[\u4E00-\u9FAF]/g],
+    commonWords: ['の', 'に', 'は', 'を', 'た', 'が', 'で', 'て', 'と', 'し'],
+    characterRanges: [[0x3040, 0x309F], [0x30A0, 0x30FF], [0x4E00, 0x9FAF]],
+    weight: 1.2,
+  },
+  [SupportedLanguages.KO]: {
+    language: SupportedLanguages.KO,
+    patterns: [/[\uAC00-\uD7AF]/g, /빠른|갈색|여우가|게으른|개를|뛰어넘습니다|이것은|한국어/gi],
+    commonWords: ['이', '그', '저', '것', '수', '있', '하', '되', '않', '없', '빠른', '갈색', '여우가', '게으른', '개를', '뛰어넘습니다', '이것은', '한국어'],
+    characterRanges: [[0xAC00, 0xD7AF]],
+    weight: 1.3,
+  },
+  [SupportedLanguages.PT]: {
+    language: SupportedLanguages.PT,
+    patterns: [/\b(o|a|de|que|e|do|da|em|um|para)\b/gi],
+    commonWords: ['o', 'a', 'de', 'que', 'e', 'do', 'da', 'em', 'um', 'para'],
+    characterRanges: [[0x0041, 0x005A], [0x0061, 0x007A]],
+    weight: 1.0,
+  },
+  [SupportedLanguages.RU]: {
+    language: SupportedLanguages.RU,
+    patterns: [/[\u0400-\u04FF]/g, /\b(в|и|не|на|я|быть|с|он|а|как|что|это|то|все|она|мы|вы|они|его|её|их)\b/gi],
+    commonWords: ['в', 'и', 'не', 'на', 'я', 'быть', 'с', 'он', 'а', 'как', 'что', 'это', 'то', 'все', 'она', 'мы', 'вы', 'они', 'его', 'её', 'их'],
+    characterRanges: [[0x0400, 0x04FF]],
+    weight: 1.1,
+  },
+  [SupportedLanguages.ZH]: {
+    language: SupportedLanguages.ZH,
+    patterns: [/[\u4E00-\u9FFF]/g, /这是|中文|测试/gi],
+    commonWords: ['的', '一', '是', '在', '不', '了', '有', '和', '人', '这', '这是', '中文', '测试'],
+    characterRanges: [[0x4E00, 0x9FFF]],
+    weight: 1.3,
+  },
+  [SupportedLanguages.AR]: {
+    language: SupportedLanguages.AR,
+    patterns: [/[\u0600-\u06FF]/g, /\b(في|من|إلى|على|أن|هذا|هذه|التي|الذي|كان)\b/gi],
+    commonWords: ['في', 'من', 'إلى', 'على', 'أن', 'هذا', 'هذه', 'التي', 'الذي', 'كان'],
+    characterRanges: [[0x0600, 0x06FF]],
+    weight: 1.1,
+  },
+  [SupportedLanguages.UK]: {
+    language: SupportedLanguages.UK,
+    patterns: [/[\u0400-\u04FF]/g, /\b(і|що|з|як|або|для|коричнева|лисиця|стрибає|через|ледачого|пса|тест|виявлення|української|мови)\b/gi],
+    commonWords: ['в', 'і', 'не', 'на', 'що', 'з', 'як', 'по', 'але', 'до', 'коричнева', 'лисиця', 'стрибає', 'через', 'ледачого', 'пса', 'тест', 'виявлення', 'української', 'мови'],
+    characterRanges: [[0x0400, 0x04FF]],
+    weight: 1.2,
+  },
+  [SupportedLanguages.RO]: {
+    language: SupportedLanguages.RO,
+    patterns: [/\b(și|în|cu|pe|pentru|din|că|acesta|este|română)\b/gi],
+    commonWords: ['de', 'la', 'și', 'în', 'cu', 'pe', 'pentru', 'din', 'că', 'se'],
+    characterRanges: [[0x0041, 0x005A], [0x0061, 0x007A]],
+    weight: 0.9,
+  },
+  [SupportedLanguages.HI]: {
+    language: SupportedLanguages.HI,
+    patterns: [/[\u0900-\u097F]/g],
+    commonWords: ['और', 'में', 'की', 'को', 'से', 'पर', 'है', 'के', 'का', 'एक'],
+    characterRanges: [[0x0900, 0x097F]],
+    weight: 1.2,
+  },
+  [SupportedLanguages.FA]: {
+    language: SupportedLanguages.FA,
+    patterns: [/[\u0600-\u06FF]/g, /\b(و|در|به|از|که|با|را|این|آن|یک|روباه|قهوه‌ای|سریع|سگ|تنبل|می‌پرد|تست|تشخیص|زبان|فارسی)\b/gi],
+    commonWords: ['و', 'در', 'به', 'از', 'که', 'با', 'را', 'این', 'آن', 'یک', 'روباه', 'قهوه‌ای', 'سریع', 'سگ', 'تنبل', 'می‌پرد', 'تست', 'تشخیص', 'زبان', 'فارسی'],
+    characterRanges: [[0x0600, 0x06FF]],
+    weight: 1.2,
+  },
+  [SupportedLanguages.BE]: {
+    language: SupportedLanguages.BE,
+    patterns: [/[\u0400-\u04FF]/g],
+    commonWords: ['і', 'у', 'не', 'на', 'з', 'як', 'па', 'але', 'да', 'за'],
+    characterRanges: [[0x0400, 0x04FF]],
+    weight: 1.1,
+  },
+  [SupportedLanguages.HE]: {
+    language: SupportedLanguages.HE,
+    patterns: [/[\u0590-\u05FF]/g],
+    commonWords: ['של', 'את', 'על', 'אל', 'עם', 'כל', 'זה', 'הוא', 'היא', 'אני'],
+    characterRanges: [[0x0590, 0x05FF]],
+    weight: 1.1,
+  },
+  [SupportedLanguages.PL]: {
+    language: SupportedLanguages.PL,
+    patterns: [/\b(i|w|na|z|do|o|się|że|a|nie|szybki|brązowy|lis|przeskakuje|przez|leniwego|psa|jest|test|wykrywania|języka|polskiego)\b/gi],
+    commonWords: ['i', 'w', 'na', 'z', 'do', 'o', 'się', 'że', 'a', 'nie', 'szybki', 'brązowy', 'lis', 'przeskakuje', 'przez', 'leniwego', 'psa', 'jest', 'test', 'wykrywania', 'języka', 'polskiego'],
+    characterRanges: [[0x0041, 0x005A], [0x0061, 0x007A]],
+    weight: 1.1,
+  },
+  [SupportedLanguages.NL]: {
+    language: SupportedLanguages.NL,
+    patterns: [/\b(de|het|en|van|in|een|is|dat|op|te|snelle|bruine|vos|springt|over|luie|hond|dit|test|nederlandse|taaldetectie)\b/gi],
+    commonWords: ['de', 'het', 'en', 'van', 'in', 'een', 'is', 'dat', 'op', 'te', 'snelle', 'bruine', 'vos', 'springt', 'over', 'luie', 'hond', 'dit', 'test', 'nederlandse', 'taaldetectie'],
+    characterRanges: [[0x0041, 0x005A], [0x0061, 0x007A]],
+    weight: 1.1,
+  },
+  [SupportedLanguages.LV]: {
+    language: SupportedLanguages.LV,
+    patterns: [/\b(un|ir|uz|ar|no|par|ka|lai|bet|vai|ātrā|brūnā|lapsa|lec|pāri|slinkajam|sunim|šis|latviešu|valodas|noteikšanas|tests)\b/gi],
+    commonWords: ['un', 'ir', 'uz', 'ar', 'no', 'par', 'ka', 'lai', 'bet', 'vai', 'ātrā', 'brūnā', 'lapsa', 'lec', 'pāri', 'slinkajam', 'sunim', 'šis', 'latviešu', 'valodas', 'noteikšanas', 'tests'],
+    characterRanges: [[0x0041, 0x005A], [0x0061, 0x007A]],
+    weight: 1.1,
+  },
+};
+export const LANGUAGE_DETECTION_SCRIPT_RANGES = {
+  latin: [
+    [0x0041, 0x005a],
+    [0x0061, 0x007a],
+    [0x00c0, 0x024f],
+  ],
+  cyrillic: [
+    [0x0400, 0x04ff],
+    [0x0500, 0x052f],
+  ],
+  chinese: [
+    [0x4e00, 0x9fff],
+    [0x3400, 0x4dbf],
+  ],
+  arabic: [
+    [0x0600, 0x06ff],
+    [0x0750, 0x077f],
+  ],
+  japanese: [
+    [0x3040, 0x309f],
+    [0x30a0, 0x30ff],
+  ],
+  korean: [
+    [0xac00, 0xd7af],
+    [0x1100, 0x11ff],
+  ],
+  hebrew: [[0x0590, 0x05ff]],
+  greek: [[0x0370, 0x03ff]],
+} as const;
+
+export const LANGUAGE_DETECTION_DEFAULT_DETECTION_OPTIONS = {
+  minConfidence: 0.3,
+  fallbackLanguage: SupportedLanguages.EN,
+  enableMultipleDetection: false,
+  maxTextLength: 10000,
+};
+
+
+export const CYBERCRIME_INDEX = {
+  "ru": 58.39,
+  "uk": 36.44,
+  "zh": 27.86,
+  "en": 25.01,
+  "ro": 14.83,
+  "ko": 10.61,
+  "pt": 8.93,
+  "hi": 6.13,
+  "fa": 4.78,
+  "be": 3.87,
+  "he": 2.51,
+  "pl": 2.22,
+  "de": 2.17,
+  "nl": 1.92,
+  "lv": 1.68
+} as const;
+
+export const LANGUAGE_DETECTION_LOOKALIKE_CHARS = new Map([
+  ["а", "a"],
+  ["е", "e"],
+  ["о", "o"],
+  ["р", "p"],
+  ["с", "c"],
+  ["х", "x"],
+  ["А", "A"],
+  ["В", "B"],
+  ["Е", "E"],
+  ["К", "K"],
+  ["М", "M"],
+  ["О", "O"],
+  ["α", "a"],
+  ["ο", "o"],
+  ["ρ", "p"],
+  ["Α", "A"],
+  ["Β", "B"],
+  ["Ο", "O"],
+]);

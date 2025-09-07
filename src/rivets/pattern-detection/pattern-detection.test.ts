@@ -24,6 +24,6 @@ describe("patternDetection(...)", () => {
     const result = await chainmail.protect("This contains a secret word");
 
     expect(result.context.flags).toContain(SecurityFlag.INJECTION_PATTERN);
-    expect(result.context.metadata.matchedPattern).toBeDefined();
+    expect(result.context.metadata.matched_pattern).toBeDefined();
   });
 });

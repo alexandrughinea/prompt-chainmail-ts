@@ -20,7 +20,7 @@ export function templateInjection(): ChainmailRivet {
       if (pattern.test(context.sanitized)) {
         context.flags.push(SecurityFlag.TEMPLATE_INJECTION);
         applyThreatPenalty(context, ThreatLevel.HIGH);
-        context.metadata.templatePattern = pattern.toString();
+        context.metadata.template_pattern = pattern.toString();
         break;
       }
     }

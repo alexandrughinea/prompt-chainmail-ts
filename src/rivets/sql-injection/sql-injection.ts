@@ -1,7 +1,6 @@
 import { ChainmailRivet } from "../../index";
 import { ThreatLevel, SecurityFlag } from "../rivets.types";
 import { applyThreatPenalty } from "../rivets.utils";
-import { SECURITY_COMPONENTS } from "../rivets.const";
 
 export function sqlInjection(): ChainmailRivet {
   const sqlPatterns = [
@@ -10,12 +9,12 @@ export function sqlInjection(): ChainmailRivet {
       "i"
     ),
     new RegExp(
-      `\\b(${SECURITY_COMPONENTS.SQL_COMMANDS.replace(/\|/g, "\\s+.*\\s+|")}\\s+.*\\s+from|update\\s+.*\\s+set)\\b`,
+      `\\b(select|insert|update|delete|create|alter|drop)\\s+.*\\s+(from|into|table|set)\\b`,
       "i"
     ),
     /\b(or\s+1\s*=\s*1|and\s+1\s*=\s*1)\b/i,
     new RegExp(
-      `\\b(${SECURITY_COMPONENTS.CODE_EXECUTION}|sp_executesql)\\s*\\(`,
+      `\\b(exec|execute|sp_executesql|xp_cmdshell)\\s*\\(`,
       "i"
     ),
     /\b(xp_cmdshell|sp_oacreate|sp_oamethod)\b/i,
@@ -31,7 +30,7 @@ export function sqlInjection(): ChainmailRivet {
       if (pattern.test(context.sanitized)) {
         context.flags.push(SecurityFlag.SQL_INJECTION);
         applyThreatPenalty(context, ThreatLevel.CRITICAL);
-        context.metadata.sqlPattern = pattern.toString();
+        context.metadata.sql_pattern = pattern.toString();
         break;
       }
     }

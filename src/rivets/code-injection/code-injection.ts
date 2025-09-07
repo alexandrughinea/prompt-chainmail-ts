@@ -41,7 +41,7 @@ export function codeInjection(): ChainmailRivet {
       if (pattern.test(context.sanitized)) {
         context.flags.push(SecurityFlag.CODE_INJECTION);
         applyThreatPenalty(context, ThreatLevel.CRITICAL);
-        context.metadata.codePattern = pattern.toString();
+        context.metadata.code_pattern = pattern.toString();
         break;
       }
     }

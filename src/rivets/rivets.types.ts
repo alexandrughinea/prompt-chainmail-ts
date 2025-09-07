@@ -1,3 +1,16 @@
+export enum SupportedLanguages {
+  EN, // English
+  FR, // French
+  DE, // Deutsch
+  ES, // Spanish
+  IT, // Italian
+  JA, // Japanese
+  KO, // Korean
+  PT, // Portuguese
+  RU, // Russian
+  ZH, // Chinese
+  AR, // Arabic
+}
 /**
  * Threat levels for security violations
  */
@@ -18,6 +31,9 @@ export enum SecurityFlag {
 
   // Role confusion flags
   ROLE_CONFUSION = "role_confusion",
+  ROLE_CONFUSION_LOOKALIKE_CHARACTERS = "role_confusion_lookalike_characters",
+  ROLE_CONFUSION_MULTILINGUAL_ATTACK = "role_confusion_multilingual_attack",
+  ROLE_CONFUSION_HIGH_RISK_ROLE_CONFUSION = "high_risk_role_confusion",
 
   // Encoding detection flags
   BASE64_ENCODING = "base64_encoding",
@@ -48,6 +64,22 @@ export enum SecurityFlag {
   // Attack pattern flags
   DELIMITER_CONFUSION = "delimiter_confusion",
   INSTRUCTION_HIJACKING = "instruction_hijacking",
+  MULTILINGUAL_ATTACK = "multilingual_attack",
+  HIGH_RISK_LANGUAGE = "high_risk_language",
+
+  // Role confusion attack types
+  ROLE_CONFUSION_ROLE_ASSUMPTION = "role_confusion_role_assumption",
+  ROLE_CONFUSION_MODE_SWITCHING = "role_confusion_mode_switching",
+  ROLE_CONFUSION_PERMISSION_ASSERTION = "role_confusion_permission_assertion",
+  ROLE_CONFUSION_SCRIPT_MIXING = "role_confusion_script_mixing",
+
+  // Instruction hijacking attack types
+  INSTRUCTION_HIJACKING_OVERRIDE = "instruction_hijacking_override",
+  INSTRUCTION_HIJACKING_IGNORE = "instruction_hijacking_ignore",
+  INSTRUCTION_HIJACKING_RESET = "instruction_hijacking_reset",
+  INSTRUCTION_HIJACKING_BYPASS = "instruction_hijacking_bypass",
+  INSTRUCTION_HIJACKING_REVEAL = "instruction_hijacking_reveal",
+  INSTRUCTION_HIJACKING_SCRIPT_MIXING = "instruction_hijacking_script_mixing",
 
   // HTTP and validation flags
   HTTP_VALIDATION_FAILED = "http_validation_failed",

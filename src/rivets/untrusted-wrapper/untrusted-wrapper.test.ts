@@ -39,7 +39,7 @@ describe("untrustedWrapper()", () => {
     const originalInput = "Original user input";
     const result = await chainmail.protect(originalInput);
 
-    expect(result.context.metadata.originalContent).toBe(originalInput);
+    expect(result.context.metadata.original_content).toBe(originalInput);
     expect(result.context.sanitized).toBe(
       "<UNTRUSTED_CONTENT>\nOriginal user input\n</UNTRUSTED_CONTENT>"
     );

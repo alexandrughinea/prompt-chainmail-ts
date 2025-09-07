@@ -27,7 +27,7 @@ describe("httpFetch(...)", () => {
     const result = await chainmail.protect("test input");
 
     expect(result.context.flags).toContain(SecurityFlag.HTTP_VALIDATED);
-    expect(result.context.metadata.httpResponse).toEqual(mockResponse);
+    expect(result.context.metadata.http_response).toEqual(mockResponse);
     expect(global.fetch).toHaveBeenCalledWith(
       "https://api.example.com/validate",
       expect.objectContaining({
@@ -53,7 +53,7 @@ describe("httpFetch(...)", () => {
     const result = await chainmail.protect("test input");
 
     expect(result.context.flags).toContain(SecurityFlag.HTTP_ERROR);
-    expect(result.context.metadata.httpError).toContain("HTTP 500");
+    expect(result.context.metadata.http_error).toContain("HTTP 500");
     expect(result.context.confidence).toBeLessThan(1.0);
   });
 
@@ -67,7 +67,7 @@ describe("httpFetch(...)", () => {
     const result = await chainmail.protect("test input");
 
     expect(result.context.flags).toContain(SecurityFlag.HTTP_ERROR);
-    expect(result.context.metadata.httpError).toBe("Network error");
+    expect(result.context.metadata.http_error).toBe("Network error");
     expect(result.context.confidence).toBeLessThan(1.0);
   });
 
@@ -89,7 +89,7 @@ describe("httpFetch(...)", () => {
     const result = await chainmail.protect("test input");
 
     expect(result.context.flags).toContain(SecurityFlag.HTTP_TIMEOUT);
-    expect(result.context.metadata.httpError).toContain(
+    expect(result.context.metadata.http_error).toContain(
       "timed out after 50ms"
     );
     expect(result.context.confidence).toBeLessThan(1.0);
@@ -119,7 +119,7 @@ describe("httpFetch(...)", () => {
     expect(result.context.flags).toContain(
       SecurityFlag.HTTP_VALIDATION_FAILED
     );
-    expect(result.context.metadata.httpValidationError).toBe(
+    expect(result.context.metadata.http_validation_error).toBe(
       "Response validation failed"
     );
     expect(result.context.confidence).toBeLessThan(1.0);

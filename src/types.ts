@@ -101,7 +101,7 @@ export interface ChainmailResult {
  *
  *   // Post-processing logic
  *   if (!result.success) {
- *     context.metadata.failureReason = 'Custom rivet detected issue';
+ *     context.metadata.failure_reason = 'Custom rivet detected issue';
  *   }
  *
  *   return result;

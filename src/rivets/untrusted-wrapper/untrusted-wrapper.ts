@@ -9,7 +9,7 @@ export function untrustedWrapper(
     const wrappedContent = `<${tagName}>\n${context.sanitized}\n</${tagName}>`;
 
     if (preserveOriginal) {
-      context.metadata.originalContent = context.sanitized;
+      context.metadata.original_content = context.sanitized;
     }
 
     context.sanitized = wrappedContent;

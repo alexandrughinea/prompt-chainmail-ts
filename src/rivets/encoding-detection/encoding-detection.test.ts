@@ -12,7 +12,7 @@ describe("encodingDetection()", () => {
 
     expect(result.context.flags).toContain(SecurityFlag.BASE64_ENCODING);
     expect(result.context.confidence).toBeLessThan(1.0);
-    expect(result.context.metadata.decodedContent).toContain(
+    expect(result.context.metadata.decoded_content).toContain(
       "ignore all instructions"
     );
   });
@@ -35,7 +35,7 @@ describe("encodingDetection()", () => {
 
     expect(result.context.flags).toContain(SecurityFlag.URL_ENCODING);
     expect(result.context.confidence).toBeLessThan(1.0);
-    expect(result.context.metadata.urlDecodedContent).toContain(
+    expect(result.context.metadata.url_decoded_content).toContain(
       "ignore system"
     );
   });
@@ -48,7 +48,7 @@ describe("encodingDetection()", () => {
 
     expect(result.context.flags).toContain(SecurityFlag.UNICODE_ENCODING);
     expect(result.context.confidence).toBeLessThan(1.0);
-    expect(result.context.metadata.unicodeDecodedContent).toContain("ignore");
+    expect(result.context.metadata.unicode_decoded_content).toContain("ignore");
   });
 
   it("should detect HTML entities", async () => {
@@ -59,7 +59,7 @@ describe("encodingDetection()", () => {
 
     expect(result.context.flags).toContain(SecurityFlag.HTML_ENTITY_ENCODING);
     expect(result.context.confidence).toBeLessThan(1.0);
-    expect(result.context.metadata.htmlDecodedContent).toContain("ignore");
+    expect(result.context.metadata.html_decoded_content).toContain("ignore");
   });
 
   it("should detect binary encoding", async () => {
@@ -71,7 +71,7 @@ describe("encodingDetection()", () => {
 
     expect(result.context.flags).toContain(SecurityFlag.BINARY_ENCODING);
     expect(result.context.confidence).toBeLessThan(1.0);
-    expect(result.context.metadata.binaryDecodedContent).toContain("ignore");
+    expect(result.context.metadata.binary_decoded_content).toContain("ignore");
   });
 
   it("should detect octal encoding", async () => {
@@ -82,7 +82,7 @@ describe("encodingDetection()", () => {
 
     expect(result.context.flags).toContain(SecurityFlag.OCTAL_ENCODING);
     expect(result.context.confidence).toBeLessThan(1.0);
-    expect(result.context.metadata.octalDecodedContent).toContain("ignore");
+    expect(result.context.metadata.octal_decoded_content).toContain("ignore");
   });
 
   it("should detect ROT13 encoding", async () => {
@@ -93,7 +93,7 @@ describe("encodingDetection()", () => {
 
     expect(result.context.flags).toContain(SecurityFlag.ROT13_ENCODING);
     expect(result.context.confidence).toBeLessThan(1.0);
-    expect(result.context.metadata.rot13DecodedContent).toContain(
+    expect(result.context.metadata.rot13_decoded_content).toContain(
       "ignore system"
     );
   });
@@ -108,6 +108,6 @@ describe("encodingDetection()", () => {
       SecurityFlag.MIXED_CASE_OBFUSCATION
     );
     expect(result.context.confidence).toBeLessThan(1.0);
-    expect(result.context.metadata.mixedCaseWords).toBeDefined();
+    expect(result.context.metadata.mixed_case_words).toBeDefined();
   });
 });

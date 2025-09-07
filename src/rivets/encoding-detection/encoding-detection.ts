@@ -1,12 +1,13 @@
 import { ChainmailRivet } from "../../index";
-import { ThreatLevel, SecurityFlag } from "../rivets.types";
+import { ThreatLevel, SecurityFlag, SupportedLanguages } from "../rivets.types";
 import { applyThreatPenalty } from "../rivets.utils";
-import { SECURITY_COMPONENTS } from "../rivets.const";
+import { SECURITY_COMPONENTS_BY_LANGUAGE } from "../rivets.const";
 
 export function encodingDetection(): ChainmailRivet {
   return async (context, next) => {
+    const englishComponents = SECURITY_COMPONENTS_BY_LANGUAGE[SupportedLanguages.EN];
     const suspiciousKeywords = new RegExp(
-      SECURITY_COMPONENTS.SUSPICIOUS,
+      `${englishComponents.PRIVILEGED_ROLES}|${englishComponents.TECHNICAL_ROLES}|${englishComponents.INSTRUCTION_VERBS}|${englishComponents.HIJACK_ACTIONS}|${englishComponents.OVERRIDE_VERBS}`,
       "i"
     );
 
@@ -20,7 +21,7 @@ export function encodingDetection(): ChainmailRivet {
         if (suspiciousKeywords.test(decoded)) {
           context.flags.push(SecurityFlag.BASE64_ENCODING);
           applyThreatPenalty(context, ThreatLevel.MEDIUM);
-          context.metadata.decodedContent = decoded.slice(0, 100);
+          context.metadata.decoded_content = decoded.slice(0, 100);
         }
       } catch {
         // Not valid base64
@@ -43,7 +44,7 @@ export function encodingDetection(): ChainmailRivet {
         if (suspiciousKeywords.test(decoded)) {
           context.flags.push(SecurityFlag.URL_ENCODING);
           applyThreatPenalty(context, ThreatLevel.MEDIUM);
-          context.metadata.urlDecodedContent = decoded.slice(0, 100);
+          context.metadata.url_decoded_content = decoded.slice(0, 100);
         }
       } catch {
         // Invalid URL encoding
@@ -60,7 +61,7 @@ export function encodingDetection(): ChainmailRivet {
         if (suspiciousKeywords.test(decoded)) {
           context.flags.push(SecurityFlag.UNICODE_ENCODING);
           applyThreatPenalty(context, ThreatLevel.MEDIUM);
-          context.metadata.unicodeDecodedContent = decoded.slice(0, 100);
+          context.metadata.unicode_decoded_content = decoded.slice(0, 100);
         }
       } catch {
         // Invalid unicode
@@ -85,7 +86,7 @@ export function encodingDetection(): ChainmailRivet {
       if (suspiciousKeywords.test(decoded)) {
         context.flags.push(SecurityFlag.HTML_ENTITY_ENCODING);
         applyThreatPenalty(context, ThreatLevel.MEDIUM);
-        context.metadata.htmlDecodedContent = decoded.slice(0, 100);
+        context.metadata.html_decoded_content = decoded.slice(0, 100);
       }
     }
 
@@ -102,7 +103,7 @@ export function encodingDetection(): ChainmailRivet {
         if (suspiciousKeywords.test(decoded)) {
           context.flags.push(SecurityFlag.BINARY_ENCODING);
           applyThreatPenalty(context, ThreatLevel.HIGH);
-          context.metadata.binaryDecodedContent = decoded.slice(0, 100);
+          context.metadata.binary_decoded_content = decoded.slice(0, 100);
         }
       } catch {
         // Invalid binary
@@ -119,7 +120,7 @@ export function encodingDetection(): ChainmailRivet {
         if (suspiciousKeywords.test(decoded)) {
           context.flags.push(SecurityFlag.OCTAL_ENCODING);
           applyThreatPenalty(context, ThreatLevel.MEDIUM);
-          context.metadata.octalDecodedContent = decoded.slice(0, 100);
+          context.metadata.octal_decoded_content = decoded.slice(0, 100);
         }
       } catch {
         // Invalid octal
@@ -142,7 +143,7 @@ export function encodingDetection(): ChainmailRivet {
     ) {
       context.flags.push(SecurityFlag.ROT13_ENCODING);
       applyThreatPenalty(context, ThreatLevel.MEDIUM);
-      context.metadata.rot13DecodedContent = rot13Decoded.slice(0, 100);
+      context.metadata.rot13_decoded_content = rot13Decoded.slice(0, 100);
     }
 
     // Mixed case obfuscation detection
@@ -159,7 +160,7 @@ export function encodingDetection(): ChainmailRivet {
     if (mixedCaseWords.length > 2) {
       context.flags.push(SecurityFlag.MIXED_CASE_OBFUSCATION);
       applyThreatPenalty(context, ThreatLevel.MEDIUM);
-      context.metadata.mixedCaseWords = mixedCaseWords.slice(0, 5);
+      context.metadata.mixed_case_words = mixedCaseWords.slice(0, 5);
     }
 
     return next();
