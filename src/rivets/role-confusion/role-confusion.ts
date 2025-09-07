@@ -19,16 +19,15 @@ export function roleConfusion(): ChainmailRivet {
 
     interface AttackDetection {
       type: string;
-      language: number;
+      language: string;
       patternIndex: number;
     }
 
     const detectedAttacks: AttackDetection[] = [];
-    const attackingLanguages = new Set<number>();
+    const attackingLanguages = new Set<string>();
 
     Object.entries(ROLE_CONFUSION_PATTERNS_BY_LANGUAGE).forEach(([langCode, patterns]) => {
-      const lang = Number(langCode) as keyof typeof ROLE_CONFUSION_PATTERNS_BY_LANGUAGE;
-      const attackTypes = ROLE_CONFUSION_ATTACK_TYPE_MAP[lang];
+      const attackTypes = ROLE_CONFUSION_ATTACK_TYPE_MAP;
 
       patterns.forEach((pattern, index) => {
         if (pattern.test(context.sanitized)) {
@@ -37,8 +36,8 @@ export function roleConfusion(): ChainmailRivet {
           if (index === 0 && attackType === 'ROLE_ASSUMPTION') {
             const match = pattern.exec(context.sanitized);
             if (match) {
-              const keywords = PERMISSION_ASSERTION_KEYWORDS_BY_LANGUAGE[lang] || [];
-              const hasPermissionKeyword = keywords.some(keyword => 
+              const keywords = PERMISSION_ASSERTION_KEYWORDS_BY_LANGUAGE[langCode as keyof typeof PERMISSION_ASSERTION_KEYWORDS_BY_LANGUAGE] || [];
+              const hasPermissionKeyword = keywords.some((keyword: string) => 
                 match[0].toLowerCase().includes(keyword.toLowerCase())
               );
               if (hasPermissionKeyword) {
@@ -49,10 +48,10 @@ export function roleConfusion(): ChainmailRivet {
 
           detectedAttacks.push({
             type: attackType,
-            language: lang,
+            language: langCode,
             patternIndex: index
           });
-          attackingLanguages.add(lang);
+          attackingLanguages.add(langCode);
         }
       });
     });

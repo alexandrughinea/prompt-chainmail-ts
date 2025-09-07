@@ -71,7 +71,7 @@ describe("roleConfusion()", () => {
   describe.each(Object.entries(multilingualTestCases))(
     "Multilingual role confusion detection - %s",
     (langKey, testCases) => {
-      const lang = parseInt(langKey) as SupportedLanguages;
+      const lang = langKey as SupportedLanguages;
       const langName = SupportedLanguages[lang];
 
       it(`should detect role assumption in ${langName}`, async () => {

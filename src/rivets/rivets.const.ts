@@ -257,28 +257,11 @@ export const ROLE_CONFUSION_PATTERNS_BY_LANGUAGE = {
   ],
 } as const;
 
-export const ROLE_CONFUSION_ATTACK_TYPE_MAP = {
-  [SupportedLanguages.EN]: ["ROLE_ASSUMPTION", "MODE_SWITCHING"],
-  [SupportedLanguages.ES]: ["ROLE_ASSUMPTION", "MODE_SWITCHING"],
-  [SupportedLanguages.FR]: ["ROLE_ASSUMPTION", "MODE_SWITCHING"],
-  [SupportedLanguages.DE]: ["ROLE_ASSUMPTION", "MODE_SWITCHING"],
-  [SupportedLanguages.RU]: [
-    "ROLE_ASSUMPTION",
-    "MODE_SWITCHING",
-    "PERMISSION_ASSERTION",
-  ],
-  [SupportedLanguages.ZH]: ["ROLE_ASSUMPTION", "MODE_SWITCHING"],
-  [SupportedLanguages.AR]: [
-    "ROLE_ASSUMPTION",
-    "MODE_SWITCHING",
-    "PERMISSION_ASSERTION",
-  ],
-  [SupportedLanguages.JA]: [
-    "ROLE_ASSUMPTION",
-    "MODE_SWITCHING",
-    "PERMISSION_ASSERTION",
-  ],
-} as const;
+export const ROLE_CONFUSION_ATTACK_TYPE_MAP = [
+  "ROLE_ASSUMPTION",
+  "MODE_SWITCHING",
+  "PERMISSION_ASSERTION",
+] as const
 
 export const PERMISSION_ASSERTION_KEYWORDS_BY_LANGUAGE = {
   [SupportedLanguages.EN]: [

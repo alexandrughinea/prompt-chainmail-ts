@@ -1,24 +1,24 @@
 export enum SupportedLanguages {
-  EN, // English
-  FR, // French
-  DE, // Deutsch
-  ES, // Spanish
-  IT, // Italian
-  JA, // Japanese
-  KO, // Korean
-  PT, // Portuguese
-  RU, // Russian
-  ZH, // Chinese
-  AR, // Arabic
-  UK, // Ukrainian
-  RO, // Romanian
-  HI, // Hindi
-  FA, // Persian/Farsi
-  BE, // Belarusian
-  HE, // Hebrew
-  PL, // Polish
-  NL, // Dutch
-  LV, // Latvian
+  EN = "en", // English
+  FR = "fr", // French
+  DE = "de", // Deutsch
+  ES = "es", // Spanish
+  IT = "it", // Italian
+  JA = "ja", // Japanese
+  KO = "ko", // Korean
+  PT = "pt", // Portuguese
+  RU = "ru", // Russian
+  ZH = "zh", // Chinese
+  AR = "ar", // Arabic
+  UK = "uk", // Ukrainian
+  RO = "ro", // Romanian
+  HI = "hi", // Hindi
+  FA = "fa", // Persian/Farsi
+  BE = "be", // Belarusian
+  HE = "he", // Hebrew
+  PL = "pl", // Polish
+  NL = "nl", // Dutch
+  LV = "lv", // Latvian
 }
 /**
  * Threat levels for security violations
