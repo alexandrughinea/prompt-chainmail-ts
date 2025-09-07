@@ -10,6 +10,15 @@ export enum SupportedLanguages {
   RU, // Russian
   ZH, // Chinese
   AR, // Arabic
+  UK, // Ukrainian
+  RO, // Romanian
+  HI, // Hindi
+  FA, // Persian/Farsi
+  BE, // Belarusian
+  HE, // Hebrew
+  PL, // Polish
+  NL, // Dutch
+  LV, // Latvian
 }
 /**
  * Threat levels for security violations

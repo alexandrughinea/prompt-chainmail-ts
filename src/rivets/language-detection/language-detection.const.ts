@@ -181,7 +181,7 @@ export const LANGUAGE_DETECTION_DEFAULT_DETECTION_OPTIONS = {
 
 
 export const CYBERCRIME_INDEX = {
-  "ru": 58.39,
+  [SupportedLanguages.RU]: 58.39,
   "uk": 36.44,
   "zh": 27.86,
   "en": 25.01,
