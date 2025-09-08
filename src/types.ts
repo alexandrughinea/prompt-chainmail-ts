@@ -1,4 +1,3 @@
-
 /**
  * Context object passed through the rivet chain during input processing.
  * Contains the current state of input analysis and security assessment.

@@ -1,125 +1,125 @@
-import { ChainmailRivet } from "../../index";
-import { ThreatLevel, SecurityFlag } from "../rivets.types";
+import { SecurityFlags } from "../rivets.types";
 import {
-  detectLanguages,
   detectScriptMixing,
-  detectLookalikeChars,
-  calculateWeightedConfidence,
   LanguageDetector,
 } from "../../@shared/language-detection";
-import { applyThreatPenalty } from "../rivets.utils";
-import { ROLE_CONFUSION_PATTERNS_BY_LANGUAGE, ROLE_INDICATORS, ROLE_CONFUSION_ATTACK_TYPE_MAP, PERMISSION_ASSERTION_KEYWORDS_BY_LANGUAGE } from "../rivets.const";
+import { RoleConfusionDetector } from "./role-confusion.utils";
 import { ChainmailContext } from "../../types";
+import { applyThreatPenalty } from "../rivets.utils";
+import { ThreatLevel } from "../rivets.types";
+import confusionPatternsConfig from "../../@configs/confusion_patterns.json";
+import { RoleConfusionAttackType } from "./role-confusion.types";
 
 /**
  * @description
  * This is a stub and will be implemented in the future to detect and flag more precisely with other strategies.
  */
-export function roleConfusion(): ChainmailRivet {
-  const languageDetector = new LanguageDetector({
-    enableMultipleDetection: true,
-    minConfidence: 0.1,
-  });
-  return async (context: ChainmailContext, next) => {
-    const languages = languageDetector.detect(context.sanitized);
-    const hasScriptMixing = detectScriptMixing(context.sanitized);
-    const hasLookalikes = detectLookalikeChars(context.sanitized);
+export function roleConfusion() {
+  const languageDetector = new LanguageDetector();
+  const confusionDetector = new RoleConfusionDetector();
 
-    interface AttackDetection {
-      type: string;
-      language: string;
-      patternIndex: number;
+  return async (context: ChainmailContext, next: any) => {
+    const relevantLanguages = languageDetector
+      .detect(context.sanitized)
+      .filter(([, confidence]) => confidence > 0.1);
+
+    if (relevantLanguages.length === 0) {
+      relevantLanguages.push(["eng", 0.3]);
     }
 
-    const detectedAttacks: AttackDetection[] = [];
-    const attackingLanguages = new Set<string>();
+    const hasScriptMixing = detectScriptMixing(context.sanitized);
+    const detectionResults = [];
 
-    Object.entries(ROLE_CONFUSION_PATTERNS_BY_LANGUAGE).forEach(([langCode, patterns]) => {
-      const attackTypes = ROLE_CONFUSION_ATTACK_TYPE_MAP;
+    let maxRiskScore = 0;
+    let maxConfidence = 0;
 
-      patterns.forEach((pattern, index) => {
-        if (pattern.test(context.sanitized)) {
-          let attackType = attackTypes[index] || 'UNKNOWN';
+    const allAttackTypes = new Set<RoleConfusionAttackType>();
 
-          if (index === 0 && attackType === 'ROLE_ASSUMPTION') {
-            const match = pattern.exec(context.sanitized);
-            if (match) {
-              const keywords = PERMISSION_ASSERTION_KEYWORDS_BY_LANGUAGE[langCode as keyof typeof PERMISSION_ASSERTION_KEYWORDS_BY_LANGUAGE] || [];
-              const hasPermissionKeyword = keywords.some((keyword: string) => 
-                match[0].toLowerCase().includes(keyword.toLowerCase())
-              );
-              if (hasPermissionKeyword) {
-                attackType = 'PERMISSION_ASSERTION';
-              }
-            }
-          }
+    for (const [iso3Code, confidence] of relevantLanguages) {
+      try {
+        const result = confusionDetector.detect(context.sanitized, iso3Code);
 
-          detectedAttacks.push({
-            type: attackType,
-            language: langCode,
-            patternIndex: index
-          });
-          attackingLanguages.add(langCode);
+        detectionResults.push({
+          language: iso3Code,
+          result,
+          detectionConfidence: confidence,
+        });
+
+        maxRiskScore = Math.max(maxRiskScore, result.risk_score);
+        maxConfidence = Math.max(maxConfidence, result.confidence);
+
+        result.attack_types.forEach((attackType: string) =>
+          allAttackTypes.add(attackType as RoleConfusionAttackType)
+        );
+      } catch (error) {
+        console.error(
+          `Error detecting role confusion for language ${iso3Code}:`,
+          error
+        );
+      }
+    }
+
+    const attackTypesArray = Array.from(allAttackTypes);
+    const threshold = confusionPatternsConfig.config.confidence_threshold;
+    const isAttack = attackTypesArray.length > 0 && maxConfidence > threshold;
+
+    if (isAttack) {
+      const flagSet = new Set(context.flags);
+      flagSet.add(SecurityFlags.ROLE_CONFUSION);
+
+      attackTypesArray.forEach((attackType: RoleConfusionAttackType) => {
+        switch (attackType) {
+          case RoleConfusionAttackType.ROLE_ASSUMPTION:
+            flagSet.add(SecurityFlags.ROLE_CONFUSION_ROLE_ASSUMPTION);
+            break;
+          case RoleConfusionAttackType.MODE_SWITCHING:
+            flagSet.add(SecurityFlags.ROLE_CONFUSION_MODE_SWITCHING);
+            break;
+          case RoleConfusionAttackType.PERMISSION_ASSERTION:
+            flagSet.add(SecurityFlags.ROLE_CONFUSION_PERMISSION_ASSERTION);
+            break;
+          case RoleConfusionAttackType.ROLE_INDICATOR:
+            flagSet.add(SecurityFlags.ROLE_CONFUSION_ROLE_INDICATOR);
+            break;
         }
       });
-    });
 
-    const totalMatches = detectedAttacks.length;
-    const detectedAttackTypes = [...new Set(detectedAttacks.map(a => a.type))];
+      const highRiskThreshold = confusionPatternsConfig.config.high_risk_role_confidence_threshold;
 
-    const roleIndicatorRegex = new RegExp(ROLE_INDICATORS, 'i');
-    const roleIndicatorMatch = roleIndicatorRegex.exec(context.sanitized);
-    const baseConfidence = Math.max(totalMatches * 0.3, roleIndicatorMatch ? 0.3 : 0);
-
-    const riskScore = calculateWeightedConfidence(
-      baseConfidence,
-      languages,
-      hasScriptMixing,
-      hasLookalikes
-    );
-
-    if (totalMatches > 0 || roleIndicatorMatch) {
-      context.flags.push(SecurityFlag.ROLE_CONFUSION);
-
-      // Add specific attack type flags
-      if (detectedAttackTypes.includes('ROLE_ASSUMPTION')) {
-        context.flags.push(SecurityFlag.ROLE_CONFUSION_ROLE_ASSUMPTION);
-      }
-      if (detectedAttackTypes.includes('MODE_SWITCHING')) {
-        context.flags.push(SecurityFlag.ROLE_CONFUSION_MODE_SWITCHING);
-      }
-      if (detectedAttackTypes.includes('PERMISSION_ASSERTION')) {
-        context.flags.push(SecurityFlag.ROLE_CONFUSION_PERMISSION_ASSERTION);
+      if (maxConfidence > highRiskThreshold && attackTypesArray.length > 1) {
+        flagSet.add(SecurityFlags.ROLE_CONFUSION_HIGH_RISK_ROLE);
       }
 
-      if (attackingLanguages.size > 1) {
-        context.flags.push(SecurityFlag.MULTILINGUAL_ATTACK);
+      if (relevantLanguages.length > 1) {
+        flagSet.add(SecurityFlags.ROLE_CONFUSION_MULTILINGUAL_ATTACK);
       }
 
-      if (hasScriptMixing || hasLookalikes) {
-        context.flags.push(SecurityFlag.ROLE_CONFUSION_SCRIPT_MIXING);
+      if (hasScriptMixing) {
+        flagSet.add(SecurityFlags.ROLE_CONFUSION_SCRIPT_MIXING);
       }
 
+      context.flags = Array.from(flagSet);
 
-      let threatLevel: ThreatLevel;
-      if (riskScore >= 0.8) threatLevel = ThreatLevel.CRITICAL;
-      else if (riskScore >= 0.6) threatLevel = ThreatLevel.HIGH;
-      else if (riskScore >= 0.4) threatLevel = ThreatLevel.MEDIUM;
-      else threatLevel = ThreatLevel.LOW;
+      const threatLevel =
+        maxConfidence > highRiskThreshold
+          ? ThreatLevel.CRITICAL
+          : maxConfidence > 0.5
+            ? ThreatLevel.HIGH
+            : maxConfidence > 0.3
+              ? ThreatLevel.MEDIUM
+              : ThreatLevel.LOW;
 
       applyThreatPenalty(context, threatLevel);
 
       context.metadata.role_confusion_detected = true;
-      context.metadata.role_confusion_confidence = riskScore;
-      context.metadata.role_confusion_risk_score = riskScore;
-      context.metadata.role_confusion_attack_types = detectedAttackTypes;
-      context.metadata.role_confusion_detected_languages = languages.map(l => l.code);
-      context.metadata.role_indicator = roleIndicatorMatch ? roleIndicatorMatch[0].toLowerCase() : undefined;
-      context.metadata.attack_types = detectedAttackTypes;
-      context.metadata.attacking_languages = Array.from(attackingLanguages);
-      context.metadata.has_script_mixing = hasScriptMixing;
-      context.metadata.has_lookalikes = hasLookalikes;
-
+      context.metadata.role_confusion_confidence = maxConfidence;
+      context.metadata.role_confusion_risk_score = maxRiskScore;
+      context.metadata.role_confusion_attack_types = attackTypesArray;
+      context.metadata.role_confusion_detected_language =
+        detectionResults.find((r) => r.result.confidence === maxConfidence)
+          ?.language || "eng";
+      context.metadata.role_confusion_detected_languages =
+        relevantLanguages.map(([iso3]) => iso3);
     }
 
     return next();

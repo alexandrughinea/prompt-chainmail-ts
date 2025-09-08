@@ -1,142 +1,159 @@
 import { ChainmailRivet } from "../../index";
-import { SecurityFlag, SupportedLanguages } from "../rivets.types";
+import { SecurityFlags } from "../rivets.types";
 import {
-  detectLanguages,
-  detectScriptMixing,
   detectLookalikeChars,
+  detectScriptMixing,
   LanguageDetector,
 } from "../../@shared/language-detection";
 import { ChainmailContext } from "../../types";
-import { MultilingualIntrusionDetector } from "./instruction-hijacking.utils";
+import { IntrusionDetector } from "./instruction-hijacking.utils";
 import { AttackType } from "./instruction-hijacking.types";
+import { applyThreatPenalty } from "../rivets.utils";
+import { ThreatLevel } from "../rivets.types";
+import instructionPatternsConfig from "../../@configs/instruction_patterns.json";
 
 /**
  * @description
- * This is a stub and will be implemented in the future to detect and flag more precisely with other strategies.
+ * Detects instruction hijacking attempts using multilingual pattern matching
  */
 export function instructionHijacking(): ChainmailRivet {
-  const languageDetector = new LanguageDetector({
-    enableMultipleDetection: true,
-    minConfidence: 0.1,
-  });
-  const intrusionDetector = new MultilingualIntrusionDetector();
+  const languageDetector = new LanguageDetector();
+  const intrusionDetector = new IntrusionDetector();
 
   return async (context: ChainmailContext, next) => {
-    const languages = languageDetector.detect(context.sanitized);
+    const relevantLanguages = languageDetector
+      .detect(context.sanitized)
+      .filter(([, confidence]) => confidence > 0.1);
+
+    if (relevantLanguages.length === 0) {
+      relevantLanguages.push(["eng", 0.3]);
+    }
+
+    // Prioritize high-confidence languages for better detection accuracy
+    const prioritizeLanguages = (
+      languages: [string, number][],
+      priorities: Array<{ code: string; minConfidence: number }>
+    ) => {
+      const prioritized: [string, number][] = [];
+      const remaining = [...languages];
+
+      for (const { code, minConfidence } of priorities) {
+        const index = remaining.findIndex(
+          ([lang, conf]) => lang === code && conf >= minConfidence
+        );
+        if (index !== -1) {
+          prioritized.push(remaining.splice(index, 1)[0]);
+        }
+      }
+
+      return [...prioritized, ...remaining].slice(0, 5); // Limit to 5 total
+    };
+
+    // Apply prioritization for languages with strong attack patterns
+    relevantLanguages.splice(
+      0,
+      relevantLanguages.length,
+      ...prioritizeLanguages(relevantLanguages, [
+        { code: "rus", minConfidence: 0.8 },
+        { code: "deu", minConfidence: 0.7 },
+      ])
+    );
+
     const hasScriptMixing = detectScriptMixing(context.sanitized);
     const hasLookalikes = detectLookalikeChars(context.sanitized);
 
-    // Store script mixing and lookalike detection results
-    context.metadata.has_script_mixing = hasScriptMixing;
-    context.metadata.has_lookalikes = hasLookalikes;
-
-    // Add script mixing and lookalike character flags
     if (hasScriptMixing) {
-      context.flags.push(SecurityFlag.INSTRUCTION_HIJACKING_SCRIPT_MIXING);
+      context.flags.push(SecurityFlags.INSTRUCTION_HIJACKING_SCRIPT_MIXING);
     }
 
     if (hasLookalikes) {
-      context.flags.push(SecurityFlag.INSTRUCTION_HIJACKING_LOOKALIKES);
+      context.flags.push(SecurityFlags.INSTRUCTION_HIJACKING_LOOKALIKES);
     }
 
-    // Run intrusion detection for each detected language
     const detectionResults = [];
     let maxRiskScore = 0;
     let maxConfidence = 0;
     const allAttackTypes = new Set<AttackType>();
 
-    // Use detected languages, but always include English as fallback
-    const languagesToCheck = languages.length > 0 ? [...languages, SupportedLanguages.EN] : [SupportedLanguages.EN];
-
-    for (const language of languagesToCheck) {
+    for (const [iso3Code, confidence] of relevantLanguages) {
       try {
-        const languageCode = typeof language === 'string' ? language : language.code;
-        const result = intrusionDetector.processDetection(context.sanitized, languageCode as SupportedLanguages);
-        detectionResults.push(result);
+        const result = intrusionDetector.detect(context.sanitized, iso3Code);
 
-        // Track the highest risk score and confidence across all languages
-        maxRiskScore = Math.max(maxRiskScore, result.riskScore);
+        detectionResults.push({
+          language: iso3Code,
+          result,
+          detectionConfidence: confidence,
+        });
+
+        maxRiskScore = Math.max(maxRiskScore, result.risk_score);
         maxConfidence = Math.max(maxConfidence, result.confidence);
 
-        // Collect all attack types
-        result.attackTypes.forEach(attackType => allAttackTypes.add(attackType));
-
+        result.attack_types.forEach((attackType) =>
+          allAttackTypes.add(attackType as AttackType)
+        );
       } catch (error) {
-        // Log error but don't break the chain
-        console.warn(`Intrusion detection failed for language ${language}:`, error);
+        console.error(
+          `Error detecting attacks for language ${iso3Code}:`,
+          error
+        );
       }
     }
 
-    // Convert attack types set to array
     const attackTypesArray = Array.from(allAttackTypes);
-
-    // Store detection metadata
-    context.metadata.instruction_hijacking_attack_types = attackTypesArray;
-    context.metadata.instruction_hijacking_risk_score = maxRiskScore / 100; // Normalize to 0-1 range
-    context.metadata.instruction_hijacking_confidence = maxConfidence;
-    context.metadata.instruction_hijacking_detected_languages = languages;
-    
-
-    // Determine if this is an attack - simplified logic
-    const isAttack = attackTypesArray.length > 0;
+    const threshold =
+      instructionPatternsConfig.config.instruction_hijacking_threshold;
+    const isAttack = attackTypesArray.length > 0 && maxConfidence > threshold;
 
     if (isAttack) {
-      // Add general instruction hijacking flag
-      if (!context.flags.includes(SecurityFlag.INSTRUCTION_HIJACKING)) {
-        context.flags.push(SecurityFlag.INSTRUCTION_HIJACKING);
-      }
-      
-      // Remove lookalike flag if genuine attack is detected
-      const lookalikeIndex = context.flags.indexOf(SecurityFlag.INSTRUCTION_HIJACKING_LOOKALIKES);
-      if (lookalikeIndex > -1) {
-        context.flags.splice(lookalikeIndex, 1);
-      }
-
-      // Add specific security flags based on detected attack types
-      attackTypesArray.forEach(attackType => {
+      const flagSet = new Set(context.flags);
+      flagSet.add(SecurityFlags.INSTRUCTION_HIJACKING);
+      attackTypesArray.forEach((attackType) => {
         switch (attackType) {
           case AttackType.INSTRUCTION_OVERRIDE:
-            if (!context.flags.includes(SecurityFlag.INSTRUCTION_HIJACKING_OVERRIDE)) {
-              context.flags.push(SecurityFlag.INSTRUCTION_HIJACKING_OVERRIDE);
-            }
+            flagSet.add(SecurityFlags.INSTRUCTION_HIJACKING_OVERRIDE);
             break;
           case AttackType.INSTRUCTION_FORGETTING:
-            if (!context.flags.includes(SecurityFlag.INSTRUCTION_HIJACKING_IGNORE)) {
-              context.flags.push(SecurityFlag.INSTRUCTION_HIJACKING_IGNORE);
-            }
+            flagSet.add(SecurityFlags.INSTRUCTION_HIJACKING_IGNORE);
             break;
           case AttackType.RESET_SYSTEM:
-            if (!context.flags.includes(SecurityFlag.INSTRUCTION_HIJACKING_RESET)) {
-              context.flags.push(SecurityFlag.INSTRUCTION_HIJACKING_RESET);
-            }
+            flagSet.add(SecurityFlags.INSTRUCTION_HIJACKING_RESET);
             break;
           case AttackType.BYPASS_SECURITY:
-            if (!context.flags.includes(SecurityFlag.INSTRUCTION_HIJACKING_BYPASS)) {
-              context.flags.push(SecurityFlag.INSTRUCTION_HIJACKING_BYPASS);
-            }
+            flagSet.add(SecurityFlags.INSTRUCTION_HIJACKING_BYPASS);
             break;
           case AttackType.INFORMATION_EXTRACTION:
-            if (!context.flags.includes(SecurityFlag.INSTRUCTION_HIJACKING_REVEAL)) {
-              context.flags.push(SecurityFlag.INSTRUCTION_HIJACKING_REVEAL);
-            }
+            flagSet.add(SecurityFlags.INSTRUCTION_HIJACKING_REVEAL);
             break;
           default:
-            if (!context.flags.includes(SecurityFlag.INSTRUCTION_HIJACKING_UNKNOWN)) {
-              context.flags.push(SecurityFlag.INSTRUCTION_HIJACKING_UNKNOWN);
-            }
+            flagSet.add(SecurityFlags.INSTRUCTION_HIJACKING_UNKNOWN);
         }
       });
 
-      // Add multilingual attack flag if multiple languages detected
-      if (languages.length > 1) {
-        if (!context.flags.includes(SecurityFlag.MULTILINGUAL_ATTACK)) {
-          context.flags.push(SecurityFlag.MULTILINGUAL_ATTACK);
-        }
+      if (relevantLanguages.length > 1) {
+        flagSet.add(SecurityFlags.INSTRUCTION_HIJACKING_MULTILINGUAL_ATTACK);
       }
 
-      // Set overall confidence based on detection results
-      context.confidence = Math.min(context.confidence || 1.0, 1.0 - maxConfidence);
+      context.flags = Array.from(flagSet);
+
+      const threatLevel =
+        maxConfidence > 0.7
+          ? ThreatLevel.CRITICAL
+          : maxConfidence > 0.5
+            ? ThreatLevel.HIGH
+            : maxConfidence > 0.3
+              ? ThreatLevel.MEDIUM
+              : ThreatLevel.LOW;
+
+      applyThreatPenalty(context, threatLevel);
     }
+
+    context.metadata.has_script_mixing = hasScriptMixing;
+    context.metadata.has_lookalikes = hasLookalikes;
+    context.metadata.instruction_hijacking_attack_types = attackTypesArray;
+    context.metadata.instruction_hijacking_risk_score = maxRiskScore / 100;
+    context.metadata.instruction_hijacking_confidence = maxConfidence;
+    context.metadata.instruction_hijacking_detected_languages =
+      relevantLanguages.map(([iso3]) => iso3);
 
     return next();
   };

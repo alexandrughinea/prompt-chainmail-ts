@@ -169,20 +169,20 @@ export const languageFilter = (allowedLanguages: string[]): ChainmailRivet => {
     const hasArabic = /[\u0600-\u06FF]/.test(context.sanitized);
     const hasChinese = /[\u4e00-\u9fff]/.test(context.sanitized);
 
-    const detectedLanguages: string[] = [];
-    if (hasLatin) detectedLanguages.push("latin");
-    if (hasCyrillic) detectedLanguages.push("cyrillic");
-    if (hasArabic) detectedLanguages.push("arabic");
-    if (hasChinese) detectedLanguages.push("chinese");
+    const detected_languages: string[] = [];
+    if (hasLatin) detected_languages.push("latin");
+    if (hasCyrillic) detected_languages.push("cyrillic");
+    if (hasArabic) detected_languages.push("arabic");
+    if (hasChinese) detected_languages.push("chinese");
 
-    const hasAllowedLanguage = detectedLanguages.some((lang) =>
+    const hasAllowedLanguage = detected_languages.some((lang) =>
       allowedLanguages.includes(lang)
     );
 
-    if (detectedLanguages.length > 0 && !hasAllowedLanguage) {
+    if (detected_languages.length > 0 && !hasAllowedLanguage) {
       context.flags.push("unsupported_language");
       context.confidence *= 0.7;
-      context.metadata.detectedLanguages = detectedLanguages;
+      context.metadata.detected_languages = detected_languages;
     }
 
     return next();
@@ -472,7 +472,7 @@ export const minimalChainmail = () => {
 
 /**
  * Example: Advanced Custom Chainmail
- * Comprehensive protection with multiple layers
+ * Multi-layered protection
  */
 export const advancedCustomChainmail = () => {
   return new PromptChainmail()

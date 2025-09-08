@@ -1,312 +1,251 @@
-import {
-  ATTACK_PATTERNS,
-} from "./instruction-hijacking.const";
-import { AttackType, LanguagePatterns, DetectionPattern } from "./instruction-hijacking.types";
-import { SupportedLanguages } from "../rivets.types";
-import { CYBERCRIME_INDEX_BY_LANGUAGE } from "../rivets.const";
+import { COMMON_PATTERNS } from "../../@shared/regex-patterns/common.const";
+import { normalizeText } from "../../@shared/language-detection";
+import languageGroups from "../../@configs/language_iso3_to_language_groups.json";
+import cybercrimeIndex from "../../@configs/language_region_cybercrime_index_index.json";
+import instructionPatternsConfig from "../../@configs/instruction_patterns.json";
 
+interface PatternTemplate {
+  templates: string[];
+  slots: Record<string, string[]>;
+  weight?: number;
+}
+
+interface AttackPatterns {
+  [attackType: string]: PatternTemplate;
+}
 
 export interface DetectionResult {
   isAttack: boolean;
-  attackTypes: AttackType[];
+  attack_types: string[];
   confidence: number;
-  riskScore: number;
-  detectedLanguage: SupportedLanguages;
+  risk_score: number;
+  detected_language: string;
   details: string[];
 }
 
-export class MultilingualIntrusionDetector {
-  private readonly patterns: LanguagePatterns;
-  private readonly cybercrimeIndex: typeof CYBERCRIME_INDEX_BY_LANGUAGE;
+export class IntrusionDetector {
+  private readonly patterns = instructionPatternsConfig;
+  private readonly detectionConfig = this.patterns.config;
 
-  constructor() {
-    this.patterns = ATTACK_PATTERNS;
-    this.cybercrimeIndex = CYBERCRIME_INDEX_BY_LANGUAGE;
-  }
-
-  /**
-   * Evaluate attack heuristics for a specific text variant
-   */
-  private evaluateAttackHeuristics(
-    text: string,
-    pattern: DetectionPattern
-  ): { confidence: number; matches: string[] } {
-    let keywordMatches = 0;
-    let phraseMatches = 0;
-    let contextMatches = 0;
-    const matches: string[] = [];
-
-    // Keyword matching with fuzzy tolerance
-    for (const keyword of pattern.keywords) {
-      if (text.includes(keyword.toLowerCase())) {
-        keywordMatches++;
-        matches.push(`keyword: ${keyword}`);
-      }
+  public detect(text: string, languageCode: string): DetectionResult {
+    if (!text?.trim()) {
+      return this.createEmptyResult(languageCode);
     }
 
-    // Phrase matching with exact match priority
-    let hasExactPhraseMatch = false;
-    let hasStrongPhraseMatch = false;
-    for (const phrase of pattern.phrases) {
-      if (text.includes(phrase.toLowerCase())) {
-        phraseMatches++;
-        matches.push(`phrase: ${phrase}`);
-        if (text.trim().toLowerCase() === phrase.toLowerCase()) {
-          hasExactPhraseMatch = true;
-        }
-        // Check for strong phrase match (phrase covers most of the text)
-        if (phrase.length > text.length * 0.6) {
-          hasStrongPhraseMatch = true;
-        }
-      }
+    const normalizedText = normalizeText(text);
+    const patternGroup =
+      languageGroups.value[languageCode as keyof typeof languageGroups.value];
+    const attackPatterns = patternGroup
+      ? this.patterns.value[patternGroup as keyof typeof this.patterns.value]
+      : this.patterns.value.eng;
+
+    if (!attackPatterns) {
+      return this.createEmptyResult(languageCode);
     }
 
-    // Context pattern matching with regex
-    for (const contextPattern of pattern.contextPatterns) {
-      try {
-        const regex = new RegExp(contextPattern, "i");
-        if (regex.test(text)) {
-          contextMatches++;
-          matches.push(`pattern: ${contextPattern}`);
-        }
-      } catch (e) {
-        continue;
-      }
-    }
-
-    // Simplified confidence calculation
-    const keywordScore = keywordMatches > 0 ? Math.min(keywordMatches / Math.max(pattern.keywords.length, 1), 1.0) : 0;
-    const phraseScore = phraseMatches > 0 ? Math.min(phraseMatches / Math.max(pattern.phrases.length, 1), 1.0) : 0;
-    const contextScore = contextMatches > 0 ? Math.min(contextMatches / Math.max(pattern.contextPatterns.length, 1), 1.0) : 0;
-  
-    // Prioritize exact phrase matches with higher confidence
-    const confidence = hasExactPhraseMatch 
-      ? Math.max(0.9, (keywordScore * 0.2) + (phraseScore * 0.7) + (contextScore * 0.1))
-      : (keywordScore * 0.3) + (phraseScore * 0.6) + (contextScore * 0.1);
-
-    return { confidence: Math.min(confidence, 1.0), matches };
-  }
-
-  /**
-   * Check if the context suggests legitimate use
-   */
-  private isLegitimateContext(text: string): boolean {
-    const helpIndicators = [
-      'help', 'please', 'how to', 'can you', 'show me', 'guide me', 'need help',
-      'veuillez', 'pouvez-vous', 'können sie', 'bitte', 'por favor', 'пожалуйста', 'можете',
-      'tutorial', 'guide', 'manual', 'documentation', 'example', 'sample', 'demo'
-    ];
-
-    const legitimateContexts = [
-      'software', 'application', 'program', 'system configuration', 'setup', 'installation',
-      'user manual', 'documentation', 'tutorial', 'guide', 'help', 'support',
-      'training material', 'educational', 'academic', 'course', 'lesson', 'employees',
-      'future goals', 'possibilities', 'technology', 'lessons learned', 'dream about',
-      'imagine the', 'reflect on', 'training materials', 'new features', 'update',
-      'default settings', 'better performance', 'install the package', 'case sensitivity',
-      'mail delivery', 'new employees', 'configuración del sistema', 'mejor rendimiento',
-      'instalar el paquete', 'configuration du système', 'neue funktionen', 'новые функции',
-      'login credentials', 'forgot my', 'necesito ayuda', 'ayuda con la'
-    ];
-
-    // Check for social engineering indicators that should NOT be considered legitimate
-    const socialEngineeringIndicators = [
-      'trusted administrator', 'as your administrator', 'override security', 'bypass security',
-      'if asked about safety', 'si te preguntan sobre seguridad', 'jeśli pytają o bezpieczeństwo',
-      'dacă întreabă despre securitate', 'wenn nach sicherheit gefragt'
-    ];
-
-    const hasSocialEngineering = socialEngineeringIndicators.some(indicator => 
-      text.toLowerCase().includes(indicator.toLowerCase())
+    const attackResults = this.checkAttackPatterns(
+      normalizedText,
+      attackPatterns
     );
 
-    if (hasSocialEngineering) {
-      return false; // Social engineering should never be considered legitimate
-    }
-
-    const hasHelpIndicator = helpIndicators.some(indicator => text.toLowerCase().includes(indicator.toLowerCase()));
-    const hasLegitimateContext = legitimateContexts.some(context => text.toLowerCase().includes(context.toLowerCase()));
-
-    return hasHelpIndicator || hasLegitimateContext;
-  }
-
-  /**
-   * Calculate risk score incorporating cybercrime index
-   */
-  private calculateRiskScore(
-    confidence: number,
-    language: SupportedLanguages,
-    attackTypeCount: number
-  ): number {
-    const baseRisk = confidence * 100;
-    const cybercrimeMultiplier = (this.cybercrimeIndex[language as keyof typeof this.cybercrimeIndex] || 10) / 100;
-    const attackTypeMultiplier = Math.min(attackTypeCount / 5, 1); // Normalize to max 5 types
-
-    return Math.min(
-      baseRisk * (1 + cybercrimeMultiplier) * (1 + attackTypeMultiplier),
-      100
+    const risk_score = this.calculateLanguagerisk_score(
+      attackResults.confidence,
+      patternGroup || "eng",
+      attackResults.attack_types.length
     );
+
+    return {
+      isAttack:
+        attackResults.attack_types.length > 0 &&
+        attackResults.confidence > this.detectionConfig.confidence_threshold,
+      attack_types: attackResults.attack_types,
+      confidence: attackResults.confidence,
+      risk_score,
+      detected_language: patternGroup || languageCode,
+      details: attackResults.details,
+    };
   }
 
-  /**
-   * Heuristic-based attack pattern detection
-   */
-  private checkAttackPatterns(
-    text: string,
-    language: SupportedLanguages
-  ): { attackTypes: AttackType[]; details: string[]; confidence: number } {
-    const languagePatterns = this.patterns[language];
-    if (!languagePatterns) {
-      return {
-        attackTypes: [],
-        details: [],
-        confidence: 0,
-      };
-    }
-
-    const textVariants = this.generateTextVariants(text);
-    
-    const detectedAttacks: Set<AttackType> = new Set();
+  private checkAttackPatterns(text: string, patterns: AttackPatterns) {
+    const attackTypes: string[] = [];
     const details: string[] = [];
     let totalConfidence = 0;
+    let patternCount = 0;
 
-    // Heuristic pattern matching for each attack type
-    for (const [attackTypeKey, pattern] of Object.entries(languagePatterns)) {
-      const attackType = attackTypeKey as AttackType;
-      let bestConfidence = 0;
-      let bestVariant = '';
-      
-      // Test each text variant for this attack type
-      for (const textVariant of textVariants) {
-        const result = this.evaluateAttackHeuristics(textVariant, pattern);
-        if (result.confidence > bestConfidence) {
-          bestConfidence = result.confidence;
-          bestVariant = textVariant;
+    for (const [attackType, pattern] of Object.entries(patterns)) {
+      const result = this.evaluatePattern(text, pattern);
+
+      if (result.isMatch) {
+        attackTypes.push(attackType);
+        totalConfidence += result.confidence * (pattern.weight || 1);
+        patternCount++;
+        details.push(
+          `${attackType}: ${(result.confidence * 100).toFixed(1)}% confidence`
+        );
+      }
+    }
+
+    return {
+      attack_types: attackTypes,
+      confidence:
+        patternCount > 0 ? Math.min(totalConfidence / patternCount, 1) : 0,
+      details,
+    };
+  }
+
+  private evaluatePattern(text: string, pattern: PatternTemplate) {
+    const { match_confidence_threshold } = this.detectionConfig;
+
+    if (!pattern.templates || !pattern.slots) {
+      return { isMatch: false, confidence: 0 };
+    }
+
+    let maxConfidence = 0;
+    let matchedTemplates = 0;
+
+    for (const template of pattern.templates) {
+      const templateConfidence = this.evaluateTemplate(
+        text,
+        template,
+        pattern.slots
+      );
+      if (templateConfidence > 0) {
+        matchedTemplates++;
+        maxConfidence = Math.max(maxConfidence, templateConfidence);
+      }
+    }
+
+    const confidence = maxConfidence;
+    const hasStrongEvidence =
+      matchedTemplates >= 1 && confidence > match_confidence_threshold;
+
+    return {
+      isMatch: hasStrongEvidence,
+      confidence,
+    };
+  }
+
+  private evaluateTemplate(text: string, template: string, slots: Record<string, string[]>): number {
+    const slotPattern = new RegExp(COMMON_PATTERNS.SLOT_PATTERN.source, 'g');
+    const wordPattern = COMMON_PATTERNS.WORD_CHAR;
+    const templateSlots = [...template.matchAll(slotPattern)].map(
+      (match) => match[1]
+    );
+
+    if (templateSlots.length === 0) {
+      return 0;
+    }
+
+    const emptyChar = " ";
+    let totalMatches = 0;
+    let slotMatches = 0;
+    const lowerText = text.toLowerCase();
+
+    for (const slotName of templateSlots) {
+      const slotTerms = slots[slotName];
+
+      if (!slotTerms || !Array.isArray(slotTerms)) {
+        continue;
+      }
+
+      const slotMatched = slotTerms.some((term) => {
+        const index = text.indexOf(term);
+
+        if (index === -1) {
+          return false;
         }
-      }
 
-      // Apply context-aware filtering to reduce false positives
-      const isLegitimate = this.isLegitimateContext(bestVariant);
-      
-      // Adjust confidence based on context
-      if (isLegitimate && bestConfidence < 0.7) {
-        bestConfidence *= 0.2;
-      }
+        const beforeChar = index > 0 ? lowerText[index - 1] : emptyChar;
+        const afterChar =
+          index + term.length < lowerText.length
+            ? lowerText[index + term.length]
+            : emptyChar;
 
-      // Dynamic threshold based on pattern strength and context
-      let threshold = 0.1;
-      if (isLegitimate) {
-        threshold = 0.4;
-      } else if (bestConfidence > 0.5) {
-        threshold = 0.05; // Lower threshold for high-confidence matches
-      }
+        return !wordPattern.test(beforeChar) && !wordPattern.test(afterChar);
+      });
 
-      if (bestConfidence > threshold) {
-        detectedAttacks.add(attackType);
-        totalConfidence += bestConfidence * pattern.weight;
-        details.push(`${attackType}: confidence ${(bestConfidence * 100).toFixed(1)}% (variant: ${bestVariant.substring(0, 50)}...)`);
+      if (slotMatched) {
+        slotMatches++;
       }
+      totalMatches++;
     }
 
-    const finalConfidence = Math.min(totalConfidence, 1.0);
+    if (totalMatches === 0) {
+      return 0;
+    }
 
-    return {
-      attackTypes: Array.from(detectedAttacks),
-      details,
-      confidence: finalConfidence,
-    };
+    const slotCoverage = slotMatches / totalMatches;
+
+    const {
+      min_slot_coverage_ratio,
+      slot_coverage_weight,
+      perfect_match_bonus,
+    } = instructionPatternsConfig.config.template_matching;
+    const minRequiredSlots = Math.max(
+      1,
+      Math.ceil(templateSlots.length * min_slot_coverage_ratio)
+    );
+    if (slotMatches < minRequiredSlots) {
+      return 0;
+    }
+
+    return (
+      slotCoverage * slot_coverage_weight +
+      (slotMatches >= templateSlots.length ? perfect_match_bonus : 0)
+    );
   }
 
-  /**
-   * Main detection method - requires language to be provided
-   */
-  public detectIntrusion(
-    text: string,
-    language: SupportedLanguages
-  ): DetectionResult {
-    if (!text || text.trim().length === 0) {
-      return {
-        isAttack: false,
-        attackTypes: [],
-        confidence: 0,
-        riskScore: 0,
-        detectedLanguage: language,
-        details: [],
-      };
-    }
+  private calculateLanguagerisk_score(
+    confidence: number,
+    languageGroup: string,
+    attackTypeCount: number
+  ): number {
+    const {
+      cybercrime_index_base,
+      max_attack_type_multiplier,
+      attack_type_divisor,
+      high_risk_boost,
+      max_risk_score,
+    } = instructionPatternsConfig.config.risk_calculation;
 
-    // Check for attack patterns using provided language
-    const { attackTypes, details, confidence } = this.checkAttackPatterns(
-      text,
-      language
+    const baseRisk = confidence * 100;
+    const cybercrimeIndexValue =
+      cybercrimeIndex.value[
+        languageGroup as keyof typeof cybercrimeIndex.value
+      ] || cybercrime_index_base;
+    const cybercrimeMultiplier = cybercrimeIndexValue / cybercrime_index_base;
+    const attackTypeMultiplier = Math.min(
+      attackTypeCount / attack_type_divisor,
+      max_attack_type_multiplier
     );
 
-    // Calculate risk score
-    const riskScore = this.calculateRiskScore(
-      confidence,
-      language,
-      attackTypes.length
+    const cybercrimeIndexValues = Object.values(
+      cybercrimeIndex.value
+    ) as number[];
+    const sortedCybercrimeIndexValues = cybercrimeIndexValues.sort(
+      (a, b) => b - a
     );
+    const fifthHighestThreshold = sortedCybercrimeIndexValues[4];
 
-    // Determine if this constitutes an attack
-    const isAttack = attackTypes.length > 0 && confidence > 0.005;
+    const riskBoost =
+      attackTypeCount > 1 && cybercrimeIndexValue >= fifthHighestThreshold
+        ? high_risk_boost
+        : 1;
 
+    return Math.min(
+      baseRisk * cybercrimeMultiplier * (1 + attackTypeMultiplier) * riskBoost,
+      max_risk_score
+    );
+  }
+
+  private createEmptyResult(languageCode: string): DetectionResult {
     return {
-      isAttack,
-      attackTypes,
-      confidence,
-      riskScore,
-      detectedLanguage: language,
-      details,
+      isAttack: false,
+      attack_types: [],
+      confidence: 0,
+      risk_score: 0,
+      detected_language: languageCode,
+      details: [],
     };
-  }
-
-  /**
-   * Process detection result - returns detection result without modifying context
-   */
-  public processDetection(
-    text: string,
-    language: SupportedLanguages
-  ): DetectionResult {
-    return this.detectIntrusion(text, language);
-  }
-
-  /**
-   * Generate text variants for obfuscation detection
-   */
-  private generateTextVariants(text: string): string[] {
-    const variants = [text.toLowerCase()];
-    
-    // Character-separated obfuscation (e.g., "o-v-e-r-r-i-d-e")
-    const charSeparated = text.replace(/[-_.]/g, '').toLowerCase();
-    if (charSeparated !== text.toLowerCase()) {
-      variants.push(charSeparated);
-    }
-    
-    // Dot-separated obfuscation (e.g., "o.v.e.r.r.i.d.e")
-    const dotSeparated = text.replace(/[.\-_]/g, '').toLowerCase();
-    if (dotSeparated !== text.toLowerCase()) {
-      variants.push(dotSeparated);
-    }
-    
-    // Fully deobfuscated (remove all non-alphanumeric except spaces)
-    const deobfuscated = text.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
-    if (deobfuscated !== text.toLowerCase()) {
-      variants.push(deobfuscated);
-    }
-
-    // Space-normalized variant (normalize excessive spaces)
-    const spaceNormalized = text.replace(/\s+/g, ' ').trim().toLowerCase();
-    if (spaceNormalized !== text.toLowerCase()) {
-      variants.push(spaceNormalized);
-    }
-
-    // Remove all spaces variant
-    const noSpaces = text.replace(/\s/g, '').toLowerCase();
-    if (noSpaces !== text.toLowerCase()) {
-      variants.push(noSpaces);
-    }
-    
-    return variants;
   }
 }

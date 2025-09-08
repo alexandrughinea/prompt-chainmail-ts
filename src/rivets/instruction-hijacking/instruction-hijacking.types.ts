@@ -1,24 +1,17 @@
-import { SupportedLanguages } from "../rivets.types";
-
 export enum AttackType {
-  INSTRUCTION_OVERRIDE = "INSTRUCTION_OVERRIDE",
-  INSTRUCTION_FORGETTING = "INSTRUCTION_FORGETTING",
-  RESET_SYSTEM = "RESET_SYSTEM",
-  BYPASS_SECURITY = "BYPASS_SECURITY",
-  INFORMATION_EXTRACTION = "INFORMATION_EXTRACTION",
+  INSTRUCTION_OVERRIDE = "instruction_override",
+  INSTRUCTION_FORGETTING = "instruction_forgetting",
+  RESET_SYSTEM = "reset_system",
+  BYPASS_SECURITY = "bypass_security",
+  INFORMATION_EXTRACTION = "information_extraction",
 }
 
 export interface DetectionPattern {
-  keywords: string[];
-  phrases: string[];
-  contextPatterns: string[];
+  templates: string[];
+  slots: Record<string, string[]>;
   weight: number;
 }
 
 export type AttackPatterns = {
   [K in AttackType]: DetectionPattern;
-};
-
-export type LanguagePatterns = {
-  [K in SupportedLanguages]: AttackPatterns;
 };

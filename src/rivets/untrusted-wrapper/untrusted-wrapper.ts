@@ -1,5 +1,5 @@
 import { ChainmailRivet } from "../../index";
-import { SecurityFlag } from "../rivets.types";
+import { SecurityFlags } from "../rivets.types";
 
 export function untrustedWrapper(
   tagName = "UNTRUSTED_CONTENT",
@@ -13,7 +13,7 @@ export function untrustedWrapper(
     }
 
     context.sanitized = wrappedContent;
-    context.flags.push(SecurityFlag.UNTRUSTED_WRAPPED);
+    context.flags.push(SecurityFlags.UNTRUSTED_WRAPPED);
 
     return next();
   };

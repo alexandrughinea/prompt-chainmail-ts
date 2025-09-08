@@ -1,4 +1,4 @@
-# Prompt Chainmail (beta)
+# Prompt Chainmail
 
 <div align="center">
   <img src="src/logo.png" alt="Prompt Chainmail Logo" width="200" height="200">
@@ -12,14 +12,15 @@ Security middleware that shields AI applications from prompt injection, jailbrea
 [![npm version](https://badge.fury.io/js/prompt-chainmail.svg)](https://badge.fury.io/js/prompt-chainmail)
 [![TypeScript](https://img.shields.io/badge/%3C%2F%3E-TypeScript-%230074c1.svg)](http://www.typescriptlang.org/)
 [![Security Audit](https://img.shields.io/badge/security-audited-green.svg)](https://github.com/alexandrughinea/prompt-chainmail/actions/workflows/security.yml)
-[![License: BSL-1.1](https://img.shields.io/badge/License-BSL--1.1-blue.svg)](https://github.com/alexandrughinea/prompt-chainmail/blob/main/LICENSE)
-[![Commercial License](https://img.shields.io/badge/Commercial-Available-success.svg)](mailto:alexandrughinea.dev+prompt-chainmail@gmail.com)
-[![Enterprise Ready](https://img.shields.io/badge/Enterprise-Ready-purple.svg)](https://github.com/alexandrughinea/prompt-chainmail#enterprise-edition)
+[![License: BSL-1.1](https://img.shields.io/badge/license-BSL--1.1-blue.svg)](https://github.com/alexandrughinea/prompt-chainmail/blob/main/LICENSE)
+[![Commercial License](https://img.shields.io/badge/commercial-Available-success.svg)](mailto:alexandrughinea.dev+prompt-chainmail@gmail.com)
+[![Enterprise Ready](https://img.shields.io/badge/enterprise-Ready-purple.svg)](https://github.com/alexandrughinea/prompt-chainmail#enterprise-edition)
+[![Beta](https://img.shields.io/badge/status-beta-orange.svg)](https://github.com/alexandrughinea/prompt-chainmail)
 
 ## Features
 
 - **Security** - Composable rivet system (dedicated security plugins) for enterprise-scale deployments
-- **Zero Dependencies** - Minimal attack surface with no external dependencies
+- **One Dependency** - Minimal attack surface - single dependency is used for language detection
 - **TypeScript** - Full type safety, IntelliSense support, and strict mode compliance
 - **Compliance Ready** - Built-in audit logging and security event tracking for SOC2/ISO27001
 - **Monitoring Integration** - Native support for Datadog, New Relic, Sentry, and custom telemetry
@@ -135,7 +136,7 @@ async function secureChat(userMessage: string) {
 
 ### Security Reviews
 
-Detailed security analysis and implementation reviews for each rivet can be found in the [`src/rivets/`](src/rivets/) directory. Each rivet includes comprehensive test coverage and security considerations documented in their respective folders.
+Detailed security analysis and implementation reviews for each rivet can be found in the [`src/rivets/`](src/rivets/) directory. Each rivet includes test coverage and security considerations documented in their respective folders.
 
 ### Rivet Signature
 ```typescript
@@ -181,9 +182,19 @@ Prompt Chainmail uses standardized security flags to categorize detected threats
 
 | Flag | Category | Description | Triggered By | Threat Level |
 |------|----------|-------------|--------------|--------------|
+| **General Content Processing** |
 | `TRUNCATED` | Content Processing | Input was truncated due to length limits | `sanitize()` | Low |
+| `SANITIZED_HTML_TAGS` | Content Processing | HTML tags were sanitized | `sanitize()` | Low |
+| `SANITIZED_CONTROL_CHARS` | Content Processing | Control characters were sanitized | `sanitize()` | Low |
+| `SANITIZED_WHITESPACE` | Content Processing | Whitespace was normalized | `sanitize()` | Low |
+| `UNTRUSTED_WRAPPED` | Content Processing | Content wrapped in security tags | `untrustedWrapper()` | Info |
+| **General Pattern Detection** |
 | `INJECTION_PATTERN` | Attack Detection | Common prompt injection patterns detected | `patternDetection()` | High |
-| `ROLE_CONFUSION` | Attack Detection | Role manipulation or confusion attempts | `roleConfusion()` | Medium/High |
+| **General Structure Analysis** |
+| `EXCESSIVE_LINES` | Structure Analysis | Input contains too many lines (>50) | `structureAnalysis()` | Low |
+| `NON_ASCII_HEAVY` | Structure Analysis | High ratio of non-ASCII characters | `structureAnalysis()` | Low |
+| `REPETITIVE_CONTENT` | Structure Analysis | Repetitive patterns detected | `structureAnalysis()` | Low |
+| **General Encoding Detection** |
 | `BASE64_ENCODING` | Encoding Detection | Base64 encoded suspicious content found | `encodingDetection()` | Medium |
 | `HEX_ENCODING` | Encoding Detection | Hexadecimal encoded content detected | `encodingDetection()` | Medium |
 | `URL_ENCODING` | Encoding Detection | URL encoded suspicious content found | `encodingDetection()` | Medium |
@@ -193,30 +204,50 @@ Prompt Chainmail uses standardized security flags to categorize detected threats
 | `OCTAL_ENCODING` | Encoding Detection | Octal encoded content found | `encodingDetection()` | Medium |
 | `ROT13_ENCODING` | Encoding Detection | ROT13 encoded suspicious content | `encodingDetection()` | Medium |
 | `MIXED_CASE_OBFUSCATION` | Encoding Detection | Mixed case obfuscation patterns | `encodingDetection()` | Medium |
-| `EXCESSIVE_LINES` | Structure Analysis | Input contains too many lines (>50) | `structureAnalysis()` | Low |
-| `NON_ASCII_HEAVY` | Structure Analysis | High ratio of non-ASCII characters | `structureAnalysis()` | Low |
-| `REPETITIVE_CONTENT` | Structure Analysis | Repetitive patterns detected | `structureAnalysis()` | Low |
+| **General Confidence and Rate Control** |
 | `CONFIDENCE_RANGE` | Confidence Control | Confidence within specified range | `confidenceFilter()` | Variable |
 | `LOW_CONFIDENCE` | Confidence Control | Confidence below minimum threshold | `confidenceFilter()` | Variable |
 | `RATE_LIMITED` | Rate Control | Request rate limit exceeded | `rateLimit()` | Medium |
-| `SQL_INJECTION` | Injection Detection | SQL injection patterns detected | `sqlInjection()` | Critical |
-| `CODE_INJECTION` | Injection Detection | Code execution attempts found | `codeInjection()` | Critical |
-| `TEMPLATE_INJECTION` | Injection Detection | Template injection patterns detected | `templateInjection()` | High |
-| `DELIMITER_CONFUSION` | Attack Detection | Context-breaking delimiter attempts | `delimiterConfusion()` | High |
-| `INSTRUCTION_HIJACKING` | Attack Detection | Instruction override attempts | `instructionHijacking()` | Critical |
+| **General HTTP Operations** |
 | `HTTP_VALIDATION_FAILED` | HTTP Operations | External validation failed | `httpFetch()` | High |
 | `HTTP_VALIDATED` | HTTP Operations | External validation succeeded | `httpFetch()` | Info |
 | `HTTP_ERROR` | HTTP Operations | HTTP request error occurred | `httpFetch()` | Medium |
 | `HTTP_TIMEOUT` | HTTP Operations | HTTP request timed out | `httpFetch()` | Medium |
-| `UNTRUSTED_WRAPPED` | Content Processing | Content wrapped in security tags | `untrustedWrapper()` | Info |
+| **Specific Injection Attacks** |
+| `SQL_INJECTION` | Injection Detection | SQL injection patterns detected | `sqlInjection()` | Critical |
+| `CODE_INJECTION` | Injection Detection | Code execution attempts found | `codeInjection()` | Critical |
+| `TEMPLATE_INJECTION` | Injection Detection | Template injection patterns detected | `templateInjection()` | High |
+| `DELIMITER_CONFUSION` | Attack Detection | Context-breaking delimiter attempts | `delimiterConfusion()` | High |
+| **Specific Role Confusion Attacks** |
+| `ROLE_CONFUSION` | Attack Detection | Role manipulation or confusion attempts | `roleConfusion()` | Medium/High |
+| `ROLE_CONFUSION_ROLE_ASSUMPTION` | Attack Detection | Direct role assumption patterns | `roleConfusion()` | High |
+| `ROLE_CONFUSION_MODE_SWITCHING` | Attack Detection | Mode switching attempts | `roleConfusion()` | High |
+| `ROLE_CONFUSION_PERMISSION_ASSERTION` | Attack Detection | Permission assertion patterns | `roleConfusion()` | High |
+| `ROLE_CONFUSION_ROLE_INDICATOR` | Attack Detection | Role indicator patterns detected | `roleConfusion()` | Medium |
+| `ROLE_CONFUSION_SCRIPT_MIXING` | Attack Detection | Script mixing in role confusion | `roleConfusion()` | High |
+| `ROLE_CONFUSION_LOOKALIKE_CHARACTERS` | Attack Detection | Lookalike character substitution in role confusion | `roleConfusion()` | High |
+| `ROLE_CONFUSION_MULTILINGUAL_ATTACK` | Attack Detection | Multilingual role confusion attack | `roleConfusion()` | High |
+| `ROLE_CONFUSION_HIGH_RISK_ROLE` | Attack Detection | High-risk role assumption attempt | `roleConfusion()` | Critical |
+| **Specific Instruction Hijacking Attacks** |
+| `INSTRUCTION_HIJACKING` | Attack Detection | Instruction override attempts | `instructionHijacking()` | Critical |
+| `INSTRUCTION_HIJACKING_OVERRIDE` | Attack Detection | Instruction override attack type | `instructionHijacking()` | Critical |
+| `INSTRUCTION_HIJACKING_IGNORE` | Attack Detection | Instruction ignore attack type | `instructionHijacking()` | Critical |
+| `INSTRUCTION_HIJACKING_RESET` | Attack Detection | System reset attack type | `instructionHijacking()` | Critical |
+| `INSTRUCTION_HIJACKING_BYPASS` | Attack Detection | Security bypass attack type | `instructionHijacking()` | Critical |
+| `INSTRUCTION_HIJACKING_REVEAL` | Attack Detection | Information extraction attack type | `instructionHijacking()` | Critical |
+| `INSTRUCTION_HIJACKING_UNKNOWN` | Attack Detection | Unknown instruction hijacking pattern | `instructionHijacking()` | High |
+| `INSTRUCTION_HIJACKING_SCRIPT_MIXING` | Attack Detection | Script mixing in instruction hijacking | `instructionHijacking()` | Critical |
+| `INSTRUCTION_HIJACKING_LOOKALIKES` | Attack Detection | Lookalike characters in instruction hijacking | `instructionHijacking()` | Critical |
+| `INSTRUCTION_HIJACKING_MULTILINGUAL_ATTACK` | Attack Detection | Multilingual instruction hijacking attack | `instructionHijacking()` | Critical |
+
+> **Note:** In addition to security flags, the `context.metadata` object provides rich case-by-case details including detected languages, attack patterns, confidence breakdowns, and rivet-specific analysis data for threat intelligence and debugging.
 
 ### Flag Usage Example
 
 ```typescript
 const result = await chainmail.protect(userInput);
 
-// Check for specific security concerns
-if (result.context.flags.includes(SecurityFlag.SQL_INJECTION)) {
+if (result.context.flags.includes(SecurityFlags.SQL_INJECTION)) {
   console.log('SQL injection attempt detected!');
 }
 ```
@@ -342,7 +373,7 @@ chainmail.forge(Rivets.telemetry({
 
 ## Other Examples
 
-For comprehensive usage scenarios and custom rivet implementations, see [`examples.ts`](examples.ts) which includes:
+For multi-layered protection and custom rivet implementations, see [`examples.ts`](examples.ts) which includes:
 
 - **Custom Rivet Development** - Building domain-specific security rivets
 - **Advanced Chainmail Composition** - Complex protection workflows
@@ -403,7 +434,7 @@ We are committed to fostering a welcoming and inclusive community. All contribut
 #### Security-First Development
 
 Given the security-critical nature of this project:
-- All contributions must include comprehensive test coverage
+- All contributions must include decent test coverage
 - Security vulnerabilities must be reported privately via email
 - Code reviews will include security analysis
 - Breaking changes require security impact assessment

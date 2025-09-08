@@ -1,7 +1,17 @@
 import { ChainmailRivet } from "../../index";
 import { ChainmailContext } from "../../types";
 
-export function logger(logFn?: (context: ChainmailContext) => void): ChainmailRivet {
+type LogLevel = "log" | "warn" | "debug" | "info";
+
+/**
+ * @description
+ * Logs processing details and performance metrics for debugging
+ * and monitoring purposes with customizable logging functions.
+ */
+export function logger(
+  level: LogLevel = "log",
+  logFn?: (context: ChainmailContext) => void
+): ChainmailRivet {
   return async (context, next) => {
     const start = Date.now();
     const result = await next();
@@ -18,7 +28,7 @@ export function logger(logFn?: (context: ChainmailContext) => void): ChainmailRi
     if (logFn) {
       logFn(context);
     } else {
-      console.log("[PromptChainmail]", logData);
+      console[level]("[PromptChainmail]", logData);
     }
 
     return result;

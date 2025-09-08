@@ -3,6 +3,11 @@ import { ThreatLevel } from "../rivets.types";
 import { applyThreatPenalty } from "../rivets.utils";
 import { ChainmailContext } from "../../types";
 
+/**
+ * @description
+ * Creates a custom conditional rivet that applies flags and penalties
+ * when a user-defined predicate function returns true.
+ */
 export function condition(
   predicate: (context: ChainmailContext) => boolean,
   flagName = "custom_condition",
