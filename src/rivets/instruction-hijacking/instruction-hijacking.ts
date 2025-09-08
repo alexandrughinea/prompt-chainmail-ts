@@ -3,6 +3,10 @@ import { ThreatLevel, SecurityFlag } from "../rivets.types";
 import { createPatternDetectionPatterns, applyThreatPenalty } from "../rivets.utils";
 import { SECURITY_COMPONENTS, PATTERN_COMPONENTS } from "../rivets.const";
 
+/**
+ * @description
+ * This is a stub and will be implemented in the future to detect and flag more precisely with other strategies.
+ */
 export function instructionHijacking(): ChainmailRivet {
   const hijackPatterns = [
     new RegExp(

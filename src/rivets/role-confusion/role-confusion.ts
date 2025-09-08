@@ -3,6 +3,10 @@ import { ThreatLevel, SecurityFlag } from "../rivets.types";
 import { createRolePattern, applyThreatPenalty } from "../rivets.utils";
 import { ROLE_INDICATORS, SECURITY_COMPONENTS } from "../rivets.const";
 
+/**
+ * @description
+ * This is a stub and will be implemented in the future to detect and flag more precisely with other strategies.
+ */
 export function roleConfusion(): ChainmailRivet {
   return async (context, next) => {
     const lower = context.sanitized.toLowerCase();
