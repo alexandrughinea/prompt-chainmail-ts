@@ -10,6 +10,10 @@ import { ChainmailContext } from "../../types";
 import { MultilingualIntrusionDetector } from "./instruction-hijacking.utils";
 import { AttackType } from "./instruction-hijacking.types";
 
+/**
+ * @description
+ * This is a stub and will be implemented in the future to detect and flag more precisely with other strategies.
+ */
 export function instructionHijacking(): ChainmailRivet {
   const languageDetector = new LanguageDetector({
     enableMultipleDetection: true,

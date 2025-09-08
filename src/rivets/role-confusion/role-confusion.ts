@@ -11,6 +11,10 @@ import { applyThreatPenalty } from "../rivets.utils";
 import { ROLE_CONFUSION_PATTERNS_BY_LANGUAGE, ROLE_INDICATORS, ROLE_CONFUSION_ATTACK_TYPE_MAP, PERMISSION_ASSERTION_KEYWORDS_BY_LANGUAGE } from "../rivets.const";
 import { ChainmailContext } from "../../types";
 
+/**
+ * @description
+ * This is a stub and will be implemented in the future to detect and flag more precisely with other strategies.
+ */
 export function roleConfusion(): ChainmailRivet {
   const languageDetector = new LanguageDetector({
     enableMultipleDetection: true,
