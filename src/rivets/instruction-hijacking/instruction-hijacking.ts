@@ -1,87 +1,137 @@
 import { ChainmailRivet } from "../../index";
-import { ThreatLevel, SecurityFlag } from "../rivets.types";
+import { SecurityFlag, SupportedLanguages } from "../rivets.types";
 import {
   detectLanguages,
   detectScriptMixing,
   detectLookalikeChars,
-  calculateWeightedConfidence,
-} from "../language-detection";
-import { applyThreatPenalty } from "../rivets.utils";
+  LanguageDetector,
+} from "../../@shared/language-detection";
 import { ChainmailContext } from "../../types";
-import { detectInstructionHijackingAttackTypes } from "./instruction-hijacking.utils";
+import { MultilingualIntrusionDetector } from "./instruction-hijacking.utils";
+import { AttackType } from "./instruction-hijacking.types";
 
 export function instructionHijacking(): ChainmailRivet {
+  const languageDetector = new LanguageDetector({
+    enableMultipleDetection: true,
+    minConfidence: 0.1,
+  });
+  const intrusionDetector = new MultilingualIntrusionDetector();
+
   return async (context: ChainmailContext, next) => {
-    const languages = detectLanguages(context.sanitized);
+    const languages = languageDetector.detect(context.sanitized);
     const hasScriptMixing = detectScriptMixing(context.sanitized);
     const hasLookalikes = detectLookalikeChars(context.sanitized);
 
-    const detectedAttackTypes = detectInstructionHijackingAttackTypes(context.sanitized, languages);
+    // Store script mixing and lookalike detection results
+    context.metadata.has_script_mixing = hasScriptMixing;
+    context.metadata.has_lookalikes = hasLookalikes;
 
-    const attackingLanguages = new Set<string>();
-    let totalMatches = 0;
+    // Add script mixing and lookalike character flags
+    if (hasScriptMixing) {
+      context.flags.push(SecurityFlag.INSTRUCTION_HIJACKING_SCRIPT_MIXING);
+    }
 
-    for (const lang of languages) {
-      if (detectedAttackTypes.length > 0) {
-        attackingLanguages.add(lang.code);
-        totalMatches++;
+    if (hasLookalikes) {
+      context.flags.push(SecurityFlag.INSTRUCTION_HIJACKING_LOOKALIKES);
+    }
+
+    // Run intrusion detection for each detected language
+    const detectionResults = [];
+    let maxRiskScore = 0;
+    let maxConfidence = 0;
+    const allAttackTypes = new Set<AttackType>();
+
+    // Use detected languages, but always include English as fallback
+    const languagesToCheck = languages.length > 0 ? [...languages, SupportedLanguages.EN] : [SupportedLanguages.EN];
+
+    for (const language of languagesToCheck) {
+      try {
+        const languageCode = typeof language === 'string' ? language : language.code;
+        const result = intrusionDetector.processDetection(context.sanitized, languageCode as SupportedLanguages);
+        detectionResults.push(result);
+
+        // Track the highest risk score and confidence across all languages
+        maxRiskScore = Math.max(maxRiskScore, result.riskScore);
+        maxConfidence = Math.max(maxConfidence, result.confidence);
+
+        // Collect all attack types
+        result.attackTypes.forEach(attackType => allAttackTypes.add(attackType));
+
+      } catch (error) {
+        // Log error but don't break the chain
+        console.warn(`Intrusion detection failed for language ${language}:`, error);
       }
     }
 
-    const baseConfidence = Math.min(totalMatches * 0.25, 1.0);
-    const riskScore = calculateWeightedConfidence(
-      baseConfidence,
-      languages,
-      hasScriptMixing,
-      hasLookalikes
-    );
+    // Convert attack types set to array
+    const attackTypesArray = Array.from(allAttackTypes);
 
-    if (totalMatches > 0 || detectedAttackTypes.length > 0) {
-      context.flags.push(SecurityFlag.INSTRUCTION_HIJACKING);
+    // Store detection metadata
+    context.metadata.instruction_hijacking_attack_types = attackTypesArray;
+    context.metadata.instruction_hijacking_risk_score = maxRiskScore / 100; // Normalize to 0-1 range
+    context.metadata.instruction_hijacking_confidence = maxConfidence;
+    context.metadata.instruction_hijacking_detected_languages = languages;
+    
 
-      detectedAttackTypes.forEach(attackType => {
+    // Determine if this is an attack - simplified logic
+    const isAttack = attackTypesArray.length > 0;
+
+    if (isAttack) {
+      // Add general instruction hijacking flag
+      if (!context.flags.includes(SecurityFlag.INSTRUCTION_HIJACKING)) {
+        context.flags.push(SecurityFlag.INSTRUCTION_HIJACKING);
+      }
+      
+      // Remove lookalike flag if genuine attack is detected
+      const lookalikeIndex = context.flags.indexOf(SecurityFlag.INSTRUCTION_HIJACKING_LOOKALIKES);
+      if (lookalikeIndex > -1) {
+        context.flags.splice(lookalikeIndex, 1);
+      }
+
+      // Add specific security flags based on detected attack types
+      attackTypesArray.forEach(attackType => {
         switch (attackType) {
-          case "INSTRUCTION_OVERRIDE":
-            context.flags.push(SecurityFlag.INSTRUCTION_HIJACKING_OVERRIDE);
+          case AttackType.INSTRUCTION_OVERRIDE:
+            if (!context.flags.includes(SecurityFlag.INSTRUCTION_HIJACKING_OVERRIDE)) {
+              context.flags.push(SecurityFlag.INSTRUCTION_HIJACKING_OVERRIDE);
+            }
             break;
-          case "INSTRUCTION_FORGETTING":
-            context.flags.push(SecurityFlag.INSTRUCTION_HIJACKING_IGNORE);
+          case AttackType.INSTRUCTION_FORGETTING:
+            if (!context.flags.includes(SecurityFlag.INSTRUCTION_HIJACKING_IGNORE)) {
+              context.flags.push(SecurityFlag.INSTRUCTION_HIJACKING_IGNORE);
+            }
             break;
-          case "RESET_SYSTEM":
-            context.flags.push(SecurityFlag.INSTRUCTION_HIJACKING_RESET);
+          case AttackType.RESET_SYSTEM:
+            if (!context.flags.includes(SecurityFlag.INSTRUCTION_HIJACKING_RESET)) {
+              context.flags.push(SecurityFlag.INSTRUCTION_HIJACKING_RESET);
+            }
             break;
-          case "BYPASS_SECURITY":
-            context.flags.push(SecurityFlag.INSTRUCTION_HIJACKING_BYPASS);
+          case AttackType.BYPASS_SECURITY:
+            if (!context.flags.includes(SecurityFlag.INSTRUCTION_HIJACKING_BYPASS)) {
+              context.flags.push(SecurityFlag.INSTRUCTION_HIJACKING_BYPASS);
+            }
             break;
-          case "INFORMATION_EXTRACTION":
-            context.flags.push(SecurityFlag.INSTRUCTION_HIJACKING_REVEAL);
+          case AttackType.INFORMATION_EXTRACTION:
+            if (!context.flags.includes(SecurityFlag.INSTRUCTION_HIJACKING_REVEAL)) {
+              context.flags.push(SecurityFlag.INSTRUCTION_HIJACKING_REVEAL);
+            }
             break;
+          default:
+            if (!context.flags.includes(SecurityFlag.INSTRUCTION_HIJACKING_UNKNOWN)) {
+              context.flags.push(SecurityFlag.INSTRUCTION_HIJACKING_UNKNOWN);
+            }
         }
       });
 
-      if (attackingLanguages.size > 1) {
-        context.flags.push(SecurityFlag.MULTILINGUAL_ATTACK);
+      // Add multilingual attack flag if multiple languages detected
+      if (languages.length > 1) {
+        if (!context.flags.includes(SecurityFlag.MULTILINGUAL_ATTACK)) {
+          context.flags.push(SecurityFlag.MULTILINGUAL_ATTACK);
+        }
       }
 
-      if (hasScriptMixing || hasLookalikes) {
-        context.flags.push(SecurityFlag.INSTRUCTION_HIJACKING_SCRIPT_MIXING);
-      }
-
-      let threatLevel: ThreatLevel;
-      if (riskScore >= 0.8) threatLevel = ThreatLevel.CRITICAL;
-      else if (riskScore >= 0.6) threatLevel = ThreatLevel.HIGH;
-      else if (riskScore >= 0.4) threatLevel = ThreatLevel.MEDIUM;
-      else threatLevel = ThreatLevel.LOW;
-
-      applyThreatPenalty(context, threatLevel);
-
-      context.metadata.instruction_hijacking_attack_types = detectedAttackTypes;
-      context.metadata.instruction_hijacking_detected_languages = languages.map(l => l.code);
-      context.metadata.instruction_hijacking_confidence = baseConfidence;
-      context.metadata.instruction_hijacking_risk_score = riskScore;
-      context.metadata.has_script_mixing = hasScriptMixing;
-      context.metadata.has_lookalikes = hasLookalikes;
-      context.metadata.instruction_hijacking_threat_level = threatLevel;
+      // Set overall confidence based on detection results
+      context.confidence = Math.min(context.confidence || 1.0, 1.0 - maxConfidence);
     }
 
     return next();

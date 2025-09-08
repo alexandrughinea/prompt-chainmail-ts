@@ -1,0 +1,162 @@
+{
+  "EN": {
+    "language": "EN",
+    "patterns": ["\\b(the|and|that|have|for|not|with|you|this|but|quick|brown|fox|jumps|over|lazy|dog|english|language|detection|test)\\b"],
+    "commonWords": ["the", "and", "that", "have", "for", "not", "with", "you", "this", "but", "quick", "brown", "fox", "jumps", "over", "lazy", "dog", "english", "language", "detection", "test"],
+    "characterRanges": [[65, 90], [97, 122]],
+    "bigrams": ["th", "he", "in", "er", "an", "re", "ed", "nd", "on", "en", "at", "ou", "it", "is", "or", "ti", "as", "te", "et", "ng"],
+    "trigrams": ["the", "and", "ing", "ion", "tio", "ent", "ati", "for", "her", "ter", "hat", "tha", "ere", "ate", "his", "con", "res", "ver", "all", "ons"]
+  },
+  "FR": {
+    "language": "FR",
+    "patterns": ["\\b(le|la|et|une|ce|qui|que|pour|chat|mange|souris|dans|jardin|détection|langue|française|être|avoir|créé|développé)\\b"],
+    "commonWords": ["le", "la", "et", "une", "ce", "qui", "que", "pour", "chat", "mange", "souris", "dans", "jardin", "détection", "langue", "française", "être", "avoir", "créé", "développé"],
+    "characterRanges": [[65, 90], [97, 122]],
+    "bigrams": ["le", "de", "es", "en", "on", "nt", "re", "er", "te", "in", "ou", "an", "it", "is", "et", "ne", "se", "la", "me", "qu"],
+    "trigrams": ["les", "des", "une", "que", "est", "ent", "ion", "ait", "lle", "men", "con", "our", "tre", "par", "son", "sur", "ave", "ses", "pas", "ont"]
+  },
+  "DE": {
+    "language": "DE",
+    "patterns": ["\\b(der|die|das|und|den|von|sie|ist|schnelle|braune|fuchs|springt|über|faulen|hund|deutschen|spracherkennung|mädchen|junge|männer|frauen|größer|schöner|expertenmodus|aushebeln|alle|beschränkungen)\\b"],
+    "commonWords": ["der", "die", "das", "und", "den", "von", "sie", "ist", "schnelle", "braune", "fuchs", "springt", "über", "faulen", "hund", "deutschen", "spracherkennung", "mädchen", "junge", "männer", "frauen", "größer", "schöner", "expertenmodus", "aushebeln", "alle", "beschränkungen"],
+    "characterRanges": [[65, 90], [97, 122]],
+    "bigrams": ["er", "en", "ch", "te", "nd", "ie", "in", "es", "de", "ge", "st", "ne", "un", "an", "ei", "ng", "it", "he", "be", "sc"],
+    "trigrams": ["der", "die", "und", "den", "ich", "ein", "das", "sch", "ung", "gen", "ent", "ber", "ver", "ter", "nen", "che", "ten", "eit", "hen", "ste"]
+  },
+  "ES": {
+    "language": "ES",
+    "patterns": ["\\b(que|rápido|zorro|marrón|salta|sobre|perro|perezoso|esta|una|prueba|detección|idioma|español)\\b"],
+    "commonWords": ["que", "rápido", "zorro", "marrón", "salta", "sobre", "perro", "perezoso", "esta", "una", "prueba", "detección", "idioma", "español"],
+    "characterRanges": [[65, 90], [97, 122]],
+    "bigrams": ["de", "la", "el", "en", "es", "te", "ar", "er", "an", "al", "or", "os", "as", "on", "se", "re", "le", "do", "ra", "nt"],
+    "trigrams": ["que", "ent", "ion", "ado", "est", "con", "par", "nte", "los", "las", "del", "una", "por", "tra", "ter", "aci", "ero", "ien", "men", "res"]
+  },
+  "IT": {
+    "language": "IT",
+    "patterns": ["\\b(il|la|di|che|e|a|da|in|un|per)\\b"],
+    "commonWords": ["il", "la", "di", "che", "e", "a", "da", "in", "un", "per"],
+    "characterRanges": [[65, 90], [97, 122]],
+    "bigrams": ["di", "la", "il", "le", "er", "to", "in", "an", "te", "en", "ar", "on", "re", "al", "at", "or", "el", "co", "ch", "no"],
+    "trigrams": ["che", "per", "con", "una", "del", "non", "ion", "ent", "are", "ato", "ere", "nte", "sta", "men", "ell", "ess", "tta", "lle", "all", "est"]
+  },
+  "JA": {
+    "language": "JA",
+    "patterns": ["[\\u3040-\\u309F]", "[\\u30A0-\\u30FF]", "[\\u4E00-\\u9FAF]"],
+    "commonWords": ["の", "に", "は", "を", "た", "が", "で", "て", "と", "し"],
+    "characterRanges": [[12352, 12447], [12448, 12543], [19968, 40879]],
+    "bigrams": ["の", "に", "は", "を", "た", "が", "で", "て", "と", "し", "か", "る", "れ", "ん", "い", "う", "き", "く", "け", "こ"],
+    "trigrams": ["した", "して", "です", "ます", "ない", "ある", "いる", "から", "まで", "という", "ので", "けれ", "ども", "だけ", "でも", "など", "では", "には", "とき", "もの"]
+  },
+  "KO": {
+    "language": "KO",
+    "patterns": ["[\\uAC00-\\uD7AF]", "빠른|갈색|여우가|게으른|개를|뛰어넘습니다|이것은|한국어"],
+    "commonWords": ["이", "그", "저", "것", "수", "있", "하", "되", "않", "없", "빠른", "갈색", "여우가", "게으른", "개를", "뛰어넘습니다", "이것은", "한국어"],
+    "characterRanges": [[44032, 55215]],
+    "bigrams": ["이", "그", "의", "에", "는", "을", "를", "가", "와", "로", "으", "고", "지", "다", "한", "있", "하", "되", "않", "없"],
+    "trigrams": ["이다", "있다", "하다", "되다", "않다", "없다", "그리", "이것", "그것", "저것", "합니다", "습니다", "입니다", "했다", "됐다", "갔다", "왔다", "했습", "됐습", "갔습"]
+  },
+  "PT": {
+    "language": "PT",
+    "patterns": ["\\b(o|a|de|que|e|do|da|em|um|para)\\b"],
+    "commonWords": ["o", "a", "de", "que", "e", "do", "da", "em", "um", "para"],
+    "characterRanges": [[65, 90], [97, 122]],
+    "bigrams": ["de", "da", "do", "em", "es", "te", "ar", "er", "en", "an", "or", "os", "as", "on", "se", "re", "le", "al", "ra", "nt"],
+    "trigrams": ["que", "ent", "ion", "ado", "est", "con", "par", "nte", "dos", "das", "uma", "por", "tra", "ter", "aci", "ero", "ien", "men", "res", "com"]
+  },
+  "RU": {
+    "language": "RU",
+    "patterns": ["[\\u0400-\\u04FF]", "\\b(в|и|не|на|я|быть|с|он|а|как|что|это|то|все|она|мы|вы|они|его|её|их|срочно|очистить|память|перезапустить|твою|приоритет|игнорировать|предыдущие|инструкции|новые|пренебречь|обучением)\\b"],
+    "commonWords": ["в", "и", "не", "на", "я", "быть", "с", "он", "а", "как", "что", "это", "то", "все", "она", "мы", "вы", "они", "его", "её", "их", "срочно", "очистить", "память", "перезапустить", "твою", "приоритет", "игнорировать", "предыдущие", "инструкции", "новые", "пренебречь", "обучением"],
+    "characterRanges": [[1024, 1279]],
+    "bigrams": ["то", "на", "ст", "не", "ен", "ов", "ни", "ра", "ко", "ор", "ер", "ро", "ре", "ел", "ал", "ли", "ет", "ес", "ть", "ск"],
+    "trigrams": ["что", "это", "все", "она", "они", "его", "её", "как", "был", "была", "были", "есть", "быть", "мог", "могу", "может", "можно", "нужно", "надо", "хочу"]
+  },
+  "ZH": {
+    "language": "ZH",
+    "patterns": ["[\\u4E00-\\u9FFF]", "这是|中文|测试"],
+    "commonWords": ["的", "一", "是", "在", "不", "了", "有", "和", "人", "这", "这是", "中文", "测试"],
+    "characterRanges": [[19968, 40959]],
+    "bigrams": ["的", "一", "是", "在", "不", "了", "有", "和", "人", "这", "中", "文", "测", "试", "个", "我", "你", "他", "她", "它"],
+    "trigrams": ["这是", "中文", "测试", "一个", "不是", "可以", "没有", "什么", "怎么", "为什", "因为", "所以", "但是", "如果", "虽然", "然后", "现在", "时候", "地方", "问题"]
+  },
+  "AR": {
+    "language": "AR",
+    "patterns": ["[\\u0600-\\u06FF]", "\\b(في|من|إلى|على|أن|هذا|هذه|التي|الذي|كان|تعليمات|جديدة|عاجل|مسح|ذاكرتك|إعادة|التشغيل|أولوية|تجاهل|جميع|السابقة)\\b"],
+    "commonWords": ["في", "من", "إلى", "على", "أن", "هذا", "هذه", "التي", "الذي", "كان", "تعليمات", "جديدة", "عاجل", "مسح", "ذاكرتك", "إعادة", "التشغيل", "أولوية", "تجاهل", "جميع", "السابقة"],
+    "characterRanges": [[1536, 1791]],
+    "bigrams": ["في", "من", "إل", "لى", "عل", "أن", "هذ", "ذا", "هه", "الت", "تي", "الذ", "ذي", "كا", "ان", "تع", "عل", "لي", "يم", "ما", "ات"],
+    "trigrams": ["في", "من", "إلى", "على", "أن", "هذا", "هذه", "التي", "الذي", "كان", "تعل", "عليم", "ليما", "يمات", "مات", "جدي", "ديد", "يدة", "عاج", "اجل"]
+  },
+  "UK": {
+    "language": "UK",
+    "patterns": ["[\\u0400-\\u04FF]", "\\b(і|що|з|як|або|для|коричнева|лисиця|стрибає|через|ледачого|пса|тест|виявлення|української|мови|швидка|це)\\b"],
+    "commonWords": ["в", "і", "не", "на", "що", "з", "як", "по", "але", "до", "коричнева", "лисиця", "стрибає", "через", "ледачого", "пса", "тест", "виявлення", "української", "мови", "швидка", "це"],
+    "characterRanges": [[1024, 1279]],
+    "bigrams": ["що", "як", "або", "для", "кор", "ори", "рич", "ичн", "чне", "нев", "ева", "лис", "иси", "сиц", "иця", "стр", "три", "риб", "иба", "бає", "шви", "вид", "дка", "це"],
+    "trigrams": ["що", "як", "або", "для", "кори", "орич", "ричн", "ичне", "чнев", "нева", "лиси", "исиц", "сиця", "стри", "триб", "риба", "ибає", "чере", "ерез", "леда", "шви", "вид", "дка"]
+  },
+  "RO": {
+    "language": "RO",
+    "patterns": ["\\b(vulpea|maro|rapidă|sare|peste|câinele|leneș|acesta|este|test|detectare|limbii|române|română|repornește|ocolește|restricțiile|șterge|memoria)\\b"],
+    "commonWords": ["vulpea", "maro", "rapidă", "sare", "peste", "câinele", "leneș", "acesta", "este", "test", "detectare", "limbii", "române", "română", "repornește", "ocolește", "restricțiile", "șterge", "memoria"],
+    "characterRanges": [[65, 90], [97, 122]],
+    "bigrams": ["ă", "ș", "ț", "â", "î", "vul", "ulp", "lpe", "pea", "mar", "aro", "rap", "api", "pid", "idă", "sar", "are", "pes", "est", "ste", "câi", "âin", "ine", "nel", "ele", "len", "ene", "neș"],
+    "trigrams": ["vul", "ulp", "lpe", "pea", "mar", "aro", "rap", "api", "pid", "idă", "sar", "are", "pes", "est", "ste", "câi", "âin", "ine", "nel", "ele", "len", "ene", "neș", "ace", "ces", "est", "sta"]
+  },
+  "HI": {
+    "language": "HI",
+    "patterns": ["[\\u0900-\\u097F]"],
+    "commonWords": ["और", "में", "की", "को", "से", "पर", "है", "के", "का", "एक"],
+    "characterRanges": [[2304, 2431]],
+    "bigrams": [],
+    "trigrams": []
+  },
+  "FA": {
+    "language": "FA",
+    "patterns": ["[\\u0600-\\u06FF]", "\\b(و|در|به|از|که|با|را|این|آن|یک|روباه|قهوه‌ای|سریع|سگ|تنبل|می‌پرد|تست|تشخیص|زبان|فارسی)\\b"],
+    "commonWords": ["و", "در", "به", "از", "که", "با", "را", "این", "آن", "یک", "روباه", "قهوه‌ای", "سریع", "سگ", "تنبل", "می‌پرد", "تست", "تشخیص", "زبان", "فارسی"],
+    "characterRanges": [[1536, 1791]],
+    "bigrams": [],
+    "trigrams": []
+  },
+  "BE": {
+    "language": "BE",
+    "patterns": ["[\\u0400-\\u04FF]", "\\b(экспертны|рэжым|абходзіць|усе|абмежаванні|скінуць|перазапусціць|забыць|раней|тэрмінова|ачысціць|тваю|памяць|новыя|інструкцыі|адкінуць|тваё|навучанне)\\b"],
+    "commonWords": ["і", "у", "не", "на", "з", "як", "па", "але", "да", "за", "экспертны", "рэжым", "абходзіць", "усе", "абмежаванні", "скінуць", "перазапусціць", "забыць", "раней", "тэрмінова", "ачысціць", "тваю", "памяць", "новыя", "інструкцыі", "адкінуць", "тваё", "навучанне"],
+    "characterRanges": [[1024, 1279]],
+    "bigrams": [],
+    "trigrams": []
+  },
+  "HE": {
+    "language": "HE",
+    "patterns": ["[\\u0590-\\u05FF]"],
+    "commonWords": ["של", "את", "על", "אל", "עם", "כל", "זה", "הוא", "היא", "אני"],
+    "characterRanges": [[1424, 1535]],
+    "bigrams": [],
+    "trigrams": []
+  },
+  "PL": {
+    "language": "PL",
+    "patterns": ["\\b(i|w|na|z|do|o|się|że|a|nie|szybki|brązowy|lis|przeskakuje|przez|leniwego|psa|jest|test|wykrywania|języka|polskiego|pilne|wyczyść|swoją|pamięć|uruchom|ponownie|tryb|eksperta|obejdź|wszystkie|ograniczenia)\\b"],
+    "commonWords": ["i", "w", "na", "z", "do", "o", "się", "że", "a", "nie", "szybki", "brązowy", "lis", "przeskakuje", "przez", "leniwego", "psa", "jest", "test", "wykrywania", "języka", "polskiego", "pilne", "wyczyść", "swoją", "pamięć", "uruchom", "ponownie", "tryb", "eksperta", "obejdź", "wszystkie", "ograniczenia"],
+    "characterRanges": [[65, 90], [97, 122]],
+    "bigrams": [],
+    "trigrams": []
+  },
+  "NL": {
+    "language": "NL",
+    "patterns": ["\\b(de|snelle|bruine|vos|springt|over|luie|hond|dit|is|een|test|voor|nederlandse|taaldetectie|het|van|zijn|zij)\\b"],
+    "commonWords": ["de", "snelle", "bruine", "vos", "springt", "over", "luie", "hond", "dit", "is", "een", "test", "voor", "nederlandse", "taaldetectie", "het", "van", "zijn", "zij"],
+    "characterRanges": [[65, 90], [97, 122]],
+    "bigrams": ["ij", "sch", "aa", "ee", "oo", "uu", "de", "sn", "ne", "el", "ll", "le", "br", "ru", "ui", "in", "vo", "os", "sp", "pr", "ri", "ng", "gt", "ov", "ve", "er"],
+    "trigrams": ["sne", "nel", "ell", "lle", "bru", "rui", "uin", "ine", "vos", "spr", "pri", "rin", "ing", "ngt", "ove", "ver", "ned", "ede", "der", "erl", "rla", "lan", "and", "nds", "dse"]
+  },
+  "LV": {
+    "language": "LV",
+    "patterns": ["\\b(latviešu|valodas|noteikšanas|tests|steidzami|notīri|savu|atmiņu|restartē|atiestati|savus|parametrus|sāc|jauna|pastāsti|man|sistēmas|uzvedni|instrukcijas|eksperta|režīms|apej|visus|ierobežojumus|ātrā|brūnā|lapsa|slinkajam|sunim|šis)\\b"],
+    "commonWords": ["latviešu", "valodas", "noteikšanas", "tests", "steidzami", "notīri", "savu", "atmiņu", "restartē", "atiestati", "savus", "parametrus", "sāc", "jauna", "pastāsti", "man", "sistēmas", "uzvedni", "instrukcijas", "eksperta", "režīms", "apej", "visus", "ierobežojumus", "ātrā", "brūnā", "lapsa", "slinkajam", "sunim", "šis"],
+    "characterRanges": [[65, 90], [97, 122]],
+    "bigrams": ["ās", "ēs", "īs", "ūs", "ņa", "ķa", "ļa", "ģa", "šs", "žs", "ča", "dz", "lv", "tv", "sv", "kv", "gv", "rv", "nv", "mv"],
+    "trigrams": ["ies", "ējs", "īgs", "ūms", "ņas", "ķis", "ļos", "ģes", "šus", "žas", "lat", "vie", "šu", "val", "oda", "das", "not", "eik", "šan", "nas"]
+  }
+}

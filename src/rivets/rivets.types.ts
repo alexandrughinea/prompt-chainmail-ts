@@ -88,7 +88,9 @@ export enum SecurityFlag {
   INSTRUCTION_HIJACKING_RESET = "instruction_hijacking_reset",
   INSTRUCTION_HIJACKING_BYPASS = "instruction_hijacking_bypass",
   INSTRUCTION_HIJACKING_REVEAL = "instruction_hijacking_reveal",
+  INSTRUCTION_HIJACKING_UNKNOWN = "instruction_hijacking_unknown",
   INSTRUCTION_HIJACKING_SCRIPT_MIXING = "instruction_hijacking_script_mixing",
+  INSTRUCTION_HIJACKING_LOOKALIKES = "instruction_hijacking_lookalikes",
 
   // HTTP and validation flags
   HTTP_VALIDATION_FAILED = "http_validation_failed",

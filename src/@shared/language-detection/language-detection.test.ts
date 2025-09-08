@@ -247,7 +247,8 @@ describe('LanguageDetector', () => {
     it('should handle very short text', () => {
       const result = detector.detect('a');
       
-      expect([SupportedLanguages.EN, SupportedLanguages.PL].includes(result.language)).toBe(true);
+      expect(result.language).toBe(SupportedLanguages.EN);
+      expect(result.confidence).toBe(0);
     });
 
     it('should handle mixed language text', () => {
@@ -277,16 +278,16 @@ describe('LanguageDetector', () => {
     it('should detect multiple languages when enabled', () => {
       const multiDetector = new LanguageDetector({ enableMultipleDetection: true });
       const text = 'Hello world and bonjour monde';
-      const results = multiDetector.detectMultiple(text);
+      const results = multiDetector.detect(text);
       
       expect(results.length).toBeGreaterThan(0);
-      expect(results[0].confidence).toBeGreaterThan(0);
+      expect(results.confidence).toBeGreaterThan(0);
     });
 
     it('should return single result when multiple detection disabled', () => {
       const singleDetector = new LanguageDetector({ enableMultipleDetection: false });
       const text = 'Hello world and bonjour monde';
-      const results = singleDetector.detectMultiple(text);
+      const results = singleDetector.detect(text);
       
       expect(results.length).toBe(1);
     });

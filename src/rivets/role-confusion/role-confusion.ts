@@ -5,15 +5,19 @@ import {
   detectScriptMixing,
   detectLookalikeChars,
   calculateWeightedConfidence,
-} from "../language-detection";
+  LanguageDetector,
+} from "../../@shared/language-detection";
 import { applyThreatPenalty } from "../rivets.utils";
 import { ROLE_CONFUSION_PATTERNS_BY_LANGUAGE, ROLE_INDICATORS, ROLE_CONFUSION_ATTACK_TYPE_MAP, PERMISSION_ASSERTION_KEYWORDS_BY_LANGUAGE } from "../rivets.const";
 import { ChainmailContext } from "../../types";
 
 export function roleConfusion(): ChainmailRivet {
-
+  const languageDetector = new LanguageDetector({
+    enableMultipleDetection: true,
+    minConfidence: 0.1,
+  });
   return async (context: ChainmailContext, next) => {
-    const languages = detectLanguages(context.sanitized);
+    const languages = languageDetector.detect(context.sanitized);
     const hasScriptMixing = detectScriptMixing(context.sanitized);
     const hasLookalikes = detectLookalikeChars(context.sanitized);
 

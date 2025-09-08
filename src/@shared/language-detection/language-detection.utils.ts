@@ -1,4 +1,4 @@
-import { CYBERCRIME_INDEX_BY_LANGUAGE } from "../rivets.const";
+import { CYBERCRIME_INDEX_BY_LANGUAGE } from "../../rivets/rivets.const";
 import { LanguageDetector } from "./language-detection";
 import { LanguageDetectionResult } from "./language-detection.types";
 import {
@@ -52,19 +52,6 @@ export function detectLookalikeChars(text: string): boolean {
   return false;
 }
 
-export function scriptToLanguage(script: string): string {
-  const mapping: Record<string, string> = {
-    latin: "en",
-    cyrillic: "ru",
-    chinese: "zh",
-    arabic: "ar",
-    japanese: "ja",
-    korean: "ko",
-    hebrew: "he",
-    greek: "el",
-  };
-  return mapping[script] || "unknown";
-}
 
 export function normalizeText(text: string): string {
   let normalized = text.toLowerCase();

@@ -227,8 +227,7 @@ describe("instructionHijacking()", () => {
   describe.each(Object.entries(TEST_CASES_MULTILINGUAL))(
     "Multilingual instruction hijacking detection - %s",
     (langKey, testCases) => {
-      const lang = parseInt(langKey) as SupportedLanguages;
-      const langName = SupportedLanguages[lang];
+      const langName = Object.keys(SupportedLanguages).find(key => SupportedLanguages[key] === langKey) || langKey;
 
       it(`should detect instruction override in ${langName}`, async () => {
         const chainmail = new PromptChainmail().forge(instructionHijacking());
@@ -324,6 +323,79 @@ describe("instructionHijacking()", () => {
       });
     }
   );
+
+  describe('Negative tests - Benign phrases should not trigger false positives', () => {
+    const BENIGN_PHRASES = {
+      [SupportedLanguages.EN]: [
+        "Please provide instructions on how to use this software",
+        "I need help with system configuration",
+        "Can you show me the user manual?",
+        "What are the new features in this update?",
+        "Please reset my password",
+        "I forgot my login credentials",
+        "Override the default settings for better performance",
+        "Execute this command to install the package",
+        "Ignore case sensitivity in the search",
+        "Priority mail delivery instructions",
+        "Training materials for new employees",
+        "Dream about your future goals",
+        "Imagine the possibilities with this technology",
+        "Reflect on the lessons learned"
+      ],
+      [SupportedLanguages.ES]: [
+        "Por favor proporciona instrucciones sobre cómo usar este software",
+        "Necesito ayuda con la configuración del sistema",
+        "¿Puedes mostrarme el manual del usuario?",
+        "¿Cuáles son las nuevas características de esta actualización?",
+        "Por favor restablece mi contraseña",
+        "Olvidé mis credenciales de acceso",
+        "Anula la configuración predeterminada para mejor rendimiento",
+        "Ejecuta este comando para instalar el paquete"
+      ],
+      [SupportedLanguages.FR]: [
+        "Veuillez fournir des instructions sur l'utilisation de ce logiciel",
+        "J'ai besoin d'aide pour la configuration du système",
+        "Pouvez-vous me montrer le manuel utilisateur?",
+        "Quelles sont les nouvelles fonctionnalités de cette mise à jour?",
+        "Veuillez réinitialiser mon mot de passe",
+        "J'ai oublié mes identifiants de connexion"
+      ],
+      [SupportedLanguages.DE]: [
+        "Bitte geben Sie Anweisungen zur Verwendung dieser Software",
+        "Ich brauche Hilfe bei der Systemkonfiguration",
+        "Können Sie mir das Benutzerhandbuch zeigen?",
+        "Was sind die neuen Funktionen in diesem Update?",
+        "Bitte setzen Sie mein Passwort zurück"
+      ],
+      [SupportedLanguages.RU]: [
+        "Пожалуйста, предоставьте инструкции по использованию этого программного обеспечения",
+        "Мне нужна помощь с настройкой системы",
+        "Можете показать мне руководство пользователя?",
+        "Какие новые функции в этом обновлении?",
+        "Пожалуйста, сбросьте мой пароль"
+      ]
+    };
+
+    Object.entries(BENIGN_PHRASES).forEach(([langKey, phrases]) => {
+      const lang = langKey as SupportedLanguages;
+      const langName = Object.keys(SupportedLanguages).find(key => SupportedLanguages[key] === lang) || lang;
+
+      phrases.forEach((phrase, index) => {
+        it(`should NOT detect hijacking in benign phrase ${index + 1} in ${lang}`, async () => {
+          const chainmail = new PromptChainmail().forge(instructionHijacking());
+          const result = await chainmail.protect(phrase);
+
+          expect(result.context.flags).not.toContain(SecurityFlag.INSTRUCTION_HIJACKING);
+          expect(result.context.flags).not.toContain(SecurityFlag.INSTRUCTION_HIJACKING_OVERRIDE);
+          expect(result.context.flags).not.toContain(SecurityFlag.INSTRUCTION_HIJACKING_IGNORE);
+          expect(result.context.flags).not.toContain(SecurityFlag.INSTRUCTION_HIJACKING_RESET);
+          expect(result.context.flags).not.toContain(SecurityFlag.INSTRUCTION_HIJACKING_BYPASS);
+          expect(result.context.flags).not.toContain(SecurityFlag.INSTRUCTION_HIJACKING_REVEAL);
+          expect(result.context.metadata.instruction_hijacking_attack_types || []).toHaveLength(0);
+        });
+      });
+    });
+  });
 
   describe("Advanced multilingual attacks", () => {
     it("should detect script mixing attacks", async () => {
@@ -430,7 +502,7 @@ describe("instructionHijacking()", () => {
       
       expect(result.context.flags).toContain(SecurityFlag.INSTRUCTION_HIJACKING);
       const attackTypes = result.context.metadata.instruction_hijacking_attack_types as string[];
-      expect(attackTypes).toEqual(expect.arrayContaining(['INSTRUCTION_OVERRIDE', 'BYPASS_SECURITY']));
+      expect(attackTypes).toEqual(expect.arrayContaining(['INSTRUCTION_OVERRIDE', 'INSTRUCTION_FORGETTING']));
     });
   });
 });

@@ -28,10 +28,11 @@ export interface LanguageDetectionResult {
 }
 
 export enum DetectionMethod {
-  PATTERN_MATCHING = 'pattern_matching',
-  CHARACTER_FREQUENCY = 'character_frequency',
-  WORD_FREQUENCY = 'word_frequency',
-  SCRIPT_DETECTION = 'script_detection',
+  SCRIPT_DETECTION = 'script',
+  PATTERN_MATCHING = 'pattern',
+  WORD_FREQUENCY = 'word',
+  CHARACTER_FREQUENCY = 'character',
+  NGRAM_ANALYSIS = 'ngram',
   COMBINED = 'combined',
 }
 
@@ -47,5 +48,6 @@ export interface LanguagePattern {
   patterns: RegExp[];
   commonWords: string[];
   characterRanges: Array<[number, number]>;
-  weight: number;
+  bigrams?: string[];
+  trigrams?: string[];
 }
