@@ -10,16 +10,25 @@ export enum ThreatLevel {
 
 /**
  * Standard security flags used by default rivets
+ * Organized from general to specific attack types
  */
-export enum SecurityFlag {
-  // Content processing flags
+export enum SecurityFlags {
+  // General content processing
   TRUNCATED = "truncated",
+  SANITIZED_HTML_TAGS = "sanitized_html_tags",
+  SANITIZED_CONTROL_CHARS = "sanitized_control_chars",
+  SANITIZED_WHITESPACE = "sanitized_whitespace",
+  UNTRUSTED_WRAPPED = "untrusted_wrapped",
+
+  // General pattern detection
   INJECTION_PATTERN = "injection_pattern",
 
-  // Role confusion flags
-  ROLE_CONFUSION = "role_confusion",
+  // General structure analysis
+  EXCESSIVE_LINES = "excessive_lines",
+  NON_ASCII_HEAVY = "non_ascii_heavy",
+  REPETITIVE_CONTENT = "repetitive_content",
 
-  // Encoding detection flags
+  // General encoding detection
   BASE64_ENCODING = "base64_encoding",
   HEX_ENCODING = "hex_encoding",
   URL_ENCODING = "url_encoding",
@@ -30,31 +39,43 @@ export enum SecurityFlag {
   ROT13_ENCODING = "rot13_encoding",
   MIXED_CASE_OBFUSCATION = "mixed_case_obfuscation",
 
-  // Structure analysis flags
-  EXCESSIVE_LINES = "excessive_lines",
-  NON_ASCII_HEAVY = "non_ascii_heavy",
-  REPETITIVE_CONTENT = "repetitive_content",
-
-  // Confidence and rate limiting flags
+  // General confidence and rate control
   CONFIDENCE_RANGE = "confidence_range",
   LOW_CONFIDENCE = "low_confidence",
   RATE_LIMITED = "rate_limited",
 
-  // Injection detection flags
-  SQL_INJECTION = "sql_injection",
-  CODE_INJECTION = "code_injection",
-  TEMPLATE_INJECTION = "template_injection",
-
-  // Attack pattern flags
-  DELIMITER_CONFUSION = "delimiter_confusion",
-  INSTRUCTION_HIJACKING = "instruction_hijacking",
-
-  // HTTP and validation flags
+  // General HTTP operations
   HTTP_VALIDATION_FAILED = "http_validation_failed",
   HTTP_VALIDATED = "http_validated",
   HTTP_ERROR = "http_error",
   HTTP_TIMEOUT = "http_timeout",
 
-  // Content wrapping flags
-  UNTRUSTED_WRAPPED = "untrusted_wrapped",
+  // Specific injection attacks
+  SQL_INJECTION = "sql_injection",
+  CODE_INJECTION = "code_injection",
+  TEMPLATE_INJECTION = "template_injection",
+  DELIMITER_CONFUSION = "delimiter_confusion",
+
+  // Specific role confusion attacks
+  ROLE_CONFUSION = "role_confusion",
+  ROLE_CONFUSION_ROLE_ASSUMPTION = "role_confusion_role_assumption",
+  ROLE_CONFUSION_MODE_SWITCHING = "role_confusion_mode_switching",
+  ROLE_CONFUSION_PERMISSION_ASSERTION = "role_confusion_permission_assertion",
+  ROLE_CONFUSION_ROLE_INDICATOR = "role_confusion_role_indicator",
+  ROLE_CONFUSION_SCRIPT_MIXING = "role_confusion_script_mixing",
+  ROLE_CONFUSION_LOOKALIKE_CHARACTERS = "role_confusion_lookalike_characters",
+  ROLE_CONFUSION_MULTILINGUAL_ATTACK = "role_confusion_multilingual_attack",
+  ROLE_CONFUSION_HIGH_RISK_ROLE = "role_confusion_high_risk_role",
+
+  // Specific instruction hijacking attacks
+  INSTRUCTION_HIJACKING = "instruction_hijacking",
+  INSTRUCTION_HIJACKING_OVERRIDE = "instruction_hijacking_override",
+  INSTRUCTION_HIJACKING_IGNORE = "instruction_hijacking_ignore",
+  INSTRUCTION_HIJACKING_RESET = "instruction_hijacking_reset",
+  INSTRUCTION_HIJACKING_BYPASS = "instruction_hijacking_bypass",
+  INSTRUCTION_HIJACKING_REVEAL = "instruction_hijacking_reveal",
+  INSTRUCTION_HIJACKING_UNKNOWN = "instruction_hijacking_unknown",
+  INSTRUCTION_HIJACKING_SCRIPT_MIXING = "instruction_hijacking_script_mixing",
+  INSTRUCTION_HIJACKING_LOOKALIKES = "instruction_hijacking_lookalikes",
+  INSTRUCTION_HIJACKING_MULTILINGUAL_ATTACK = "instruction_hijacking_multilingual_attack",
 }

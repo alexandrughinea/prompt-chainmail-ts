@@ -1,6 +1,6 @@
 {
   "name": "prompt-chainmail",
-  "version": "0.6.0",
+  "version": "0.6.5",
   "description": "Security middleware that shields AI applications from prompt injection, jailbreaking, and obfuscated attacks through composable defense layers.",
   "type": "module",
   "main": "./dist/prompt-chainmail.cjs.js",
@@ -32,6 +32,7 @@
     "lint": "eslint src --ext .ts",
     "format": "prettier --write src/**/*.ts",
     "security": "semgrep --config=.semgrep.yml src/",
+    "prepare": "husky",
     "prepublishOnly": "npm run build && npm run test:ci"
   },
   "keywords": [
@@ -62,6 +63,7 @@
     "@vitest/coverage-v8": "^3.2.4",
     "@vitest/ui": "^3.2.4",
     "eslint": "^9.35.0",
+    "husky": "^9.1.7",
     "prettier": "^3.6.2",
     "typescript": "^5.9.2",
     "vite": "^7.1.5",
@@ -70,5 +72,8 @@
   },
   "engines": {
     "node": ">=16.0.0"
+  },
+  "dependencies": {
+    "franc": "^6.2.0"
   }
 }

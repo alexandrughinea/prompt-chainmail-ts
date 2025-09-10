@@ -1,7 +1,12 @@
 import { ChainmailRivet } from "../../index";
-import { SecurityFlag } from "../rivets.types";
+import { SecurityFlags } from "../rivets.types";
 import { ChainmailContext } from "../../types";
 
+/**
+ * @description
+ * Implements rate limiting to prevent abuse by tracking request counts
+ * per key within configurable time windows.
+ */
 export function rateLimit(
   maxRequests = 100,
   windowMs = 60000,
@@ -15,7 +20,7 @@ export function rateLimit(
     const now = Date.now();
 
     if (requests.size >= maxKeys && !requests.has(key)) {
-      context.flags.push(SecurityFlag.RATE_LIMITED);
+      context.flags.push(SecurityFlags.RATE_LIMITED);
       context.blocked = true;
       return {
         success: false,
@@ -36,7 +41,7 @@ export function rateLimit(
 
     if (timestamps.length >= maxRequests) {
       context.blocked = true;
-      context.flags.push(SecurityFlag.RATE_LIMITED);
+      context.flags.push(SecurityFlags.RATE_LIMITED);
       return {
         success: false,
         context,

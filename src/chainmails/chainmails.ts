@@ -3,7 +3,10 @@ import { PromptChainmail, Rivets } from "../index";
 /**
  * Pre-forged chainmail configurations
  */
-export const Chainmails: Record<string, (...args: any[]) => PromptChainmail> = {
+export const Chainmails: Record<
+  string,
+  (...args: unknown[]) => PromptChainmail
+> = {
   /**
    * Basic protection chainmail
    */

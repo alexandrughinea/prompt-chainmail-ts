@@ -1,7 +1,13 @@
 import { ChainmailRivet } from "../../index";
-import { ThreatLevel, SecurityFlag } from "../rivets.types";
-import { createPatternDetectionPatterns, applyThreatPenalty } from "../rivets.utils";
+import { ThreatLevel, SecurityFlags } from "../rivets.types";
+import { applyThreatPenalty } from "../rivets.utils";
+import { createPatternDetectionPatterns } from "./pattern-detection.utils";
 
+/**
+ * @description
+ * Detects malicious patterns using regex matching for injection attempts,
+ * suspicious keywords, and attack signatures with custom pattern support.
+ */
 export function patternDetection(customPatterns?: RegExp[]): ChainmailRivet {
   const patterns = [
     ...createPatternDetectionPatterns(),
@@ -11,9 +17,9 @@ export function patternDetection(customPatterns?: RegExp[]): ChainmailRivet {
   return async (context, next) => {
     for (const pattern of patterns) {
       if (pattern.test(context.sanitized)) {
-        context.flags.push(SecurityFlag.INJECTION_PATTERN);
+        context.flags.push(SecurityFlags.INJECTION_PATTERN);
         applyThreatPenalty(context, ThreatLevel.HIGH);
-        context.metadata.matchedPattern = pattern.toString();
+        context.metadata.matched_pattern = pattern.toString();
         break;
       }
     }

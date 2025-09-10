@@ -15,6 +15,7 @@ import { untrustedWrapper } from "./untrusted-wrapper/untrusted-wrapper";
 import { httpFetch } from "./http-fetch/http-fetch";
 import { condition } from "./condition/condition";
 import { telemetry } from "./telemetry/telemetry";
+import { languageDetection } from "./language-detection/language-detection";
 import { ChainmailRivet } from "../index";
 
 export const Rivets: Record<string, (...args: any[]) => ChainmailRivet> = {
@@ -22,6 +23,7 @@ export const Rivets: Record<string, (...args: any[]) => ChainmailRivet> = {
   patternDetection,
   roleConfusion,
   encodingDetection,
+  languageDetection,
   sqlInjection,
   codeInjection,
   delimiterConfusion,

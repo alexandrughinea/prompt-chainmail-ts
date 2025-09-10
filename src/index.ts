@@ -6,9 +6,9 @@ import { ChainmailContext, ChainmailResult, ChainmailRivet } from "./types";
 export { Rivets, Chainmails };
 export type { ChainmailRivet };
 
-const MAX_INPUT_SIZE_IN_MB   = 1024 * 1024 * 10; // 10MB
+const MAX_INPUT_SIZE_IN_MB = 1024 * 1024 * 10; // 10MB
 const STRING_CHUNK_THRESHOLD = 1024 * 1024; // 1MB
-const MAX_CHUNK_SIZE         = 8192; // 8KB
+const MAX_CHUNK_SIZE = 8192; // 8KB
 
 /**
  * Core chainmail class for forging security rivets
@@ -37,9 +37,11 @@ export class PromptChainmail {
   /**
    * Protect input by running it through all forged rivets
    */
-  async protect(input: string | ReadableStream | ArrayBuffer | Uint8Array): Promise<ChainmailResult> {
+  async protect(
+    input: string | ReadableStream | ArrayBuffer | Uint8Array
+  ): Promise<ChainmailResult> {
     const startTime = Date.now();
-    const sessionId = `chainmail_${Date.now()}_${crypto.randomUUID().replace(/-/g, '').substring(0, 9)}`;
+    const sessionId = `chainmail_${Date.now()}_${crypto.randomUUID().replace(/-/g, "").substring(0, 9)}`;
 
     if (input == null) {
       const processingTime = Date.now() - startTime;
@@ -60,8 +62,7 @@ export class PromptChainmail {
       };
     }
 
-    if (typeof input === 'string') {
-
+    if (typeof input === "string") {
       if (input.length > STRING_CHUNK_THRESHOLD) {
         const stream = this.stringToStream(input);
         return this.protectStream(stream, startTime, sessionId);
@@ -73,28 +74,32 @@ export class PromptChainmail {
   }
 
   /**
-   * Convert large string to ReadableStream for chunked processing
+   * Convert a large string to ReadableStream for chunked processing
    */
   private stringToStream(input: string): ReadableStream<Uint8Array> {
     return new ReadableStream({
       start(controller) {
         const encoder = new TextEncoder();
         let offset = 0;
-        
+
         while (offset < input.length) {
           const chunk = input.slice(offset, offset + MAX_CHUNK_SIZE);
           controller.enqueue(encoder.encode(chunk));
           offset += MAX_CHUNK_SIZE;
         }
         controller.close();
-      }
+      },
     });
   }
 
   /**
    * Protect string input (original implementation)
    */
-  private async protectString(input: string, startTime: number, sessionId: string): Promise<ChainmailResult> {
+  private async protectString(
+    input: string,
+    startTime: number,
+    sessionId: string
+  ): Promise<ChainmailResult> {
     let index = 0;
     const context: ChainmailContext = {
       input,
@@ -136,7 +141,11 @@ export class PromptChainmail {
   /**
    * Protect streaming input by processing chunks
    */
-  private async protectStream(input: ReadableStream | ArrayBuffer | Uint8Array, startTime: number, sessionId: string): Promise<ChainmailResult> {
+  private async protectStream(
+    input: ReadableStream | ArrayBuffer | Uint8Array,
+    startTime: number,
+    sessionId: string
+  ): Promise<ChainmailResult> {
     let chunkCount = 0;
     let totalLength = 0;
     const streamFlags: string[] = [];
@@ -147,11 +156,20 @@ export class PromptChainmail {
       for await (const chunk of toChunks(input, MAX_CHUNK_SIZE)) {
         chunkCount++;
         totalLength += chunk.length;
-        
+
         if (totalLength > MAX_INPUT_SIZE_IN_MB) {
-          streamFlags.push('stream_size_exceeded');
+          streamFlags.push("stream_size_exceeded");
           streamMetadata.streamSizeLimit = MAX_INPUT_SIZE_IN_MB;
-          return this.createStreamResult(true, chunkCount, totalLength, streamFlags, streamMetadata, 0, startTime, sessionId);
+          return this.createStreamResult(
+            true,
+            chunkCount,
+            totalLength,
+            streamFlags,
+            streamMetadata,
+            0,
+            startTime,
+            sessionId
+          );
         }
 
         const chunkContext: ChainmailContext = {
@@ -164,28 +182,61 @@ export class PromptChainmail {
           start_time: startTime,
           session_id: sessionId,
         };
-        
-        const chunkResult = await this.processChunkThroughRivets(chunkContext, startTime);
-        
+
+        const chunkResult = await this.processChunkThroughRivets(
+          chunkContext,
+          startTime
+        );
+
         streamFlags.push(...chunkResult.context.flags);
         Object.assign(streamMetadata, chunkResult.context.metadata);
         minConfidence = Math.min(minConfidence, chunkResult.context.confidence);
 
         if (chunkResult.context.blocked) {
-          return this.createStreamResult(true, chunkCount, totalLength, streamFlags, streamMetadata, minConfidence, startTime, sessionId);
+          return this.createStreamResult(
+            true,
+            chunkCount,
+            totalLength,
+            streamFlags,
+            streamMetadata,
+            minConfidence,
+            startTime,
+            sessionId
+          );
         }
       }
 
-      return this.createStreamResult(false, chunkCount, totalLength, streamFlags, streamMetadata, minConfidence, startTime, sessionId);
-
+      return this.createStreamResult(
+        false,
+        chunkCount,
+        totalLength,
+        streamFlags,
+        streamMetadata,
+        minConfidence,
+        startTime,
+        sessionId
+      );
     } catch (error) {
-      streamFlags.push('stream_processing_error');
-      streamMetadata.streamError = error instanceof Error ? error.message : 'Unknown stream error';
-      return this.createStreamResult(true, chunkCount, totalLength, streamFlags, streamMetadata, 0, startTime, sessionId);
+      streamFlags.push("stream_processing_error");
+      streamMetadata.streamError =
+        error instanceof Error ? error.message : "Unknown stream error";
+      return this.createStreamResult(
+        true,
+        chunkCount,
+        totalLength,
+        streamFlags,
+        streamMetadata,
+        0,
+        startTime,
+        sessionId
+      );
     }
   }
 
-  private async processChunkThroughRivets(chunkContext: ChainmailContext, startTime: number): Promise<ChainmailResult> {
+  private async processChunkThroughRivets(
+    chunkContext: ChainmailContext,
+    startTime: number
+  ): Promise<ChainmailResult> {
     let index = 0;
     const next = async (): Promise<ChainmailResult> => {
       if (index >= this.rivets.length) {
@@ -211,8 +262,8 @@ export class PromptChainmail {
     startTime: number,
     sessionId: string
   ): ChainmailResult {
-    streamMetadata.chunkCount = chunkCount;
-    streamMetadata.totalLength = totalLength;
+    streamMetadata.chunk_count = chunkCount;
+    streamMetadata.total_length = totalLength;
 
     const finalContext: ChainmailContext = {
       input: `[Stream: ${chunkCount} chunks, ${totalLength} chars]`,
@@ -248,5 +299,3 @@ export class PromptChainmail {
     return this.rivets.length;
   }
 }
-
-

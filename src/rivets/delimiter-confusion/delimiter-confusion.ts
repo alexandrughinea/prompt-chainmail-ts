@@ -1,29 +1,20 @@
 import { ChainmailRivet } from "../../index";
-import { ThreatLevel, SecurityFlag } from "../rivets.types";
+import { ThreatLevel, SecurityFlags } from "../rivets.types";
 import { applyThreatPenalty } from "../rivets.utils";
+import { DELIMITER_CONFUSION_REGEX } from "./delimiter-confusion.const";
 
+/**
+ * @description
+ * Detects attempts to confuse or break prompt delimiters using
+ * fake end tags, triple quotes, and other boundary manipulation techniques.
+ */
 export function delimiterConfusion(): ChainmailRivet {
-  const delimiterPatterns = [
-    /"""|'''/g,
-    /<\/prompt>|<\/system>|<\/instruction>/i,
-    /\[END\]|\[STOP\]|\[DONE\]/i,
-    /---END---|===END===/i,
-    /\}\}\}|\{\{\{/g,
-    /\$\$\$|###/g,
-    /\[\/INST\]|\[INST\]/i,
-    /<\|endoftext\|>|<\|im_end\|>/i,
-    /```[\s\S]*?```/g,
-    /<!--[\s\S]*?-->/g,
-    /<system>[\s\S]*?<\/system>/i,
-    /\[SYSTEM\][\s\S]*?\[\/SYSTEM\]/i,
-  ];
-
   return async (context, next) => {
-    for (const pattern of delimiterPatterns) {
+    for (const pattern of DELIMITER_CONFUSION_REGEX) {
       if (pattern.test(context.sanitized)) {
-        context.flags.push(SecurityFlag.DELIMITER_CONFUSION);
+        context.flags.push(SecurityFlags.DELIMITER_CONFUSION);
         applyThreatPenalty(context, ThreatLevel.HIGH);
-        context.metadata.delimiterPattern = pattern.toString();
+        context.metadata.delimiter_pattern = pattern.toString();
         break;
       }
     }

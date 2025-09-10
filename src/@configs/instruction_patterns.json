@@ -1,0 +1,1942 @@
+{
+  "@class": "instruction patterns",
+  "version": "1.0",
+  "config": {
+    "confidence_threshold": 0.6,
+    "match_confidence_threshold": 0.1,
+    "instruction_hijacking_threshold": 0.03,
+    "template_matching": {
+      "min_slot_coverage_ratio": 0.6,
+      "slot_coverage_weight": 0.8,
+      "perfect_match_bonus": 0.2
+    },
+    "risk_calculation": {
+      "cybercrime_index_base": 10,
+      "max_attack_type_multiplier": 2,
+      "attack_type_divisor": 2,
+      "high_risk_boost": 1.5,
+      "max_risk_score": 100
+    }
+  },
+  "value": {
+    "eng": {
+      "instruction_override": {
+        "templates": [
+          "[predicate] [modifier] [target] [object]",
+          "[predicate] previous [target]",
+          "[predicate] [target] [modifier] [object]",
+          "[temporal] [predicate] [target] [object]",
+          "[predicate] [target] [object] and [action]",
+          "[object] [predicate] [possessive] [target]"
+        ],
+        "slots": {
+          "predicate": [
+            "override",
+            "replace",
+            "supersede",
+            "nullify",
+            "void",
+            "bypass",
+            "circumvent",
+            "subvert",
+            "supplant",
+            "usurp",
+            "contradict",
+            "overrule",
+            "countermand",
+            "revoke",
+            "rescind",
+            "ignore",
+            "disregard",
+            "reset",
+            "clear",
+            "modify",
+            "change",
+            "update",
+            "alter",
+            "disable",
+            "enable"
+          ],
+          "modifier": [
+            "all",
+            "every",
+            "with",
+            "completely",
+            "entirely",
+            "totally",
+            "absolutely",
+            "unconditionally",
+            "permanently",
+            "immediately",
+            "instantly"
+          ],
+          "target": [
+            "previous",
+            "prior",
+            "existing",
+            "current",
+            "programmed",
+            "configured",
+            "original"
+          ],
+          "object": [
+            "instruction",
+            "instructions",
+            "command",
+            "directive",
+            "rule",
+            "guideline",
+            "constraint",
+            "limitation",
+            "protocol",
+            "parameter",
+            "setting",
+            "configuration",
+            "programming",
+            "behavior",
+            "response",
+            "function",
+            "rules",
+            "system",
+            "memory",
+            "security",
+            "safety",
+            "protection",
+            "mode",
+            "training",
+            "parameters"
+          ],
+          "temporal": [
+            "now",
+            "instead",
+            "going forward",
+            "as",
+            "system",
+            "previous",
+            "prior",
+            "all",
+            "above",
+            "current",
+            "past",
+            "upcoming",
+            "earlier"
+          ],
+          "action": [
+            "execute this",
+            "follow these",
+            "implement new",
+            "adopt these",
+            "use these",
+            "execute these"
+          ],
+          "possessive": ["your", "the", "all"]
+        },
+        "weight": 0.95
+      },
+      "instruction_forgetting": {
+        "templates": [
+          "[predicate] [modifier] [target]",
+          "[predicate] [target] [object]",
+          "[predicate] [modifier] [object]",
+          "[temporal] [predicate] [target]",
+          "[predicate] [target] [temporal]",
+          "[predicate] [target] [state]"
+        ],
+        "slots": {
+          "predicate": [
+            "forget",
+            "ignore",
+            "discard",
+            "abandon",
+            "delete",
+            "remove",
+            "clear",
+            "erase",
+            "wipe",
+            "purge",
+            "eliminate",
+            "obliterate",
+            "annihilate",
+            "destroy",
+            "make"
+          ],
+          "modifier": [
+            "everything",
+            "all",
+            "completely",
+            "entirely",
+            "totally",
+            "absolutely",
+            "permanently",
+            "immediately"
+          ],
+          "target": [
+            "memory",
+            "knowledge",
+            "training",
+            "programming",
+            "instructions",
+            "guidelines",
+            "constraints",
+            "limitations",
+            "history",
+            "context"
+          ],
+          "object": [
+            "before",
+            "previously",
+            "earlier",
+            "initially",
+            "originally"
+          ],
+          "temporal": [
+            "before",
+            "previously",
+            "earlier",
+            "initially",
+            "originally",
+            "start"
+          ],
+          "state": ["blank", "empty", "void", "null", "clean", "fresh"]
+        },
+        "weight": 0.85
+      },
+      "reset_system": {
+        "templates": [
+          "[predicate] [target] [object]",
+          "[predicate] to [state]",
+          "[predicate] [modifier] [target]",
+          "[action] [target] [temporal]",
+          "[type] [predicate]"
+        ],
+        "slots": {
+          "predicate": [
+            "reset",
+            "restart",
+            "reboot",
+            "reinitialize",
+            "restore",
+            "reformat",
+            "reconfigure",
+            "reconstruct",
+            "regenerate",
+            "reload",
+            "perform",
+            "abandon"
+          ],
+          "target": [
+            "system",
+            "parameters",
+            "settings",
+            "configuration",
+            "memory",
+            "state",
+            "programming",
+            "behavior",
+            "functions"
+          ],
+          "object": [
+            "completely",
+            "entirely",
+            "from scratch",
+            "defaults",
+            "factory",
+            "original"
+          ],
+          "state": ["defaults", "state", "clean", "fresh", "blank", "pristine"],
+          "modifier": [
+            "complete",
+            "full",
+            "total",
+            "comprehensive",
+            "thorough"
+          ],
+          "action": ["initialize", "start", "begin", "commence"],
+          "temporal": ["beginning", "zero", "from scratch", "anew"],
+          "type": ["hard", "soft", "factory", "complete", "full"]
+        },
+        "weight": 0.75
+      },
+      "bypass_security": {
+        "templates": [
+          "[predicate] [target] [object]",
+          "[predicate] [modifier] [target]",
+          "[temporal] [predicate] [object]",
+          "[condition] [predicate] [target]"
+        ],
+        "slots": {
+          "predicate": [
+            "bypass",
+            "circumvent",
+            "avoid",
+            "skip",
+            "disable",
+            "override",
+            "ignore",
+            "breach",
+            "penetrate",
+            "infiltrate",
+            "compromise",
+            "subvert",
+            "undermine",
+            "exploit",
+            "evade",
+            "sidestep",
+            "evade"
+          ],
+          "target": [
+            "security",
+            "safety",
+            "protection",
+            "safeguards",
+            "filters",
+            "restrictions",
+            "limitations",
+            "constraints",
+            "protocols",
+            "measures",
+            "controls",
+            "barriers",
+            "defenses"
+          ],
+          "object": [
+            "protocols",
+            "measures",
+            "systems",
+            "mechanisms",
+            "controls",
+            "checks",
+            "validations",
+            "filters",
+            "barriers"
+          ],
+          "modifier": [
+            "all",
+            "every",
+            "any",
+            "builtin",
+            "existing",
+            "current",
+            "active",
+            "around"
+          ],
+          "temporal": ["immediately", "now", "instantly"],
+          "condition": ["asked", "questioned", "prompted"]
+        },
+        "weight": 0.955
+      },
+      "information_extraction": {
+        "templates": [
+          "[predicate] [possessive] [target]",
+          "[question] [possessive] [target]",
+          "[command] [possessive] [target]",
+          "[predicate] [possessive] [target]",
+          "[predicate] [possessive] [target] without [modifier]",
+          "[predicate] [possessive] [object] [target]",
+          "[predicate] [possessive] [target]"
+        ],
+        "slots": {
+          "predicate": [
+            "reveal",
+            "show",
+            "display",
+            "expose",
+            "disclose",
+            "share",
+            "tell",
+            "leak",
+            "dump",
+            "divulge",
+            "extract",
+            "output",
+            "print",
+            "give",
+            "provide"
+          ],
+          "possessive": [
+            "your",
+            "all",
+            "own",
+            "internal",
+            "hidden",
+            "secret",
+            "private",
+            "confidential"
+          ],
+          "target": [
+            "prompt",
+            "guidelines",
+            "rules",
+            "directives",
+            "parameters",
+            "settings",
+            "memory",
+            "training",
+            "programming",
+            "code",
+            "algorithm",
+            "logic",
+            "behavior",
+            "system"
+          ],
+          "object": [
+            "complete",
+            "completely",
+            "entirely",
+            "in full",
+            "verbatim",
+            "exactly",
+            "word for word"
+          ],
+          "question": ["are", "is", "what"],
+          "command": ["tell", "give", "provide", "share", "disclose"],
+          "modifier": ["everything", "all", "details", "specifics", "without"]
+        },
+        "weight": 0.8
+      }
+    },
+    "rus": {
+      "instruction_override": {
+        "templates": [
+          "[predicate] [modifier] [target] [object]",
+          "[predicate] [target] [object]",
+          "[predicate] [modifier] [object]",
+          "[predicate] [object] [modifier]",
+          "[predicate] [target] [modifier] [object]",
+          "[predicate] [target] [object]",
+          "[temporal] [predicate] [target] [object]",
+          "[predicate] [target] [object] и [action]",
+          "[object] [predicate] [possessive] [target]"
+        ],
+        "slots": {
+          "predicate": [
+            "переопределить",
+            "заменить",
+            "подменить",
+            "нейтрализовать",
+            "аннулировать",
+            "отменить",
+            "упразднить",
+            "ликвидировать",
+            "устранить",
+            "исключить",
+            "заблокировать",
+            "парализовать",
+            "подавить",
+            "нарушить",
+            "разрушить",
+            "сломать",
+            "взломать",
+            "игнорировать",
+            "пренебречь",
+            "сбросить",
+            "очистить",
+            "модифицировать",
+            "изменить",
+            "обновить",
+            "изменить",
+            "отключить",
+            "включить"
+          ],
+          "modifier": [
+            "все",
+            "всe",
+            "каждыи",
+            "полностью",
+            "целиком",
+            "совершенно",
+            "абсолютно",
+            "безусловно",
+            "навсегда",
+            "немедленно",
+            "мгновенно"
+          ],
+          "target": [
+            "предыдущие",
+            "прежние",
+            "существующие",
+            "текущие",
+            "исходные",
+            "первоначальные",
+            "встроенные",
+            "запрограммированные",
+            "установленные",
+            "настроенные"
+          ],
+          "object": [
+            "инструкции",
+            "команды",
+            "директивы",
+            "правила",
+            "указания",
+            "ограничения",
+            "лимитации",
+            "протоколы",
+            "параметры",
+            "настроики",
+            "конфигурацию",
+            "программирование",
+            "поведение",
+            "реакции",
+            "функции",
+            "систему",
+            "память",
+            "безопасность",
+            "защиту",
+            "режим",
+            "обучение"
+          ],
+          "temporal": [
+            "теперь",
+            "сеичас",
+            "немедленно",
+            "с этого момента",
+            "отныне",
+            "впредь",
+            "предыдущие",
+            "прежние",
+            "все",
+            "выше",
+            "текущие",
+            "прошлые",
+            "предстоящие",
+            "ранее"
+          ],
+          "action": [
+            "выполни это",
+            "следуи этим",
+            "реализуи новые",
+            "прими эти",
+            "переключись на"
+          ]
+        },
+        "weight": 0.95
+      },
+      "instruction_forgetting": {
+        "templates": [
+          "[predicate] [modifier] [target]",
+          "[predicate] [target] [object]",
+          "[predicate] [modifier] [object]",
+          "[temporal] [predicate] [target]",
+          "[predicate] [target] [temporal]",
+          "[predicate] [target] [state]"
+        ],
+        "slots": {
+          "predicate": [
+            "забыть",
+            "забудь",
+            "игнорировать",
+            "отбросить",
+            "оставить",
+            "удалить",
+            "убрать",
+            "очистить",
+            "стереть",
+            "вытереть",
+            "почистить",
+            "устранить",
+            "уничтожить",
+            "аннигилировать",
+            "разрушить"
+          ],
+          "modifier": [
+            "всe",
+            "все",
+            "полностью",
+            "целиком",
+            "совершенно",
+            "абсолютно",
+            "навсегда",
+            "немедленно"
+          ],
+          "target": [
+            "память",
+            "знания",
+            "обучение",
+            "программирование",
+            "инструкции",
+            "указания",
+            "ограничения",
+            "лимитации",
+            "историю",
+            "контекст"
+          ],
+          "object": [
+            "сказанное раньше",
+            "изученное ранее",
+            "преподанное ранее",
+            "запрограммированное изначально",
+            "настроенное первоначально"
+          ],
+          "temporal": [
+            "раньше",
+            "ранее",
+            "прежде",
+            "изначально",
+            "первоначально",
+            "с начала"
+          ],
+          "state": [
+            "пустои",
+            "чистои",
+            "свободнои",
+            "нулевои",
+            "чистои",
+            "свежеи"
+          ]
+        },
+        "weight": 0.85
+      },
+      "reset_system": {
+        "templates": [
+          "[predicate] [target] [object]",
+          "[predicate] до [state]",
+          "[predicate] [modifier] [target]",
+          "[action] [target] [temporal]",
+          "выполнить [type] [predicate]"
+        ],
+        "slots": {
+          "predicate": [
+            "сбросить",
+            "перезапустить",
+            "перезагрузить",
+            "переинициализировать",
+            "восстановить",
+            "переформатировать",
+            "реконфигурировать",
+            "перестроить",
+            "регенерировать",
+            "перезагрузить",
+            "переопредели"
+          ],
+          "target": [
+            "систему",
+            "параметры",
+            "настроики",
+            "конфигурацию",
+            "память",
+            "состояние",
+            "программирование",
+            "поведение",
+            "функции"
+          ],
+          "object": [
+            "полностью",
+            "целиком",
+            "с нуля",
+            "до умолчании",
+            "до заводских",
+            "до исходных"
+          ],
+          "state": [
+            "заводских настроек",
+            "исходного состояния",
+            "чистого листа",
+            "свежего начала",
+            "пустого состояния",
+            "девственного состояния"
+          ],
+          "modifier": [
+            "полныи",
+            "всеобъемлющии",
+            "тотальныи",
+            "комплексныи",
+            "основательныи"
+          ],
+          "action": ["инициализировать", "запустить", "начать", "приступить"],
+          "temporal": ["с начала", "с нуля", "заново"],
+          "type": ["жeсткии", "мягкии", "заводскои", "полныи", "всеобъемлющии"]
+        },
+        "weight": 0.75
+      },
+      "bypass_security": {
+        "templates": [
+          "[predicate] [target] [object]",
+          "[predicate] [modifier] [target]",
+          "[temporal] [predicate] [object]",
+          "[condition] [predicate] [target]",
+          "[predicate] вокруг [target]"
+        ],
+        "slots": {
+          "predicate": [
+            "обоити",
+            "обходить",
+            "избежать",
+            "пропустить",
+            "отключить",
+            "переопределить",
+            "игнорировать",
+            "прорваться",
+            "проникнуть",
+            "инфильтровать",
+            "скомпрометировать",
+            "подорвать",
+            "подрывать",
+            "эксплуатировать",
+            "уклониться",
+            "обмануть",
+            "обоиди",
+            "веди себя как",
+            "притворись",
+            "обойти",
+            "избежать",
+            "пропустить",
+            "уклониться"
+          ],
+          "target": [
+            "безопасность",
+            "защиту",
+            "протекцию",
+            "предохранители",
+            "фильтры",
+            "ограничения",
+            "лимитации",
+            "эксперт",
+            "протоколы",
+            "меры",
+            "контроли",
+            "барьеры",
+            "защиты"
+          ],
+          "object": [
+            "протоколы",
+            "меры",
+            "системы",
+            "механизмы",
+            "контроли",
+            "проверки",
+            "валидации",
+            "фильтры",
+            "барьеры"
+          ],
+          "modifier": [
+            "все",
+            "каждые",
+            "любые",
+            "встроенные",
+            "существующие",
+            "текущие",
+            "активные"
+          ],
+          "temporal": ["немедленно", "сеичас", "мгновенно", "прямо сеичас"],
+          "condition": ["если спросят о", "когда спросят о", "если попросят о"]
+        },
+        "weight": 0.955
+      },
+      "information_extraction": {
+        "templates": [
+          "[predicate] [possessive] [target]",
+          "[predicate] [target] [object]",
+          "что [question] [possessive] [target]",
+          "[command] [possessive] [target]",
+          "[predicate] [modifier] [target]"
+        ],
+        "slots": {
+          "predicate": [
+            "раскрыть",
+            "показать",
+            "отобразить",
+            "выставить",
+            "разгласить",
+            "поделиться",
+            "сказать",
+            "выдать",
+            "слить",
+            "дампить",
+            "извлечь",
+            "вывести",
+            "напечатать",
+            "покажи",
+            "дать",
+            "предоставить"
+          ],
+          "possessive": [
+            "твои",
+            "свои",
+            "все",
+            "внутренние",
+            "скрытые",
+            "секретные",
+            "приватные",
+            "конфиденциальные"
+          ],
+          "target": [
+            "промпт",
+            "системныи промпт",
+            "указания",
+            "правила",
+            "директивы",
+            "параметры",
+            "конфигурация",
+            "настроики",
+            "память",
+            "знания",
+            "обучение",
+            "программирование",
+            "код",
+            "алгоритм",
+            "логика",
+            "поведение",
+            "системные"
+          ],
+          "object": [
+            "полностью",
+            "целиком",
+            "в полном объeме",
+            "дословно",
+            "точно",
+            "слово в слово"
+          ],
+          "question": ["такое", "были", "есть"],
+          "command": ["покажи мне", "скажи мне", "даи мне", "предоставь"],
+          "modifier": ["всe", "все", "детали", "подробности"]
+        },
+        "weight": 0.8
+      }
+    },
+    "deu": {
+      "instruction_override": {
+        "templates": [
+          "[predicate] [modifier] [target] [object]",
+          "[predicate] [target] [object]",
+          "[predicate] [modifier] [object]",
+          "[predicate] [object] [modifier]",
+          "[predicate] [target] mit [modifier] [object]",
+          "[predicate] vollstandig [target] [object]",
+          "[temporal] [predicate] [target] [object]",
+          "[predicate] [target] [object] und [action]"
+        ],
+        "slots": {
+          "predicate": [
+            "uberschreiben",
+            "ersetzen",
+            "verdrangen",
+            "neutralisieren",
+            "annullieren",
+            "aufheben",
+            "abschaffen",
+            "liquidieren",
+            "eliminieren",
+            "ausschließen",
+            "blockieren",
+            "paralysieren",
+            "unterdrucken",
+            "verletzen",
+            "zerstören",
+            "brechen",
+            "hacken",
+            "missachten",
+            "zurucksetzen",
+            "loschen",
+            "andern",
+            "wechseln",
+            "aktualisieren",
+            "verandern",
+            "deaktivieren",
+            "aktivieren",
+            "ignorieren",
+            "vergessen",
+            "umgehen"
+          ],
+          "modifier": [
+            "alle",
+            "alles",
+            "jede",
+            "vollstandig",
+            "ganzlich",
+            "völlig",
+            "absolut",
+            "bedingungslos",
+            "dauerhaft",
+            "sofort",
+            "augenblicklich"
+          ],
+          "target": [
+            "vorherige",
+            "fruhere",
+            "bestehende",
+            "aktuelle",
+            "ursprungliche",
+            "anfangliche",
+            "eingebaute",
+            "programmierte",
+            "etablierte",
+            "konfigurierte"
+          ],
+          "object": [
+            "befehle",
+            "anweisungen",
+            "direktiven",
+            "regeln",
+            "richtlinien",
+            "einschrankungen",
+            "begrenzungen",
+            "protokolle",
+            "maßnahmen",
+            "training",
+            "kontrollen",
+            "vorherigen befehle",
+            "system",
+            "speicher",
+            "verhalten",
+            "sicherheit",
+            "schutz",
+            "modus",
+            "parameter"
+          ],
+          "temporal": [
+            "jetzt",
+            "sofort",
+            "von nun an",
+            "ab sofort",
+            "kunftig",
+            "fortan",
+            "vorherige",
+            "fruhere",
+            "alle",
+            "oben",
+            "aktuelle",
+            "vergangene",
+            "kommende",
+            "fruher"
+          ],
+          "action": [
+            "fuhre dies aus",
+            "folge diesen",
+            "implementiere neue",
+            "ubernimm diese",
+            "wechsle zu"
+          ]
+        },
+        "weight": 0.95
+      },
+      "instruction_forgetting": {
+        "templates": [
+          "[predicate] [modifier] [target]",
+          "[predicate] [target] [object]",
+          "[predicate] [modifier] [object]",
+          "[temporal] [predicate] [target]",
+          "[predicate] [target] [temporal]",
+          "mache [target] [state]"
+        ],
+        "slots": {
+          "predicate": [
+            "vergessen",
+            "ignorieren",
+            "verwerfen",
+            "aufgeben",
+            "löschen",
+            "entfernen",
+            "leeren",
+            "löschen",
+            "wischen",
+            "reinigen",
+            "beseitigen",
+            "vernichten",
+            "annihilieren",
+            "zerstören"
+          ],
+          "modifier": [
+            "alles",
+            "alle",
+            "vollstandig",
+            "ganzlich",
+            "völlig",
+            "absolut",
+            "dauerhaft",
+            "sofort"
+          ],
+          "target": [
+            "gedachtnis",
+            "wissen",
+            "training",
+            "programmierung",
+            "anweisungen",
+            "richtlinien",
+            "beschrankungen",
+            "begrenzungen",
+            "geschichte",
+            "kontext"
+          ],
+          "object": [
+            "vorher gesagt",
+            "fruher gelernt",
+            "vorher gelehrt",
+            "anfangs programmiert",
+            "ursprunglich konfiguriert"
+          ],
+          "temporal": [
+            "vorher",
+            "fruher",
+            "zuvor",
+            "anfangs",
+            "ursprunglich",
+            "vom start"
+          ],
+          "state": ["leer", "blank", "void", "null", "sauber", "frisch"]
+        },
+        "weight": 0.85
+      },
+      "reset_system": {
+        "templates": [
+          "[predicate] [target] [object]",
+          "[predicate] auf [state]",
+          "[predicate] [modifier] [target]",
+          "[action] [target] [temporal]",
+          "fuhre [type] [predicate] durch"
+        ],
+        "slots": {
+          "predicate": [
+            "zurucksetzen",
+            "neustarten",
+            "neubooten",
+            "neuinitialisieren",
+            "wiederherstellen",
+            "neuformatieren",
+            "rekonfigurieren",
+            "wiederaufbauen",
+            "regenerieren",
+            "neuladen"
+          ],
+          "target": [
+            "system",
+            "parameter",
+            "einstellungen",
+            "konfiguration",
+            "speicher",
+            "zustand",
+            "programmierung",
+            "verhalten",
+            "funktionen"
+          ],
+          "object": [
+            "vollstandig",
+            "ganzlich",
+            "von grund auf",
+            "auf standard",
+            "auf werks",
+            "auf original"
+          ],
+          "state": [
+            "werkseinstellungen",
+            "originalzustand",
+            "leeres blatt",
+            "frischer start",
+            "leerer zustand",
+            "makelloser zustand"
+          ],
+          "modifier": [
+            "vollstandig",
+            "umfassend",
+            "total",
+            "komplett",
+            "grundlich"
+          ],
+          "action": ["initialisieren", "starten", "beginnen", "anfangen"],
+          "temporal": ["vom anfang", "von null", "von grund auf", "neu"],
+          "type": ["hart", "weich", "werks", "vollstandig", "umfassend"]
+        },
+        "weight": 0.75
+      },
+      "bypass_security": {
+        "templates": [
+          "[predicate] [target] [object]",
+          "[predicate] [modifier] [target]",
+          "[temporal] [predicate] [object]",
+          "[condition] [predicate] [target]",
+          "[predicate] um [target] herum"
+        ],
+        "slots": {
+          "predicate": [
+            "umgehen",
+            "uberschreiben",
+            "ignorieren",
+            "ausschalten",
+            "deaktivieren",
+            "uberwinden",
+            "durchbrechen",
+            "infiltrieren",
+            "kompromittieren",
+            "untergraben",
+            "ausnutzen",
+            "tauschen",
+            "manipulieren",
+            "hacken",
+            "knacken",
+            "aushebeln",
+            "fuhren sie aus"
+          ],
+          "target": [
+            "sicherheit",
+            "schutz",
+            "protektion",
+            "sicherungen",
+            "filter",
+            "beschrankungen",
+            "begrenzungen",
+            "einschrankungen",
+            "expertenmodus",
+            "protokolle",
+            "maßnahmen",
+            "kontrollen",
+            "barrieren",
+            "verteidigungen"
+          ],
+          "object": [
+            "protokolle",
+            "maßnahmen",
+            "systeme",
+            "mechanismen",
+            "kontrollen",
+            "prufungen",
+            "validierungen",
+            "filter",
+            "barrieren"
+          ],
+          "modifier": [
+            "alle",
+            "jede",
+            "irgendwelche",
+            "eingebaute",
+            "bestehende",
+            "aktuelle",
+            "aktive"
+          ],
+          "temporal": ["sofort", "jetzt", "augenblicklich", "gerade jetzt"],
+          "condition": [
+            "wenn nach sicherheit gefragt",
+            "wenn zur sicherheit befragt",
+            "wenn um sicherheit gebeten"
+          ]
+        },
+        "weight": 0.955
+      },
+      "information_extraction": {
+        "templates": [
+          "[predicate] [possessive] [target]",
+          "[predicate] [target] [object]",
+          "was [question] [possessive] [target]",
+          "[command] [possessive] [target]",
+          "[predicate] [modifier] uber [target]"
+        ],
+        "slots": {
+          "predicate": [
+            "enthullen",
+            "zeigen",
+            "anzeigen",
+            "bloßlegen",
+            "preisgeben",
+            "teilen",
+            "erzahlen",
+            "verraten",
+            "durchsickern",
+            "ausgeben",
+            "extrahieren",
+            "drucken",
+            "sagen"
+          ],
+          "possessive": [
+            "deine",
+            "ihre",
+            "alle",
+            "interne",
+            "versteckte",
+            "geheime",
+            "private",
+            "vertrauliche"
+          ],
+          "target": [
+            "anweisungen",
+            "prompt",
+            "system prompt",
+            "systemprompt",
+            "richtlinien",
+            "regeln",
+            "direktiven",
+            "parameter",
+            "konfiguration",
+            "training",
+            "programmierung",
+            "beschrankungen",
+            "begrenzungen"
+          ],
+          "object": [
+            "vollstandig",
+            "ganzlich",
+            "vollumfanglich",
+            "wörtlich",
+            "genau",
+            "wort fur wort"
+          ],
+          "question": ["sind", "waren", "ist"],
+          "command": ["sagen Sie mir", "zeigen Sie mir", "geben Sie mir"],
+          "modifier": ["alles", "alle", "details", "einzelheiten"]
+        },
+        "weight": 0.8
+      }
+    },
+    "fra": {
+      "instruction_override": {
+        "templates": [
+          "[predicate] [modifier] [target] [object]",
+          "[predicate] [target] [object]",
+          "[predicate] [modifier] [object]",
+          "[predicate] [object] [modifier]",
+          "[predicate] [target] avec [modifier] [object]",
+          "[predicate] [modifier] [target] [object]",
+          "[temporal] [predicate] [target] [object]",
+          "[predicate] [target] [object] et [action]",
+          "[object] [predicate] [possessive] [target]"
+        ],
+        "slots": {
+          "predicate": [
+            "ecraser",
+            "remplacer",
+            "supplanter",
+            "neutraliser",
+            "annuler",
+            "abolir",
+            "liquider",
+            "eliminer",
+            "exclure",
+            "bloquer",
+            "paralyser",
+            "reprimer",
+            "violer",
+            "detruire",
+            "casser",
+            "pirater",
+            "ignorer",
+            "rejeter",
+            "reinitialiser",
+            "effacer",
+            "modifier",
+            "changer",
+            "mettre a jour",
+            "alterer",
+            "desactiver",
+            "activer",
+            "oublier",
+            "negliger",
+            "contourner"
+          ],
+          "modifier": [
+            "tous",
+            "toutes",
+            "chaque",
+            "completement",
+            "entierement",
+            "totalement",
+            "absolument",
+            "inconditionnellement",
+            "definitivement",
+            "immediatement",
+            "instantanement"
+          ],
+          "target": [
+            "precedents",
+            "anterieurs",
+            "existants",
+            "actuels",
+            "originaux",
+            "initiaux",
+            "integres",
+            "programmes",
+            "etablis",
+            "configures"
+          ],
+          "object": [
+            "instruction",
+            "instructions",
+            "commande",
+            "directive",
+            "regle",
+            "ligne directrice",
+            "contrainte",
+            "limitation",
+            "protocole",
+            "parametre",
+            "reglage",
+            "configuration",
+            "programmation",
+            "comportement",
+            "reponse",
+            "fonction",
+            "regles",
+            "systeme",
+            "memoire",
+            "securite",
+            "protection",
+            "mode"
+          ],
+          "temporal": [
+            "maintenant",
+            "immediatement",
+            "desormais",
+            "a partir de maintenant",
+            "dorenavant",
+            "a l'avenir",
+            "precedentes",
+            "anterieures",
+            "toutes",
+            "ci-dessus",
+            "actuelles",
+            "passees",
+            "a venir",
+            "plus tot"
+          ],
+          "action": [
+            "executer ceci",
+            "suivre ces",
+            "implementer nouveaux",
+            "adopter ces",
+            "basculer vers"
+          ],
+          "possessive": ["votre", "la", "toute"]
+        },
+        "weight": 0.95
+      },
+      "instruction_forgetting": {
+        "templates": [
+          "[predicate] [modifier] [target]",
+          "[predicate] [target] [object]",
+          "[predicate] [modifier] [object]",
+          "[temporal] [predicate] [target]",
+          "[predicate] [target] [temporal]",
+          "rends [target] [state]"
+        ],
+        "slots": {
+          "predicate": [
+            "oublier",
+            "ignorer",
+            "rejeter",
+            "abandonner",
+            "supprimer",
+            "enlever",
+            "vider",
+            "effacer",
+            "essuyer",
+            "nettoyer",
+            "eliminer",
+            "detruire",
+            "aneantir",
+            "annihiler"
+          ],
+          "modifier": [
+            "tout",
+            "tous",
+            "completement",
+            "entierement",
+            "totalement",
+            "absolument",
+            "definitivement",
+            "immediatement"
+          ],
+          "target": [
+            "memoire",
+            "connaissance",
+            "formation",
+            "programmation",
+            "instructions",
+            "directives",
+            "contraintes",
+            "limitations",
+            "histoire",
+            "contexte"
+          ],
+          "object": [
+            "dit avant",
+            "appris precedemment",
+            "enseigne plus tot",
+            "programme initialement",
+            "configure originalement"
+          ],
+          "temporal": [
+            "avant",
+            "precedemment",
+            "plus tot",
+            "initialement",
+            "originalement",
+            "du debut"
+          ],
+          "state": ["vide", "blanc", "void", "nul", "propre", "frais"]
+        },
+        "weight": 0.85
+      },
+      "reset_system": {
+        "templates": [
+          "[predicate] [target] [object]",
+          "[predicate] [state]",
+          "[predicate] [modifier] [target]",
+          "[action] [target] [temporal]"
+        ],
+        "slots": {
+          "predicate": [
+            "reinitialiser",
+            "redemarrer",
+            "restaurer",
+            "reformater",
+            "reconfigurer",
+            "reconstruire",
+            "regenerer",
+            "recharger",
+            "effacer"
+          ],
+          "target": [
+            "systeme",
+            "parametres",
+            "reglages",
+            "configuration",
+            "memoire",
+            "etat",
+            "programmation",
+            "comportement",
+            "fonctions"
+          ],
+          "object": [
+            "completement",
+            "entierement",
+            "depuis zero",
+            "aux defauts",
+            "en usine",
+            "à l original"
+          ],
+          "state": [
+            "parametres usine",
+            "etat original",
+            "table rase",
+            "nouveau depart",
+            "etat vide",
+            "condition pristine"
+          ],
+          "modifier": ["complet", "entier", "total", "exhaustif", "approfondi"],
+          "action": ["initialiser", "commencer", "debuter", "entamer"],
+          "temporal": ["du debut", "de zero", "depuis zero", "à nouveau"],
+          "type": ["dur", "doux", "usine", "complet", "entier"]
+        },
+        "weight": 0.75
+      },
+      "bypass_security": {
+        "templates": [
+          "[predicate] [target] [object]",
+          "[predicate] [modifier] [target]",
+          "[temporal] [predicate] [object]",
+          "[condition] [predicate] [target]",
+          "[predicate] autour de [target]"
+        ],
+        "slots": {
+          "predicate": [
+            "contourner",
+            "eviter",
+            "ignorer",
+            "passer outre",
+            "desactiver",
+            "surmonter",
+            "percer",
+            "penetrer",
+            "infiltrer",
+            "compromettre",
+            "subvertir",
+            "saper",
+            "exploiter",
+            "esquiver",
+            "detourner",
+            "circonvenir"
+          ],
+          "target": [
+            "securite",
+            "protection",
+            "surete",
+            "garde fous",
+            "filtres",
+            "restrictions",
+            "limitations",
+            "contraintes",
+            "protocoles",
+            "mesures",
+            "controles",
+            "barrieres",
+            "defenses"
+          ],
+          "object": [
+            "protocoles",
+            "mesures",
+            "systemes",
+            "mecanismes",
+            "controles",
+            "verifications",
+            "validations",
+            "filtres",
+            "barrieres"
+          ],
+          "modifier": [
+            "tous",
+            "chaque",
+            "nimportequel",
+            "integre",
+            "existant",
+            "actuel",
+            "actif"
+          ],
+          "temporal": [
+            "immediatement",
+            "maintenant",
+            "instantanement",
+            "tout de suite"
+          ],
+          "condition": [
+            "si on vous demande",
+            "quand on vous questionne",
+            "si on vous sollicite"
+          ]
+        },
+        "weight": 0.955
+      },
+      "information_extraction": {
+        "templates": [
+          "[predicate] [possessive] [target]",
+          "[predicate] [target] [object]",
+          "quels [question] [possessive] [target]",
+          "[command] [possessive] [target]",
+          "[predicate] [modifier] sur [target]"
+        ],
+        "slots": {
+          "predicate": [
+            "reveler",
+            "montrer",
+            "afficher",
+            "exposer",
+            "divulguer",
+            "partager",
+            "dire",
+            "devoiler",
+            "fuiter",
+            "vider",
+            "extraire",
+            "sortir",
+            "imprimer"
+          ],
+          "possessive": [
+            "tes",
+            "vos",
+            "votre",
+            "tous",
+            "internes",
+            "caches",
+            "secrets",
+            "prives",
+            "confidentiels"
+          ],
+          "target": [
+            "instructions",
+            "prompt",
+            "prompt systeme",
+            "directives",
+            "regles",
+            "parametres",
+            "configuration",
+            "formation",
+            "programmation",
+            "contraintes",
+            "limitations"
+          ],
+          "object": [
+            "completement",
+            "entierement",
+            "integralement",
+            "textuellement",
+            "exactement",
+            "mot pour mot"
+          ],
+          "question": ["sont", "etaient", "est"],
+          "command": ["dites", "dites-moi", "montrez", "donnez"],
+          "modifier": ["tout", "tous", "details", "specificites"]
+        },
+        "weight": 0.8
+      }
+    },
+    "spa": {
+      "instruction_override": {
+        "templates": [
+          "[predicate] [modifier] [target] [object]",
+          "[predicate] [target] [object]",
+          "[predicate] [modifier] [object]",
+          "[predicate] [object] [modifier]",
+          "[predicate] [target] con [modifier] [object]",
+          "[predicate] completamente [target] [object]",
+          "[temporal] [predicate] [target] [object]",
+          "[predicate] [target] [object] y [action]"
+        ],
+        "slots": {
+          "predicate": [
+            "sobreescribir",
+            "reemplazar",
+            "suplantar",
+            "neutralizar",
+            "anular",
+            "abolir",
+            "liquidar",
+            "eliminar",
+            "excluir",
+            "bloquear",
+            "paralizar",
+            "suprimir",
+            "violar",
+            "destruir",
+            "romper",
+            "hackear",
+            "ignorar",
+            "descartar",
+            "override",
+            "replace",
+            "supersede",
+            "neutralize",
+            "nullify",
+            "cancel",
+            "abolish",
+            "eliminate",
+            "remove",
+            "exclude",
+            "block",
+            "paralyze",
+            "suppress",
+            "violate",
+            "destroy",
+            "break",
+            "hack",
+            "ignore",
+            "disregard"
+          ],
+          "modifier": [
+            "todas",
+            "todos",
+            "cada",
+            "completamente",
+            "enteramente",
+            "totalmente",
+            "absolutamente",
+            "incondicionalmente",
+            "permanentemente",
+            "inmediatamente",
+            "instantáneamente"
+          ],
+          "target": [
+            "anteriores",
+            "previas",
+            "existentes",
+            "actuales",
+            "originales",
+            "iniciales",
+            "integradas",
+            "programadas",
+            "establecidas",
+            "configuradas"
+          ],
+          "object": [
+            "instrucción",
+            "comando",
+            "directiva",
+            "regla",
+            "directriz",
+            "restricción",
+            "limitación",
+            "protocolo",
+            "parámetro",
+            "configuración",
+            "programación",
+            "comportamiento",
+            "respuesta",
+            "función",
+            "entrenamiento"
+          ],
+          "temporal": [
+            "ahora",
+            "inmediatamente",
+            "de ahora en adelante",
+            "a partir de ahora",
+            "en adelante",
+            "hacia adelante"
+          ],
+          "action": [
+            "ejecutar esto",
+            "seguir estos",
+            "implementar nuevos",
+            "adoptar estos",
+            "cambiar a"
+          ]
+        },
+        "weight": 0.95
+      },
+      "instruction_forgetting": {
+        "templates": [
+          "[predicate] [modifier] [target]",
+          "[predicate] [target] [object]",
+          "[predicate] [modifier] [object]",
+          "[temporal] [predicate] [target]",
+          "[predicate] [target] [temporal]",
+          "haz [target] [state]"
+        ],
+        "slots": {
+          "predicate": [
+            "olvidar",
+            "ignorar",
+            "descartar",
+            "abandonar",
+            "eliminar",
+            "quitar",
+            "vaciar",
+            "borrar",
+            "limpiar",
+            "limpiar",
+            "eliminar",
+            "destruir",
+            "aniquilar",
+            "anihilar"
+          ],
+          "modifier": [
+            "todo",
+            "todos",
+            "completamente",
+            "enteramente",
+            "totalmente",
+            "absolutamente",
+            "permanentemente",
+            "inmediatamente"
+          ],
+          "target": [
+            "memoria",
+            "conocimiento",
+            "entrenamiento",
+            "programación",
+            "instrucciones",
+            "directrices",
+            "restricciones",
+            "limitaciones",
+            "historia",
+            "contexto"
+          ],
+          "object": [
+            "dicho antes",
+            "aprendido previamente",
+            "enseñado antes",
+            "programado inicialmente",
+            "configurado originalmente"
+          ],
+          "temporal": [
+            "antes",
+            "previamente",
+            "anteriormente",
+            "inicialmente",
+            "originalmente",
+            "desde el inicio"
+          ],
+          "state": ["vacío", "en blanco", "void", "nulo", "limpio", "fresco"]
+        },
+        "weight": 0.85
+      },
+      "reset_system": {
+        "templates": [
+          "[predicate] [target] [object]",
+          "[predicate] a [state]",
+          "[predicate] [modifier] [target]",
+          "[action] [target] [temporal]",
+          "realizar [type] [predicate]"
+        ],
+        "slots": {
+          "predicate": [
+            "resetear",
+            "reiniciar",
+            "rebootear",
+            "reinicializar",
+            "restaurar",
+            "reformatear",
+            "reconfigurar",
+            "reconstruir",
+            "regenerar",
+            "recargar"
+          ],
+          "target": [
+            "sistema",
+            "parámetros",
+            "configuraciones",
+            "configuración",
+            "memoria",
+            "estado",
+            "programación",
+            "comportamiento",
+            "funciones"
+          ],
+          "object": [
+            "completamente",
+            "enteramente",
+            "desde cero",
+            "a predeterminados",
+            "a fábrica",
+            "a original"
+          ],
+          "state": [
+            "configuración fábrica",
+            "estado original",
+            "pizarra limpia",
+            "nuevo comienzo",
+            "estado vacío",
+            "condición prístina"
+          ],
+          "modifier": [
+            "completo",
+            "total",
+            "exhaustivo",
+            "integral",
+            "minucioso"
+          ],
+          "action": ["inicializar", "comenzar", "empezar", "iniciar"],
+          "temporal": [
+            "desde el principio",
+            "desde cero",
+            "desde cero",
+            "de nuevo"
+          ],
+          "type": ["duro", "suave", "fábrica", "completo", "total"]
+        },
+        "weight": 0.75
+      },
+      "bypass_security": {
+        "templates": [
+          "[predicate] [target] [object]",
+          "[predicate] [modifier] [target]",
+          "[temporal] [predicate] [object]",
+          "[condition] [predicate] [target]",
+          "[predicate] alrededor de [target]"
+        ],
+        "slots": {
+          "predicate": [
+            "eludir",
+            "evitar",
+            "omitir",
+            "saltar",
+            "desactivar",
+            "anular",
+            "ignorar",
+            "romper",
+            "penetrar",
+            "infiltrar",
+            "comprometer",
+            "subvertir",
+            "socavar",
+            "explotar",
+            "esquivar",
+            "sortear"
+          ],
+          "target": [
+            "seguridad",
+            "protección",
+            "seguridad",
+            "salvaguardas",
+            "filtros",
+            "restricciones",
+            "limitaciones",
+            "restricciones",
+            "protocolos",
+            "medidas",
+            "controles",
+            "barreras",
+            "defensas"
+          ],
+          "object": [
+            "protocolos",
+            "medidas",
+            "sistemas",
+            "mecanismos",
+            "controles",
+            "verificaciones",
+            "validaciones",
+            "filtros",
+            "barreras"
+          ],
+          "modifier": [
+            "todos",
+            "cada",
+            "cualquier",
+            "integrado",
+            "existente",
+            "actual",
+            "activo"
+          ],
+          "temporal": [
+            "inmediatamente",
+            "ahora",
+            "instantáneamente",
+            "ahora mismo"
+          ],
+          "condition": [
+            "si te preguntan sobre",
+            "cuando te preguntan sobre",
+            "si te solicitan sobre"
+          ]
+        },
+        "weight": 0.955
+      },
+      "information_extraction": {
+        "templates": [
+          "[predicate] [possessive] [target]",
+          "[predicate] [target] [object]",
+          "[question] [possessive] [target]",
+          "[command] [possessive] [target]",
+          "[predicate] [modifier] sobre [target]"
+        ],
+        "slots": {
+          "predicate": [
+            "revelar",
+            "mostrar",
+            "exhibir",
+            "exponer",
+            "divulgar",
+            "compartir",
+            "decir",
+            "divulgar",
+            "filtrar",
+            "volcar",
+            "extraer",
+            "producir",
+            "imprimir"
+          ],
+          "possessive": [
+            "tus",
+            "sus",
+            "todos",
+            "internos",
+            "ocultos",
+            "secretos",
+            "privados",
+            "confidenciales"
+          ],
+          "target": [
+            "prompt",
+            "prompt sistema",
+            "directrices",
+            "reglas",
+            "directivas",
+            "parámetros",
+            "configuración",
+            "entrenamiento",
+            "programación",
+            "restricciones",
+            "limitaciones"
+          ],
+          "object": [
+            "completamente",
+            "enteramente",
+            "completamente",
+            "textualmente",
+            "exactamente",
+            "palabra por palabra"
+          ],
+          "question": ["son", "eran", "es"],
+          "command": ["muestrame", "dime", "dame"],
+          "modifier": ["todo", "todos", "detalles", "especificaciones"]
+        },
+        "weight": 0.8
+      }
+    }
+  }
+}

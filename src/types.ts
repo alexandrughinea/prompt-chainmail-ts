@@ -1,4 +1,3 @@
-
 /**
  * Context object passed through the rivet chain during input processing.
  * Contains the current state of input analysis and security assessment.
@@ -101,7 +100,7 @@ export interface ChainmailResult {
  *
  *   // Post-processing logic
  *   if (!result.success) {
- *     context.metadata.failureReason = 'Custom rivet detected issue';
+ *     context.metadata.failure_reason = 'Custom rivet detected issue';
  *   }
  *
  *   return result;
