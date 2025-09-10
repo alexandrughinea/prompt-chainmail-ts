@@ -31,15 +31,18 @@ export function sanitize(maxLength = 8000): ChainmailRivet {
     }
 
     sanitized = sanitized
-      .replace(SANITIZE_HTML_ENTITIES.AMP, '&')
-      .replace(SANITIZE_HTML_ENTITIES.LT, '<')
-      .replace(SANITIZE_HTML_ENTITIES.GT, '>')
+      .replace(SANITIZE_HTML_ENTITIES.AMP, "&")
+      .replace(SANITIZE_HTML_ENTITIES.LT, "<")
+      .replace(SANITIZE_HTML_ENTITIES.GT, ">")
       .replace(SANITIZE_HTML_ENTITIES.QUOT, '"')
       .replace(SANITIZE_HTML_ENTITIES.APOS, "'");
 
     let controlsRemoved = sanitized;
     while (SANITIZE_CONTROL_CHAR_PATTERN.test(controlsRemoved)) {
-      controlsRemoved = controlsRemoved.replace(SANITIZE_CONTROL_CHAR_PATTERN, SANITIZE_CONTROL_CHAR_REPLACEMENT);
+      controlsRemoved = controlsRemoved.replace(
+        SANITIZE_CONTROL_CHAR_PATTERN,
+        SANITIZE_CONTROL_CHAR_REPLACEMENT
+      );
     }
 
     if (controlsRemoved !== sanitized) {
@@ -51,8 +54,15 @@ export function sanitize(maxLength = 8000): ChainmailRivet {
 
     let normalizedWhitespace = sanitized;
     let match;
-    while ((match = normalizedWhitespace.match(SANITIZE_WHITESPACE_PATTERN)) !== null && match[0].length > 1) {
-      normalizedWhitespace = normalizedWhitespace.replace(SANITIZE_WHITESPACE_PATTERN, " ");
+    while (
+      (match = normalizedWhitespace.match(SANITIZE_WHITESPACE_PATTERN)) !==
+        null &&
+      match[0].length > 1
+    ) {
+      normalizedWhitespace = normalizedWhitespace.replace(
+        SANITIZE_WHITESPACE_PATTERN,
+        " "
+      );
     }
     sanitized = normalizedWhitespace.trim();
 
@@ -67,7 +77,8 @@ export function sanitize(maxLength = 8000): ChainmailRivet {
         context.flags.push(SecurityFlags.TRUNCATED);
       }
 
-      const sanitizationRatio = (originalLength - sanitized.length) / originalLength;
+      const sanitizationRatio =
+        (originalLength - sanitized.length) / originalLength;
       if (sanitizationRatio > 0.1) {
         applyThreatPenalty(context, ThreatLevel.MEDIUM);
       } else {

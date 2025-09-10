@@ -4,7 +4,7 @@ type TelemetryLogLevel = "debug" | "info" | "warn" | "error" | "silent";
 
 export enum TelemetryEventType {
   PROCESSING_ERROR = "processing_error",
-  
+
   THREAT_DETECTED = "threat_detected",
   THREAT_BLOCKED = "threat_blocked",
   SECURITY_SCAN = "security_scan",
@@ -21,7 +21,11 @@ export type TelemetryData = {
 };
 
 export type TelemetryOptions = {
-  logFn?: (level: TelemetryLogLevel, message: string, data: TelemetryData) => void;
+  logFn?: (
+    level: TelemetryLogLevel,
+    message: string,
+    data: TelemetryData
+  ) => void;
   track_metrics?: boolean;
   logErrors?: boolean;
   provider?: "console" | "sentry" | "datadog" | "newrelic" | TelemetryProvider;

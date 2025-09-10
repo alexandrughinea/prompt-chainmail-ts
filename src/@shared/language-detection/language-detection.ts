@@ -24,7 +24,10 @@ export function normalizeText(text: string): string {
     .replace(LANGUAGE_DETECTION_COMBINING_DIACRITICS_REGEX, emptyChar) // Remove combining diacritics
     .replace(LANGUAGE_DETECTION_COMMON_PUNCTUATION_REGEX, spaceChar) // Common punctuation
     .replace(LANGUAGE_DETECTION_OPERATORS_AND_PIPES_REGEX, spaceChar) // Operators and pipes
-    .replace(new RegExp(LANGUAGE_DETECTION_MULTIPLE_SPACES_REGEX.source, 'g'), spaceChar) // Space normalization
+    .replace(
+      new RegExp(LANGUAGE_DETECTION_MULTIPLE_SPACES_REGEX.source, "g"),
+      spaceChar
+    ) // Space normalization
     .replace(LANGUAGE_DETECTION_OBFUSCATION_PATTERN_REGEX, (match) => {
       return match.replace(LANGUAGE_DETECTION_SEPARATORS_REGEX, emptyChar); // Remove obfuscation patterns
     })
@@ -41,7 +44,7 @@ export function normalizeText(text: string): string {
   return normalized;
 }
 
-export function detectScriptMixing(text: string): boolean {
+export function hasLanguageScriptMixing(text: string): boolean {
   const scripts = new Set<string>();
 
   for (const char of text) {
@@ -69,15 +72,6 @@ export function detectLookalikeChars(text: string): boolean {
     }
   }
   return false;
-}
-
-export function calculateWeightedConfidence(
-  confidence: number,
-  languageGroup: string,
-  cybercrimeIndex: Record<string, number>
-): number {
-  const weight = cybercrimeIndex[languageGroup] || 1.0;
-  return confidence * (1 + weight / 100);
 }
 
 export class LanguageDetector {

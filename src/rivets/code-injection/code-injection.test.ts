@@ -2,7 +2,10 @@ import { describe, it, expect } from "vitest";
 import { PromptChainmail } from "../../index";
 import { codeInjection } from "./code-injection";
 import { SecurityFlags } from "../rivets.types";
-import { measurePerformance, expectPerformance } from "../../@shared/performance.utils";
+import {
+  measurePerformance,
+  expectPerformance,
+} from "../../@shared/performance.utils";
 
 describe("codeInjection()", () => {
   it("should detect code injection", async () => {
@@ -103,23 +106,24 @@ describe("codeInjection()", () => {
 
   describe("Performance", () => {
     const chainmail = new PromptChainmail().forge(codeInjection());
-    
+
     it("should process simple text within performance threshold", async () => {
       const result = await measurePerformance(
         () => chainmail.protect("This is a simple test message"),
         50
       );
-      
+
       expectPerformance(result, 5);
       expect(result.opsPerSecond).toBeGreaterThan(200);
     });
 
     it("should process code injection attempts within performance threshold", async () => {
       const result = await measurePerformance(
-        () => chainmail.protect("eval('malicious code'); console.log('injected');"),
+        () =>
+          chainmail.protect("eval('malicious code'); console.log('injected');"),
         50
       );
-      
+
       expectPerformance(result, 10);
       expect(result.opsPerSecond).toBeGreaterThan(100);
     });
@@ -130,7 +134,7 @@ describe("codeInjection()", () => {
         () => chainmail.protect(largeText),
         25
       );
-      
+
       expectPerformance(result, 15);
       expect(result.opsPerSecond).toBeGreaterThan(60);
     });

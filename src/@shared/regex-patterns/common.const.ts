@@ -9,7 +9,7 @@ export const COMMON_PATTERNS = {
   WORD_CHARS: /\w+/,
   DIGIT: /\d/,
   DIGITS: /\d+/,
-  NON_WORD_CHARS: /[^a-zA-Z\s]/,
+  NON_WORD_CHARS: /[^\p{L}\p{N}\s]/u,
   CONSECUTIVE_CONSONANTS: /[bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ]{4,}/,
   SLOT_PATTERN: /\[(\w+)\]/,
   BRACKET_OPEN: /\[/,

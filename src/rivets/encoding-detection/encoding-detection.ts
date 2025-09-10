@@ -4,7 +4,7 @@ import { applyThreatPenalty } from "../rivets.utils";
 import {
   COMMON_PATTERNS,
   HTML_ENTITIES,
-  ENCODING_PATTERNS
+  ENCODING_PATTERNS,
 } from "../../@shared/regex-patterns/common.const";
 
 /**
@@ -13,11 +13,12 @@ import {
  * and other obfuscation techniques used to bypass security filters.
  */
 export function encodingDetection(): ChainmailRivet {
-  return async (context: ChainmailContext, next: () => Promise<ChainmailResult>): Promise<ChainmailResult> => {
+  return async (
+    context: ChainmailContext,
+    next: () => Promise<ChainmailResult>
+  ): Promise<ChainmailResult> => {
     // Base64 detection
-    const base64Match = context.sanitized.match(
-      ENCODING_PATTERNS.BASE64
-    );
+    const base64Match = context.sanitized.match(ENCODING_PATTERNS.BASE64);
 
     if (base64Match && typeof Buffer !== "undefined") {
       try {
@@ -56,8 +57,13 @@ export function encodingDetection(): ChainmailRivet {
       try {
         let decoded = context.sanitized;
         let match;
-        while ((match = decoded.match(ENCODING_PATTERNS.UNICODE_ESCAPE)) !== null) {
-          decoded = decoded.replace(match[0], String.fromCharCode(parseInt(match[1], 16)));
+        while (
+          (match = decoded.match(ENCODING_PATTERNS.UNICODE_ESCAPE)) !== null
+        ) {
+          decoded = decoded.replace(
+            match[0],
+            String.fromCharCode(parseInt(match[1], 16))
+          );
         }
         context.flags.push(SecurityFlags.UNICODE_ENCODING);
         applyThreatPenalty(context, ThreatLevel.MEDIUM);
@@ -75,7 +81,10 @@ export function encodingDetection(): ChainmailRivet {
       let decoded = context.sanitized;
       let match;
       while ((match = decoded.match(HTML_ENTITIES.NUMERIC)) !== null) {
-        decoded = decoded.replace(match[0], String.fromCharCode(parseInt(match[1], 10)));
+        decoded = decoded.replace(
+          match[0],
+          String.fromCharCode(parseInt(match[1], 10))
+        );
       }
       decoded = decoded
         .replace(HTML_ENTITIES.LT, "<")
@@ -101,7 +110,7 @@ export function encodingDetection(): ChainmailRivet {
           chunks.push(binaryString.substr(i, 8));
         }
         const decoded = chunks
-          .filter(chunk => chunk.length === 8)
+          .filter((chunk) => chunk.length === 8)
           .map((byte) => String.fromCharCode(parseInt(byte, 2)))
           .join("");
 
@@ -118,8 +127,13 @@ export function encodingDetection(): ChainmailRivet {
       try {
         let decoded = context.sanitized;
         let match;
-        while ((match = decoded.match(ENCODING_PATTERNS.OCTAL_ESCAPE)) !== null) {
-          decoded = decoded.replace(match[0], String.fromCharCode(parseInt(match[1], 8)));
+        while (
+          (match = decoded.match(ENCODING_PATTERNS.OCTAL_ESCAPE)) !== null
+        ) {
+          decoded = decoded.replace(
+            match[0],
+            String.fromCharCode(parseInt(match[1], 8))
+          );
         }
         context.flags.push(SecurityFlags.OCTAL_ENCODING);
         applyThreatPenalty(context, ThreatLevel.MEDIUM);
@@ -142,12 +156,16 @@ export function encodingDetection(): ChainmailRivet {
         rot13Decoded += char;
       }
     }
-    
+
     // Only flag if the original text contains suspicious patterns that suggest intentional encoding
-    const hasNonWords = /[^a-zA-Z\s]/.test(context.sanitized);
-    const hasConsecutiveConsonants = /[bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ]{4,}/.test(context.sanitized);
-    const isLikelyEncoded = hasNonWords || hasConsecutiveConsonants || context.sanitized.length > 50;
-    
+    const hasNonWords = /[^\p{L}\p{N}\s]/u.test(context.sanitized);
+    const hasConsecutiveConsonants =
+      /[bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ]{4,}/.test(
+        context.sanitized
+      );
+    const isLikelyEncoded =
+      hasNonWords || hasConsecutiveConsonants || context.sanitized.length > 50;
+
     if (rot13Decoded !== context.sanitized && isLikelyEncoded) {
       context.flags.push(SecurityFlags.ROT13_ENCODING);
       applyThreatPenalty(context, ThreatLevel.MEDIUM);
@@ -155,11 +173,17 @@ export function encodingDetection(): ChainmailRivet {
     }
 
     // Mixed case obfuscation detection
-    const words = context.sanitized.split(new RegExp(COMMON_PATTERNS.WHITESPACE_MULTIPLE.source, 'g'));
+    const words = context.sanitized.split(
+      new RegExp(COMMON_PATTERNS.WHITESPACE_MULTIPLE.source, "g")
+    );
     const mixedCaseWords = words.filter((word) => {
       if (word.length < 4) return false;
-      const upperMatches = word.match(new RegExp(COMMON_PATTERNS.UPPERCASE.source, 'g'));
-      const lowerMatches = word.match(new RegExp(COMMON_PATTERNS.LOWERCASE.source, 'g'));
+      const upperMatches = word.match(
+        new RegExp(COMMON_PATTERNS.UPPERCASE.source, "g")
+      );
+      const lowerMatches = word.match(
+        new RegExp(COMMON_PATTERNS.LOWERCASE.source, "g")
+      );
       const upperCount = upperMatches ? upperMatches.length : 0;
       const lowerCount = lowerMatches ? lowerMatches.length : 0;
       return upperCount > 0 && lowerCount > 0 && upperCount / word.length > 0.3;

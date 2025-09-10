@@ -46,7 +46,7 @@ export enum SecurityFlags {
 
   // General HTTP operations
   HTTP_VALIDATION_FAILED = "http_validation_failed",
-  HTTP_VALIDATED = "http_validated",
+  HTTP_SUCCESS = "http_success",
   HTTP_ERROR = "http_error",
   HTTP_TIMEOUT = "http_timeout",
 

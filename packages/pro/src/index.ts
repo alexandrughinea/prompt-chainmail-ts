@@ -4,10 +4,10 @@
  */
 
 // Re-export everything from core with license validation
-export * from '../../../src/index.js';
-export * from '../../../src/rivets.js';
+export * from "../../../src/index.js";
+export * from "../../../src/rivets.js";
 
-import { validateProLicense } from './license.js';
+import { validateProLicense } from "./license.js";
 
 // Validate license on module load
 validateProLicense();

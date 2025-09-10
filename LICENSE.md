@@ -3,25 +3,25 @@ Business Source License 1.1
 License text copyright (c) 2017 MariaDB Corporation Ab, All Rights Reserved.
 "Business Source License" is a trademark of MariaDB Corporation Ab.
 
------------------------------------------------------------------------------
+---
 
 Parameters
 
-Licensor:             alexandrughinea
-Licensed Work:        Prompt Chainmail
-                      The Licensed Work is (c) 2025 alexandrughinea
+Licensor: alexandrughinea
+Licensed Work: Prompt Chainmail
+The Licensed Work is (c) 2025 alexandrughinea
 Additional Use Grant: You may make production use of the Licensed Work,
-                      provided such use does not include offering the
-                      Licensed Work to third parties on a hosted or
-                      embedded basis which is competitive with products
-                      or services provided by Licensor.
-Change Date:          January 1, 2029
-Change License:       Apache License, Version 2.0
+provided such use does not include offering the
+Licensed Work to third parties on a hosted or
+embedded basis which is competitive with products
+or services provided by Licensor.
+Change Date: January 1, 2029
+Change License: Apache License, Version 2.0
 
 For information about alternative licensing arrangements for the Licensed Work,
 please visit: https://github.com/alexandrughinea/prompt-chainmail
 
------------------------------------------------------------------------------
+---
 
 Business Source License 1.1
 

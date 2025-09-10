@@ -1,6 +1,10 @@
 import { ChainmailRivet } from "../../index";
 import { SecurityFlags } from "../rivets.types";
 
+/**
+ * @description
+ * Wraps untrusted content with a specified tag for additional security handling and optionally preserves the original content.
+ */
 export function untrustedWrapper(
   tagName = "UNTRUSTED_CONTENT",
   preserveOriginal = false

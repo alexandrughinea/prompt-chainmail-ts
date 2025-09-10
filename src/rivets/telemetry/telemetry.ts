@@ -4,38 +4,18 @@ import {
   TelemetryData,
   TelemetryEventType,
   TelemetryOptions,
-  TelemetryProvider,
 } from "./telemetry.types";
 import { SecurityFlags, ThreatLevel } from "../rivets.types";
+import {
+  getLogLevelFromConfidence,
+  getThreatLevelFromConfidenceScore,
+  validateProvider,
+} from "./telemetry.utils";
 
-const getThreatLevelFromConfidenceScore = (confidence?: number): ThreatLevel => {
-  if (!confidence) return ThreatLevel.LOW;
-  if (confidence > 0.8) return ThreatLevel.CRITICAL;
-  if (confidence > 0.6) return ThreatLevel.HIGH;
-  if (confidence > 0.3) return ThreatLevel.MEDIUM;
-  return ThreatLevel.LOW;
-};
-
-const getLogLevelFromConfidence = (confidence: number): LogLevel => {
-  if (confidence < 0.5) return "error";
-  if (confidence < 0.7) return "warn";
-  return "info";
-};
-
-
-const validateProvider = (provider: unknown): provider is TelemetryProvider => {
-  return (
-    !!provider &&
-    typeof provider === "object" &&
-    typeof (provider as Record<string, unknown>).logSecurityEvent ===
-      "function" &&
-    typeof (provider as Record<string, unknown>).trackMetric === "function" &&
-    typeof (provider as Record<string, unknown>).captureError === "function" &&
-    typeof (provider as Record<string, unknown>).addBreadcrumb === "function"
-  );
-};
-
-
+/**
+ * @description
+ * Implements a telemetry system for monitoring and logging operational metrics, errors, and security events within a processing pipeline.
+ */
 export function telemetry(options: TelemetryOptions = {}): ChainmailRivet {
   const {
     logFn = (level, message, data) => {
@@ -80,13 +60,15 @@ export function telemetry(options: TelemetryOptions = {}): ChainmailRivet {
         });
 
         if (!result.success || context.flags.length > 0) {
-          const threatLevel = getThreatLevelFromConfidenceScore(context.confidence);
-          const eventType = context.blocked 
-            ? TelemetryEventType.THREAT_BLOCKED 
-            : context.flags.length > 0 
-              ? TelemetryEventType.THREAT_DETECTED 
+          const threatLevel = getThreatLevelFromConfidenceScore(
+            context.confidence
+          );
+          const eventType = context.blocked
+            ? TelemetryEventType.THREAT_BLOCKED
+            : context.flags.length > 0
+              ? TelemetryEventType.THREAT_DETECTED
               : TelemetryEventType.SECURITY_SCAN;
-          
+
           telemetryProvider.logSecurityEvent({
             type: eventType,
             threat_level: threatLevel,
@@ -94,7 +76,8 @@ export function telemetry(options: TelemetryOptions = {}): ChainmailRivet {
             context: telemetryData,
             flags: context.flags as SecurityFlags[],
             risk_score: (context.metadata?.risk_score ?? undefined) as number,
-            attack_types: (context.metadata?.attack_types ?? undefined) as string[],
+            attack_types: (context.metadata?.attack_types ??
+              undefined) as string[],
           });
         }
       }
@@ -132,7 +115,10 @@ export function telemetry(options: TelemetryOptions = {}): ChainmailRivet {
       };
 
       if (telemetryProvider) {
-        telemetryProvider.captureError(error as Error, telemetryData as Record<string, unknown>);
+        telemetryProvider.captureError(
+          error as Error,
+          telemetryData as Record<string, unknown>
+        );
         telemetryProvider.logSecurityEvent({
           type: TelemetryEventType.PROCESSING_ERROR,
           threat_level: ThreatLevel.LOW,

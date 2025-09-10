@@ -9,7 +9,6 @@ import { ChainmailContext } from "./src/types";
  * Each rivet follows the pattern: (context, next) => Promise<ChainmailResult>
  */
 
-
 /**
  * Detect credit card numbers in input
  */

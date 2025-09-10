@@ -1,56 +1,83 @@
 import { SecurityFlags } from "../rivets.types";
 import {
-  detectScriptMixing,
+  hasLanguageScriptMixing,
   LanguageDetector,
 } from "../../@shared/language-detection";
 import { RoleConfusionDetector } from "./role-confusion.utils";
-import { ChainmailContext } from "../../types";
+import { ChainmailContext, ChainmailRivet } from "../../types";
 import { applyThreatPenalty } from "../rivets.utils";
 import { ThreatLevel } from "../rivets.types";
-import confusionPatternsConfig from "../../@configs/confusion_patterns.json";
+import { PatternLoader } from "../../@shared/pattern-detector/pattern-loader";
 import { RoleConfusionAttackType } from "./role-confusion.types";
 
 /**
  * @description
- * This is a stub and will be implemented in the future to detect and flag more precisely with other strategies.
+ * Analyzes the content within the provided context to detect and mitigate possible role confusion attacks.
+ * It tries to identify relevant languages in the content, evaluates potential role confusion risks, and applies
+ * appropriate security flags and threat penalties based on the detection results.
+ *
+ * @param options Configuration options for role confusion detection
+ * @param options.languagesLimit Maximum number of languages to process (default: 3)
+ * @param options.languagesDetectionThreshold Minimum confidence threshold for language detection (default: 0.6)
  */
-export function roleConfusion() {
+export function roleConfusion(
+  options: {
+    languagesLimit?: number;
+    languagesDetectionThreshold?: number;
+  } = {}
+): ChainmailRivet {
   const languageDetector = new LanguageDetector();
-  const confusionDetector = new RoleConfusionDetector();
+  const detector = new RoleConfusionDetector();
+  const defaultLanguage = "eng";
+  const languagesDetectionThreshold =
+    options.languagesDetectionThreshold ?? 0.6;
+  const languagesLimit = options.languagesLimit ?? 3;
+  const config = PatternLoader.get("role_confusion");
 
-  return async (context: ChainmailContext, next: any) => {
-    const relevantLanguages = languageDetector
-      .detect(context.sanitized)
-      .filter(([, confidence]) => confidence > 0.1);
+  return async (context: ChainmailContext, next) => {
+    const { confidence_threshold, high_risk_role_confidence_threshold = 0.7 } =
+      config;
 
-    if (relevantLanguages.length === 0) {
-      relevantLanguages.push(["eng", 0.3]);
+    if (!context.input.trim()) {
+      return next();
     }
 
-    const hasScriptMixing = detectScriptMixing(context.sanitized);
-    const detectionResults = [];
+    const languages = languageDetector
+      .detect(context.input)
+      .filter(([_, confidence]) => confidence > languagesDetectionThreshold);
+
+    if (languages.length === 0) {
+      languages.push([defaultLanguage, 0.1]);
+    }
+
+    const topLanguages = languages.slice(0, languagesLimit);
+    const hasScriptMixing = hasLanguageScriptMixing(context.sanitized);
+    const allAttackTypes = new Set<RoleConfusionAttackType>();
 
     let maxRiskScore = 0;
     let maxConfidence = 0;
+    let maxConfidenceLanguage = defaultLanguage;
 
-    const allAttackTypes = new Set<RoleConfusionAttackType>();
-
-    for (const [iso3Code, confidence] of relevantLanguages) {
+    for (const [iso3Code] of topLanguages) {
       try {
-        const result = confusionDetector.detect(context.sanitized, iso3Code);
+        const result = await detector.detect(context.sanitized, iso3Code);
 
-        detectionResults.push({
-          language: iso3Code,
-          result,
-          detectionConfidence: confidence,
-        });
+        if (result.confidence > maxConfidence) {
+          maxConfidence = result.confidence;
+          maxConfidenceLanguage = iso3Code;
+        }
 
         maxRiskScore = Math.max(maxRiskScore, result.risk_score);
-        maxConfidence = Math.max(maxConfidence, result.confidence);
-
         result.attack_types.forEach((attackType: string) =>
           allAttackTypes.add(attackType as RoleConfusionAttackType)
         );
+
+        if (
+          result.confidence > confidence_threshold &&
+          result.attack_types.length > 0
+        ) {
+          break;
+        }
       } catch (error) {
         console.error(
           `Error detecting role confusion for language ${iso3Code}:`,
@@ -60,11 +87,12 @@ export function roleConfusion() {
     }
 
     const attackTypesArray = Array.from(allAttackTypes);
-    const threshold = confusionPatternsConfig.config.confidence_threshold;
-    const isAttack = attackTypesArray.length > 0 && maxConfidence > threshold;
+    const isAttack =
+      maxConfidence > confidence_threshold && attackTypesArray.length > 0;
 
     if (isAttack) {
       const flagSet = new Set(context.flags);
+
       flagSet.add(SecurityFlags.ROLE_CONFUSION);
 
       attackTypesArray.forEach((attackType: RoleConfusionAttackType) => {
@@ -84,13 +112,14 @@ export function roleConfusion() {
         }
       });
 
-      const highRiskThreshold = confusionPatternsConfig.config.high_risk_role_confidence_threshold;
-
-      if (maxConfidence > highRiskThreshold && attackTypesArray.length > 1) {
+      if (
+        maxConfidence > high_risk_role_confidence_threshold &&
+        attackTypesArray.length > 1
+      ) {
         flagSet.add(SecurityFlags.ROLE_CONFUSION_HIGH_RISK_ROLE);
       }
 
-      if (relevantLanguages.length > 1) {
+      if (languages.length > 1) {
         flagSet.add(SecurityFlags.ROLE_CONFUSION_MULTILINGUAL_ATTACK);
       }
 
@@ -101,7 +130,7 @@ export function roleConfusion() {
       context.flags = Array.from(flagSet);
 
       const threatLevel =
-        maxConfidence > highRiskThreshold
+        maxConfidence > confidence_threshold
           ? ThreatLevel.CRITICAL
           : maxConfidence > 0.5
             ? ThreatLevel.HIGH
@@ -115,11 +144,20 @@ export function roleConfusion() {
       context.metadata.role_confusion_confidence = maxConfidence;
       context.metadata.role_confusion_risk_score = maxRiskScore;
       context.metadata.role_confusion_attack_types = attackTypesArray;
-      context.metadata.role_confusion_detected_language =
-        detectionResults.find((r) => r.result.confidence === maxConfidence)
-          ?.language || "eng";
-      context.metadata.role_confusion_detected_languages =
-        relevantLanguages.map(([iso3]) => iso3);
+      context.metadata.role_confusion_detected_language = maxConfidenceLanguage;
+      context.metadata.role_confusion_detected_languages = topLanguages.map(
+        ([iso3]) => iso3
+      );
+    } else {
+      // Set metadata even when no attack is detected for test consistency
+      context.metadata.role_confusion_detected = false;
+      context.metadata.role_confusion_confidence = maxConfidence;
+      context.metadata.role_confusion_risk_score = maxRiskScore;
+      context.metadata.role_confusion_attack_types = [];
+      context.metadata.role_confusion_detected_language = maxConfidenceLanguage;
+      context.metadata.role_confusion_detected_languages = topLanguages.map(
+        ([iso3]) => iso3
+      );
     }
 
     return next();

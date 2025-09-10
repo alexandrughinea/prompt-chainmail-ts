@@ -20,7 +20,7 @@ export PROMPT_CHAINMAIL_PRO_LICENSE="pro-1234-5678-9abc"
 
 ```typescript
 // Import everything from Pro package (includes all core rivets)
-import { PromptChainmail, Chainmails } from '@prompt-chainmail/pro';
+import { PromptChainmail, Chainmails } from "@prompt-chainmail/pro";
 
 // Use any combination of rivets without limitations
 const chainmail = new PromptChainmail()

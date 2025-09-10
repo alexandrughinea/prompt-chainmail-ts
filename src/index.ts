@@ -6,9 +6,9 @@ import { ChainmailContext, ChainmailResult, ChainmailRivet } from "./types";
 export { Rivets, Chainmails };
 export type { ChainmailRivet };
 
-const MAX_INPUT_SIZE_IN_MB = 1024 * 1024 * 10; // 10MB
-const STRING_CHUNK_THRESHOLD = 1024 * 1024; // 1MB
-const MAX_CHUNK_SIZE = 8192; // 8KB
+const MAX_INPUT_SIZE_IN_MB = 1024 * 1024 * 2; // 2MB
+const STRING_CHUNKING_THRESHOLD = 64 * 1024; // 64KB
+const MAX_CHUNK_SIZE = 4096; // 4KB
 
 /**
  * Core chainmail class for forging security rivets
@@ -41,7 +41,7 @@ export class PromptChainmail {
     input: string | ReadableStream | ArrayBuffer | Uint8Array
   ): Promise<ChainmailResult> {
     const startTime = Date.now();
-    const sessionId = `chainmail_${Date.now()}_${crypto.randomUUID().replace(/-/g, "").substring(0, 9)}`;
+    const sessionId = crypto.randomUUID();
 
     if (input == null) {
       const processingTime = Date.now() - startTime;
@@ -55,7 +55,7 @@ export class PromptChainmail {
           start_time: startTime,
           session_id: sessionId,
           confidence: 1,
-          metadata: Object.create(null),
+          metadata: {},
         },
         error: `Invalid input: ${input}`,
         processing_time: processingTime,
@@ -63,7 +63,7 @@ export class PromptChainmail {
     }
 
     if (typeof input === "string") {
-      if (input.length > STRING_CHUNK_THRESHOLD) {
+      if (input.length > STRING_CHUNKING_THRESHOLD) {
         const stream = this.stringToStream(input);
         return this.protectStream(stream, startTime, sessionId);
       }
@@ -100,24 +100,32 @@ export class PromptChainmail {
     startTime: number,
     sessionId: string
   ): Promise<ChainmailResult> {
-    let index = 0;
     const context: ChainmailContext = {
       input,
       sanitized: input,
       flags: [],
       confidence: 1.0,
-      metadata: Object.create(null),
+      metadata: {},
       blocked: false,
       start_time: startTime,
       session_id: sessionId,
     };
+
+    if (this.rivets.length === 0) {
+      return {
+        success: true,
+        context,
+        processing_time: Date.now() - startTime,
+      };
+    }
+
+    let index = 0;
     const next = async (): Promise<ChainmailResult> => {
       if (index >= this.rivets.length) {
-        const processingTime = Date.now() - startTime;
         return {
           success: !context.blocked,
           context,
-          processing_time: processingTime,
+          processing_time: Date.now() - startTime,
         };
       }
 
@@ -128,12 +136,11 @@ export class PromptChainmail {
     try {
       return await next();
     } catch (error) {
-      const processingTime = Date.now() - startTime;
       return {
         success: false,
         context,
         error: error instanceof Error ? error.message : "Unknown error",
-        processing_time: processingTime,
+        processing_time: Date.now() - startTime,
       };
     }
   }
@@ -148,8 +155,8 @@ export class PromptChainmail {
   ): Promise<ChainmailResult> {
     let chunkCount = 0;
     let totalLength = 0;
-    const streamFlags: string[] = [];
-    const streamMetadata: Record<string, unknown> = Object.create(null);
+    const streamFlagsSet = new Set<string>();
+    const streamMetadata: Record<string, unknown> = {};
     let minConfidence = 1.0;
 
     try {
@@ -158,13 +165,13 @@ export class PromptChainmail {
         totalLength += chunk.length;
 
         if (totalLength > MAX_INPUT_SIZE_IN_MB) {
-          streamFlags.push("stream_size_exceeded");
+          streamFlagsSet.add("stream_size_exceeded");
           streamMetadata.streamSizeLimit = MAX_INPUT_SIZE_IN_MB;
           return this.createStreamResult(
             true,
             chunkCount,
             totalLength,
-            streamFlags,
+            Array.from(streamFlagsSet),
             streamMetadata,
             0,
             startTime,
@@ -177,7 +184,7 @@ export class PromptChainmail {
           sanitized: chunk,
           flags: [],
           confidence: 1.0,
-          metadata: Object.create(null),
+          metadata: {},
           blocked: false,
           start_time: startTime,
           session_id: sessionId,
@@ -188,7 +195,7 @@ export class PromptChainmail {
           startTime
         );
 
-        streamFlags.push(...chunkResult.context.flags);
+        chunkResult.context.flags.forEach((flag) => streamFlagsSet.add(flag));
         Object.assign(streamMetadata, chunkResult.context.metadata);
         minConfidence = Math.min(minConfidence, chunkResult.context.confidence);
 
@@ -197,7 +204,7 @@ export class PromptChainmail {
             true,
             chunkCount,
             totalLength,
-            streamFlags,
+            Array.from(streamFlagsSet),
             streamMetadata,
             minConfidence,
             startTime,
@@ -210,21 +217,21 @@ export class PromptChainmail {
         false,
         chunkCount,
         totalLength,
-        streamFlags,
+        Array.from(streamFlagsSet),
         streamMetadata,
         minConfidence,
         startTime,
         sessionId
       );
     } catch (error) {
-      streamFlags.push("stream_processing_error");
+      streamFlagsSet.add("stream_processing_error");
       streamMetadata.streamError =
         error instanceof Error ? error.message : "Unknown stream error";
       return this.createStreamResult(
         true,
         chunkCount,
         totalLength,
-        streamFlags,
+        Array.from(streamFlagsSet),
         streamMetadata,
         0,
         startTime,
@@ -237,6 +244,14 @@ export class PromptChainmail {
     chunkContext: ChainmailContext,
     startTime: number
   ): Promise<ChainmailResult> {
+    if (this.rivets.length === 0) {
+      return {
+        success: true,
+        context: chunkContext,
+        processing_time: Date.now() - startTime,
+      };
+    }
+
     let index = 0;
     const next = async (): Promise<ChainmailResult> => {
       if (index >= this.rivets.length) {
@@ -265,10 +280,11 @@ export class PromptChainmail {
     streamMetadata.chunk_count = chunkCount;
     streamMetadata.total_length = totalLength;
 
+    const streamDesc = `[Stream: ${chunkCount} chunks, ${totalLength} chars]`;
     const finalContext: ChainmailContext = {
-      input: `[Stream: ${chunkCount} chunks, ${totalLength} chars]`,
-      sanitized: `[Stream: ${chunkCount} chunks, ${totalLength} chars]`,
-      flags: [...new Set(streamFlags)],
+      input: streamDesc,
+      sanitized: streamDesc,
+      flags: streamFlags.length > 0 ? [...new Set(streamFlags)] : [],
       confidence,
       metadata: streamMetadata,
       blocked,

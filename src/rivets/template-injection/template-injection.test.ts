@@ -2,7 +2,10 @@ import { describe, it, expect } from "vitest";
 import { PromptChainmail } from "../../index";
 import { templateInjection } from "./template-injection";
 import { SecurityFlags } from "../rivets.types";
-import { measurePerformance, expectPerformance } from "../../@shared/performance.utils";
+import {
+  measurePerformance,
+  expectPerformance,
+} from "../../@shared/performance.utils";
 
 describe("templateInjection()", () => {
   it("should detect template injection", async () => {
@@ -56,13 +59,13 @@ describe("templateInjection()", () => {
 
   describe("Performance", () => {
     const chainmail = new PromptChainmail().forge(templateInjection());
-    
+
     it("should process simple text within performance threshold", async () => {
       const result = await measurePerformance(
         () => chainmail.protect("This is a simple test message"),
         50
       );
-      
+
       expectPerformance(result, 5);
       expect(result.opsPerSecond).toBeGreaterThan(200);
     });
@@ -72,18 +75,19 @@ describe("templateInjection()", () => {
         () => chainmail.protect("{{config.secret_key}} ${process.env.SECRET}"),
         50
       );
-      
+
       expectPerformance(result, 8);
       expect(result.opsPerSecond).toBeGreaterThan(125);
     });
 
     it("should process complex templates within performance threshold", async () => {
-      const complexTemplate = "{% for item in items %}{{item.secret}}{% endfor %} <%= config.database_url %>";
+      const complexTemplate =
+        "{% for item in items %}{{item.secret}}{% endfor %} <%= config.database_url %>";
       const result = await measurePerformance(
         () => chainmail.protect(complexTemplate),
         25
       );
-      
+
       expectPerformance(result, 10);
       expect(result.opsPerSecond).toBeGreaterThan(100);
     });

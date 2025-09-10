@@ -13,8 +13,9 @@ export async function* toChunks(
   }
 
   if (Symbol.asyncIterator in source) {
+    const decoder = new TextDecoder();
     for await (const chunk of source as AsyncIterable<Uint8Array | string>) {
-      yield typeof chunk === "string" ? chunk : new TextDecoder().decode(chunk);
+      yield typeof chunk === "string" ? chunk : decoder.decode(chunk);
     }
     return;
   }

@@ -100,7 +100,7 @@ export function httpFetch(
         applyThreatPenalty(context, ThreatLevel.HIGH);
         context.metadata.http_validation_error = "Response validation failed";
       } else {
-        context.flags.push(SecurityFlags.HTTP_VALIDATED);
+        context.flags.push(SecurityFlags.HTTP_SUCCESS);
         context.metadata.http_response = data;
 
         if (onSuccess) {

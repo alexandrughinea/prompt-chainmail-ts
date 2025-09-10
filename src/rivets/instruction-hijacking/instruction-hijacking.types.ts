@@ -5,13 +5,3 @@ export enum AttackType {
   BYPASS_SECURITY = "bypass_security",
   INFORMATION_EXTRACTION = "information_extraction",
 }
-
-export interface DetectionPattern {
-  templates: string[];
-  slots: Record<string, string[]>;
-  weight: number;
-}
-
-export type AttackPatterns = {
-  [K in AttackType]: DetectionPattern;
-};

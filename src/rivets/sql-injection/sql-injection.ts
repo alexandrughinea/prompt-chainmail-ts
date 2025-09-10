@@ -9,7 +9,6 @@ import { SQL_INJECTION_PATTERNS } from "./slq-injection.const";
  * union queries, and database manipulation commands.
  */
 export function sqlInjection(): ChainmailRivet {
-
   return async (context, next) => {
     for (const pattern of SQL_INJECTION_PATTERNS) {
       if (pattern.test(context.sanitized)) {

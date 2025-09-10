@@ -1,6 +1,6 @@
 import { TelemetryProvider } from "./telemetry.types";
 import { ThreatLevel } from "../rivets.types";
-
+import { LogLevel } from "vite";
 
 export const createConsoleProvider = (): TelemetryProvider => ({
   logSecurityEvent: (event) =>
@@ -25,7 +25,10 @@ export const createSentryProvider = (sentry: {
       level: event.threat_level,
       data: event.context,
     });
-    if (event.threat_level === ThreatLevel.HIGH || event.threat_level === ThreatLevel.CRITICAL) {
+    if (
+      event.threat_level === ThreatLevel.HIGH ||
+      event.threat_level === ThreatLevel.CRITICAL
+    ) {
       sentry.captureMessage(`Security Event: ${event.message}`, "error");
     }
   },
@@ -144,7 +147,10 @@ export const createNewRelicProvider = (newrelic: {
       flags: event.context.flags.join(","),
       session_id: event.context.session_id,
     });
-    if (event.threat_level === ThreatLevel.HIGH || event.threat_level === ThreatLevel.CRITICAL) {
+    if (
+      event.threat_level === ThreatLevel.HIGH ||
+      event.threat_level === ThreatLevel.CRITICAL
+    ) {
       newrelic.noticeError?.(new Error(event.message), {
         customAttributes: {
           eventType: event.type,
@@ -179,3 +185,33 @@ export const createNewRelicProvider = (newrelic: {
     }
   },
 });
+
+export function getThreatLevelFromConfidenceScore(
+  confidence?: number
+): ThreatLevel {
+  if (!confidence) return ThreatLevel.LOW;
+  if (confidence > 0.8) return ThreatLevel.CRITICAL;
+  if (confidence > 0.6) return ThreatLevel.HIGH;
+  if (confidence > 0.3) return ThreatLevel.MEDIUM;
+  return ThreatLevel.LOW;
+}
+
+export function getLogLevelFromConfidence(confidence: number): LogLevel {
+  if (confidence < 0.5) return "error";
+  if (confidence < 0.7) return "warn";
+  return "info";
+}
+
+export function validateProvider(
+  provider: unknown
+): provider is TelemetryProvider {
+  return (
+    !!provider &&
+    typeof provider === "object" &&
+    typeof (provider as Record<string, unknown>).logSecurityEvent ===
+      "function" &&
+    typeof (provider as Record<string, unknown>).trackMetric === "function" &&
+    typeof (provider as Record<string, unknown>).captureError === "function" &&
+    typeof (provider as Record<string, unknown>).addBreadcrumb === "function"
+  );
+}

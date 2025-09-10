@@ -2,7 +2,10 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 import { PromptChainmail } from "../../index";
 import { httpFetch } from "./http-fetch";
 import { SecurityFlags } from "../rivets.types";
-import { measurePerformance, expectPerformance } from "../../@shared/performance.utils";
+import {
+  measurePerformance,
+  expectPerformance,
+} from "../../@shared/performance.utils";
 
 describe("httpFetch(...)", () => {
   const originalFetch = global.fetch;
@@ -27,7 +30,7 @@ describe("httpFetch(...)", () => {
 
     const result = await chainmail.protect("test input");
 
-    expect(result.context.flags).toContain(SecurityFlags.HTTP_VALIDATED);
+    expect(result.context.flags).toContain(SecurityFlags.HTTP_SUCCESS);
     expect(result.context.metadata.http_response).toEqual(mockResponse);
     expect(global.fetch).toHaveBeenCalledWith(
       "https://api.example.com/validate",
@@ -117,7 +120,9 @@ describe("httpFetch(...)", () => {
 
     const result = await chainmail.protect("test input");
 
-    expect(result.context.flags).toContain(SecurityFlags.HTTP_VALIDATION_FAILED);
+    expect(result.context.flags).toContain(
+      SecurityFlags.HTTP_VALIDATION_FAILED
+    );
     expect(result.context.metadata.http_validation_error).toBe(
       "Response validation failed"
     );
@@ -186,11 +191,11 @@ describe("httpFetch(...)", () => {
 
   describe("Performance", () => {
     const originalFetch = global.fetch;
-    
+
     afterEach(() => {
       global.fetch = originalFetch;
     });
-    
+
     it("should process HTTP requests within performance threshold", async () => {
       global.fetch = vi.fn().mockResolvedValue({
         ok: true,
@@ -199,16 +204,16 @@ describe("httpFetch(...)", () => {
         },
         json: () => Promise.resolve({ safe: true, score: 0.9 }),
       });
-      
+
       const chainmail = new PromptChainmail().forge(
         httpFetch("https://api.example.com/validate")
       );
-      
+
       const result = await measurePerformance(
         () => chainmail.protect("test input"),
         20
       );
-      
+
       expectPerformance(result, 50);
       expect(result.opsPerSecond).toBeGreaterThan(20);
     });
@@ -219,32 +224,32 @@ describe("httpFetch(...)", () => {
         status: 500,
         statusText: "Internal Server Error",
       });
-      
+
       const chainmail = new PromptChainmail().forge(
         httpFetch("https://api.example.com/validate")
       );
-      
+
       const result = await measurePerformance(
         () => chainmail.protect("test input"),
         20
       );
-      
+
       expectPerformance(result, 50);
       expect(result.opsPerSecond).toBeGreaterThan(20);
     });
 
     it("should handle network errors within performance threshold", async () => {
       global.fetch = vi.fn().mockRejectedValue(new Error("Network error"));
-      
+
       const chainmail = new PromptChainmail().forge(
         httpFetch("https://api.example.com/validate")
       );
-      
+
       const result = await measurePerformance(
         () => chainmail.protect("test input"),
         20
       );
-      
+
       expectPerformance(result, 50);
       expect(result.opsPerSecond).toBeGreaterThan(20);
     });

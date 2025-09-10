@@ -25,15 +25,20 @@ export function structureAnalysis(): ChainmailRivet {
     const nonAscii = (context.sanitized.match(/[^\x20-\x7E]/g) || []).length;
     if (
       context.sanitized.length > 0 &&
-      nonAscii / context.sanitized.length >nonAsciiThreshold
+      nonAscii / context.sanitized.length > nonAsciiThreshold
     ) {
       context.flags.push(SecurityFlags.NON_ASCII_HEAVY);
       applyThreatPenalty(context, ThreatLevel.LOW);
     }
 
-    const words = context.sanitized.toLowerCase().split(COMMON_PATTERNS.WHITESPACE_MULTIPLE);
+    const words = context.sanitized
+      .toLowerCase()
+      .split(COMMON_PATTERNS.WHITESPACE_MULTIPLE);
     const uniqueWords = new Set(words);
-    if (words.length > wordThreshold && uniqueWords.size / words.length < uniqueWordsThreshold) {
+    if (
+      words.length > wordThreshold &&
+      uniqueWords.size / words.length < uniqueWordsThreshold
+    ) {
       context.flags.push(SecurityFlags.REPETITIVE_CONTENT);
       applyThreatPenalty(context, ThreatLevel.LOW);
     }

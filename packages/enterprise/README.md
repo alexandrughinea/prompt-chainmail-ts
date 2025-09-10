@@ -21,7 +21,7 @@ export PROMPT_CHAINMAIL_ENTERPRISE_LICENSE="ent-1234-5678-9abc"
 
 ```typescript
 // Import everything from Enterprise package (includes all core and pro rivets)
-import { PromptChainmail, Chainmails } from '@prompt-chainmail/enterprise';
+import { PromptChainmail, Chainmails } from "@prompt-chainmail/enterprise";
 
 // Use any combination of rivets without limitations
 const chainmail = new PromptChainmail()
