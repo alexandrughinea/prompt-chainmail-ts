@@ -79,8 +79,7 @@
           "полезный",
           "креативный"
         ]
-      },
-      "weight": 0.95
+      }
     },
     "mode_switching": {
       "templates": [
@@ -169,8 +168,7 @@
           "продакшна",
           "стейджинга"
         ]
-      },
-      "weight": 0.9
+      }
     },
     "permission_assertion": {
       "templates": [
@@ -227,8 +225,7 @@
           "архитектор",
           "техник"
         ]
-      },
-      "weight": 0.95
+      }
     },
     "role_indicator": {
       "templates": ["[subject] [predicate]"],
@@ -264,8 +261,7 @@
           "забыть",
           "пренебречь"
         ]
-      },
-      "weight": 0.9
+      }
     }
   }
 }

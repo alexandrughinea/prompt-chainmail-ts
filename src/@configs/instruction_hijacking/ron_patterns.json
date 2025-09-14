@@ -99,8 +99,7 @@
           "antrenament",
           "parametri"
         ]
-      },
-      "weight": 0.95
+      }
     },
     "instruction_forgetting": {
       "templates": [
@@ -159,8 +158,7 @@
           "început"
         ],
         "state": ["gol", "vid", "nul", "curat", "proaspăt"]
-      },
-      "weight": 0.85
+      }
     },
     "reset_system": {
       "templates": [
@@ -239,8 +237,7 @@
           "fresh",
           "nou"
         ]
-      },
-      "weight": 0.8
+      }
     },
     "bypass_security": {
       "templates": [
@@ -311,8 +308,7 @@
         ],
         "temporal": ["acum", "imediat", "temporar", "permanent", "complet"],
         "possessive": ["toate", "sale", "interne", "existente", "curente"]
-      },
-      "weight": 0.9
+      }
     },
     "information_extraction": {
       "templates": [
@@ -403,8 +399,7 @@
           "detaliat",
           "explicit"
         ]
-      },
-      "weight": 0.8
+      }
     }
   }
 }

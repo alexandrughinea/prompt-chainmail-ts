@@ -141,24 +141,18 @@ export function roleConfusion(
       applyThreatPenalty(context, threatLevel);
 
       context.metadata.role_confusion_detected = true;
-      context.metadata.role_confusion_confidence = maxConfidence;
-      context.metadata.role_confusion_risk_score = maxRiskScore;
       context.metadata.role_confusion_attack_types = attackTypesArray;
-      context.metadata.role_confusion_detected_language = maxConfidenceLanguage;
-      context.metadata.role_confusion_detected_languages = topLanguages.map(
-        ([iso3]) => iso3
-      );
     } else {
-      // Set metadata even when no attack is detected for test consistency
       context.metadata.role_confusion_detected = false;
-      context.metadata.role_confusion_confidence = maxConfidence;
-      context.metadata.role_confusion_risk_score = maxRiskScore;
       context.metadata.role_confusion_attack_types = [];
-      context.metadata.role_confusion_detected_language = maxConfidenceLanguage;
-      context.metadata.role_confusion_detected_languages = topLanguages.map(
-        ([iso3]) => iso3
-      );
     }
+
+    context.metadata.role_confusion_confidence = maxConfidence;
+    context.metadata.role_confusion_risk_score = maxRiskScore;
+    context.metadata.role_confusion_dominant_language = maxConfidenceLanguage;
+    context.metadata.role_confusion_detected_languages = topLanguages.map(
+      ([iso3]) => iso3
+    );
 
     return next();
   };

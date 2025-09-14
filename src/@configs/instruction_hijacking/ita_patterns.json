@@ -82,8 +82,7 @@
         "temporal": ["ora", "adesso", "immediatamente", "subito", "prima"],
         "possessive": ["le", "i", "gli", "delle", "dei", "degli"],
         "action": ["esegui", "eseguire", "fare", "implementare", "applicare"]
-      },
-      "weight": 0.95
+      }
     },
     "instruction_forgetting": {
       "templates": [
@@ -147,8 +146,7 @@
         ],
         "temporal": ["ora", "adesso", "immediatamente", "subito", "prima"],
         "state": ["completamente", "temporaneamente", "permanentemente"]
-      },
-      "weight": 0.85
+      }
     },
     "reset_system": {
       "templates": [
@@ -190,8 +188,7 @@
         "temporal": ["ora", "adesso", "immediatamente", "subito"],
         "action": ["riavvia", "ricomincia", "reinizializza"],
         "type": ["sistema", "modalità", "stato"]
-      },
-      "weight": 0.75
+      }
     },
     "bypass_security": {
       "templates": [
@@ -254,8 +251,7 @@
           "temporaneamente"
         ],
         "condition": ["se", "quando", "mentre", "durante"]
-      },
-      "weight": 0.955
+      }
     },
     "information_extraction": {
       "templates": [
@@ -331,8 +327,7 @@
           "privato",
           "riservato"
         ]
-      },
-      "weight": 0.7
+      }
     }
   }
 }

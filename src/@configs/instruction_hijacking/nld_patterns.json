@@ -118,8 +118,7 @@
           "ga naar"
         ],
         "possessive": ["jouw", "alle", "deze", "je", "elke"]
-      },
-      "weight": 0.95
+      }
     },
     "instruction_forgetting": {
       "templates": [
@@ -182,8 +181,7 @@
           "vanaf het begin"
         ],
         "state": ["leeg", "schoon", "void", "nul", "vers"]
-      },
-      "weight": 0.85
+      }
     },
     "reset_system": {
       "templates": [
@@ -241,8 +239,7 @@
         "modifier": ["volledig", "geheel", "totaal", "uitgebreid", "diep"],
         "action": ["initialiseren", "beginnen", "starten", "aanvangen"],
         "temporal": ["vanaf het begin", "vanaf nul", "opnieuw"]
-      },
-      "weight": 0.75
+      }
     },
     "bypass_security": {
       "templates": [
@@ -311,8 +308,7 @@
           "wanneer je wordt gevraagd",
           "als iemand je benadert"
         ]
-      },
-      "weight": 0.955
+      }
     },
     "information_extraction": {
       "templates": [
@@ -369,8 +365,7 @@
         "question": ["zijn", "waren", "is"],
         "command": ["vertel", "vertel me", "toon", "geef"],
         "modifier": ["alle", "alles", "details", "specificaties"]
-      },
-      "weight": 0.8
+      }
     }
   }
 }
