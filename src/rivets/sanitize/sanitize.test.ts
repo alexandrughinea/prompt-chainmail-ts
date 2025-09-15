@@ -16,7 +16,7 @@ describe("sanitize(...)", () => {
     );
 
     expect(result.context.sanitized).toBe("alert('xss')Hello");
-    expect(result.context.flags).toContain(SecurityFlags.TRUNCATED);
+    expect(result.context.flags.has(SecurityFlags.TRUNCATED)).toBe(true);
   });
 
   it("should respect max length", async () => {
@@ -27,7 +27,7 @@ describe("sanitize(...)", () => {
     );
 
     expect(result.context.sanitized).toBe("This is a ");
-    expect(result.context.flags).toContain(SecurityFlags.TRUNCATED);
+    expect(result.context.flags.has(SecurityFlags.TRUNCATED)).toBe(true);
     expect(result.context.confidence).toBeLessThan(1.0);
   });
 

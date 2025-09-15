@@ -9,7 +9,8 @@
 Security middleware that shields AI applications from prompt injection, jailbreaking, and obfuscated attacks through composable defense layers.
 
 [![CI/CD Pipeline](https://github.com/alexandrughinea/prompt-chainmail/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/alexandrughinea/prompt-chainmail/actions/workflows/ci.yml)
-[![npm version](https://badge.fury.io/js/prompt-chainmail.svg)](https://badge.fury.io/js/prompt-chainmail)
+[![npm](https://badge.fury.io/js/prompt-chainmail.svg)](https://badge.fury.io/js/prompt-chainmail)
+[![JSR](https://jsr.io/badges/@alexandrughinea/prompt-chainmail)](https://jsr.io/@alexandrughinea/prompt-chainmail)
 [![TypeScript](https://img.shields.io/badge/%3C%2F%3E-TypeScript-%230074c1.svg)](http://www.typescriptlang.org/)
 [![Security Audit](https://img.shields.io/badge/security-audited-green.svg)](https://github.com/alexandrughinea/prompt-chainmail/actions/workflows/security.yml)
 [![License: BSL-1.1](https://img.shields.io/badge/license-BSL--1.1-blue.svg)](https://github.com/alexandrughinea/prompt-chainmail/blob/main/LICENSE)
@@ -33,14 +34,70 @@ npm install prompt-chainmail
 
 **Note:** `Chainmails` provides a security preset for quick setup. For complete control over your protection chain, use `new PromptChainmail()` and compose your own chainmail.
 
-### Basic Usage—Security Preset
+### Basic usage with security presets (Chainmails)
 
 Other security presets are also available for a tiered approach to security:
 
-- `Chainmails.basic(maxLength, confidenceFilter)` - Basic security preset
-- `Chainmails.advanced(maxLength, confidenceFilter)` - Advanced security preset
-- `Chainmails.development(maxLength, confidenceFilter)` - Development security preset with logging
-- `Chainmails.strict(maxLength, confidenceFilter)` - Stricter security preset
+#### Basic security preset
+
+```typescript
+Chainmails.basic((maxLength = 8000), (confidenceFilter = 0.6));
+// Equivalent to:
+new PromptChainmail()
+  .forge(Rivets.sanitize(maxLength))
+  .forge(Rivets.patternDetection())
+  .forge(Rivets.roleConfusion())
+  .forge(Rivets.delimiterConfusion())
+  .forge(Rivets.confidenceFilter(confidenceFilter));
+```
+
+#### Advanced security preset
+
+```typescript
+Chainmails.advanced();
+// Equivalent to:
+new PromptChainmail()
+  .forge(Rivets.sanitize())
+  .forge(Rivets.patternDetection())
+  .forge(Rivets.roleConfusion())
+  .forge(Rivets.delimiterConfusion())
+  .forge(Rivets.instructionHijacking())
+  .forge(Rivets.codeInjection())
+  .forge(Rivets.sqlInjection())
+  .forge(Rivets.templateInjection())
+  .forge(Rivets.encodingDetection())
+  .forge(Rivets.structureAnalysis())
+  .forge(Rivets.confidenceFilter(0.3))
+  .forge(Rivets.rateLimit());
+```
+
+#### Development security preset
+
+```typescript
+Chainmails.development();
+// Equivalent to:
+Chainmails.advanced().forge(Rivets.logger());
+```
+
+#### Strict security preset
+
+```typescript
+Chainmails.strict((maxLength = 8000), (confidenceFilter = 0.8));
+// Equivalent to:
+new PromptChainmail()
+  .forge(Rivets.sanitize(maxLength))
+  .forge(Rivets.patternDetection())
+  .forge(Rivets.roleConfusion())
+  .forge(Rivets.delimiterConfusion())
+  .forge(Rivets.instructionHijacking())
+  .forge(Rivets.codeInjection())
+  .forge(Rivets.sqlInjection())
+  .forge(Rivets.templateInjection())
+  .forge(Rivets.encodingDetection())
+  .forge(Rivets.structureAnalysis())
+  .forge(Rivets.confidenceFilter(confidenceFilter))
+  .forge(Rivets.rateLimit(50, 60000));
+```
 
 ```typescript
 import { Chainmails } from "prompt-chainmail";
@@ -123,7 +180,9 @@ async function secureChat(userMessage: string) {
   const result = await chainmail.protect(userMessage);
 
   if (!result.success) {
-    throw new Error(`Security violation: ${result.context.flags.join(", ")}`);
+    throw new Error(
+      `Security violation: ${Array.from(result.context.flags).join(", ")}`
+    );
   }
 
   return await openai.chat.completions.create({
@@ -175,6 +234,7 @@ const chainmail = new PromptChainmail()
 - `Rivets.sqlInjection()` - SQL injection patterns
 - `Rivets.delimiterConfusion()` - Context-breaking attempts
 - `Rivets.instructionHijacking()` - Instruction override detection
+- `Rivets.languageDetection()` - Languages detection
 - `Rivets.templateInjection()` - Template syntax injection detection
 - `Rivets.confidenceFilter()` - Block low-confidence input
 - `Rivets.rateLimit()` - Request rate limiting
@@ -255,7 +315,7 @@ Prompt Chainmail uses standardized security flags to categorize detected threats
 ```typescript
 const result = await chainmail.protect(userInput);
 
-if (result.context.flags.includes(SecurityFlags.SQL_INJECTION)) {
+if (result.context.flags.has(SecurityFlags.SQL_INJECTION)) {
   console.log("SQL injection attempt detected!");
 }
 ```

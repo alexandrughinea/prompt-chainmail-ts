@@ -17,7 +17,7 @@ export function patternDetection(customPatterns?: RegExp[]): ChainmailRivet {
   return async (context, next) => {
     for (const pattern of patterns) {
       if (pattern.test(context.sanitized)) {
-        context.flags.push(SecurityFlags.INJECTION_PATTERN);
+        context.flags.add(SecurityFlags.INJECTION_PATTERN);
         applyThreatPenalty(context, ThreatLevel.HIGH);
         context.metadata.matched_pattern = pattern.toString();
         break;

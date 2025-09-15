@@ -144,7 +144,7 @@ export const createNewRelicProvider = (newrelic: {
       message: event.message,
       blocked: event.context.blocked,
       confidence: event.context.confidence,
-      flags: event.context.flags.join(","),
+      flags: Array.from(event.context.flags).join(","),
       session_id: event.context.session_id,
     });
     if (

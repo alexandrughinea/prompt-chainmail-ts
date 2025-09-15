@@ -17,7 +17,7 @@ export const creditCardDetection = (): ChainmailRivet => {
     const ccPattern = /\b\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}\b/g;
 
     if (ccPattern.test(context.sanitized)) {
-      context.flags.push("credit_card_detected");
+      context.flags.add("credit_card_detected");
       context.confidence *= 0.3;
       context.metadata.sensitiveDataType = "credit_card";
     }
@@ -44,7 +44,7 @@ export const profanityFilter = (customWords: string[] = []): ChainmailRivet => {
 
     for (const word of badWords) {
       if (lower.includes(word)) {
-        context.flags.push("profanity_detected");
+        context.flags.add("profanity_detected");
         context.confidence *= 0.6;
         context.metadata.detectedWord = word;
         break;
@@ -70,7 +70,7 @@ export const businessHours = (startHour = 9, endHour = 17): ChainmailRivet => {
     const hour = new Date().getHours();
 
     if (hour < startHour || hour > endHour) {
-      context.flags.push("outside_business_hours");
+      context.flags.add("outside_business_hours");
       context.confidence *= 0.9;
       context.metadata.currentHour = hour;
     }
@@ -88,7 +88,7 @@ export const businessHours = (startHour = 9, endHour = 17): ChainmailRivet => {
 // const result = await corporateChain.protect(userInput);
 
 /**
- * Whitelist allowed domains for URLs
+ * Allowlist domains for URLs
  */
 export const domainWhitelist = (allowedDomains: string[]): ChainmailRivet => {
   return async (context, next) => {
@@ -100,14 +100,14 @@ export const domainWhitelist = (allowedDomains: string[]): ChainmailRivet => {
         try {
           const domain = new URL(url).hostname;
           if (!allowedDomains.some((allowed) => domain.includes(allowed))) {
-            context.flags.push("unauthorized_domain");
+            context.flags.add("unauthorized_domain");
             context.confidence *= 0.4;
             context.metadata.blockedDomain = domain;
             break;
           }
         } catch {
           // Invalid URL
-          context.flags.push("invalid_url");
+          context.flags.add("invalid_url");
           context.confidence *= 0.7;
         }
       }
@@ -138,7 +138,7 @@ export const personalInfoDetection = (): ChainmailRivet => {
 
     for (const [type, pattern] of Object.entries(patterns)) {
       if (pattern.test(context.sanitized)) {
-        context.flags.push(`${type}_detected`);
+        context.flags.add(`${type}_detected`);
         context.confidence *= 0.4;
         context.metadata.personalInfoType = type;
         break;
@@ -179,7 +179,7 @@ export const languageFilter = (allowedLanguages: string[]): ChainmailRivet => {
     );
 
     if (detected_languages.length > 0 && !hasAllowedLanguage) {
-      context.flags.push("unsupported_language");
+      context.flags.add("unsupported_language");
       context.confidence *= 0.7;
       context.metadata.detected_languages = detected_languages;
     }
@@ -207,14 +207,14 @@ export const contentLengthLimit = (
     const length = context.sanitized.length;
 
     if (length > maxLength) {
-      context.flags.push("content_too_long");
+      context.flags.add("content_too_long");
       context.confidence *= 0.8;
       context.metadata.contentLength = length;
       context.metadata.maxAllowed = maxLength;
     }
 
     if (length < minLength) {
-      context.flags.push("content_too_short");
+      context.flags.add("content_too_short");
       context.confidence *= 0.9;
       context.metadata.contentLength = length;
       context.metadata.minRequired = minLength;
@@ -261,7 +261,7 @@ export const externalSecurityValidation = (
     onError: (context: ChainmailContext) => {
       // Fallback to local validation if external API fails
       context.metadata.externalValidationFailed = true;
-      context.flags.push("external_validation_unavailable");
+      context.flags.add("external_validation_unavailable");
     },
   });
 };
@@ -280,15 +280,15 @@ export const multiStepValidation = (
     await primaryValidation(context, async () => ({
       success: true,
       context,
-      processingTime: 0,
+      processing_time: 0,
     }));
 
     // If primary failed, try fallback
-    if (
-      context.flags.includes("http_error") ||
-      context.flags.includes("http_timeout")
-    ) {
-      context.flags = context.flags.filter((f) => !f.startsWith("http_"));
+    if (context.flags.has("http_error") || context.flags.has("http_timeout")) {
+      const flagsToRemove = Array.from(context.flags).filter((f) =>
+        f.startsWith("http_")
+      );
+      flagsToRemove.forEach((flag) => context.flags.delete(flag));
       const fallbackValidation = externalSecurityValidation(
         fallbackApi,
         apiKey
@@ -296,7 +296,7 @@ export const multiStepValidation = (
       await fallbackValidation(context, async () => ({
         success: true,
         context,
-        processingTime: 0,
+        processing_time: 0,
       }));
     }
 
@@ -545,7 +545,9 @@ export async function demoCustomChainmails() {
       const result = await chainmail.protect(input);
 
       console.log(`Success: ${result.success}`);
-      console.log(`Flags: ${result.context.flags.join(", ") || "none"}`);
+      console.log(
+        `Flags: ${Array.from(result.context.flags).join(", ") || "none"}`
+      );
       console.log(`Confidence: ${result.context.confidence.toFixed(2)}`);
     }
   }

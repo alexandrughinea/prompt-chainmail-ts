@@ -22,7 +22,7 @@ export function logger(
       confidence: context.confidence,
       blocked: context.blocked,
       duration,
-      inputLength: context.input.length,
+      input_length: context.input?.length,
     };
 
     if (logFn) {

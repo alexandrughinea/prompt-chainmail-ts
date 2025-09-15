@@ -29,7 +29,7 @@ describe("logger(...)", () => {
 
     expect(consoleSpy).toHaveBeenCalledWith(
       "[PromptChainmail]",
-      expect.objectContaining({ inputLength: 10 })
+      expect.objectContaining({ input_length: 10 })
     );
 
     consoleSpy.mockRestore();

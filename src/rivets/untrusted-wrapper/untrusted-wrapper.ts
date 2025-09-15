@@ -17,7 +17,7 @@ export function untrustedWrapper(
     }
 
     context.sanitized = wrappedContent;
-    context.flags.push(SecurityFlags.UNTRUSTED_WRAPPED);
+    context.flags.add(SecurityFlags.UNTRUSTED_WRAPPED);
 
     return next();
   };

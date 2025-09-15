@@ -12,7 +12,7 @@ export function delimiterConfusion(): ChainmailRivet {
   return async (context, next) => {
     for (const pattern of DELIMITER_CONFUSION_REGEX) {
       if (pattern.test(context.sanitized)) {
-        context.flags.push(SecurityFlags.DELIMITER_CONFUSION);
+        context.flags.add(SecurityFlags.DELIMITER_CONFUSION);
         applyThreatPenalty(context, ThreatLevel.HIGH);
         context.metadata.delimiter_pattern = pattern.toString();
         break;

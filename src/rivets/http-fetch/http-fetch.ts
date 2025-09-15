@@ -41,7 +41,7 @@ export function httpFetch(
       if (
         HTTP_FETCH_PRIVATE_RANGES.some((range) => hostname.startsWith(range))
       ) {
-        context.flags.push(SecurityFlags.HTTP_ERROR);
+        context.flags.add(SecurityFlags.HTTP_ERROR);
         applyThreatPenalty(context, ThreatLevel.HIGH);
         context.metadata.http_error =
           "Private/local IP addresses are not allowed";
@@ -49,20 +49,20 @@ export function httpFetch(
       }
 
       if (allowedHosts.length > 0 && !allowedHosts.includes(hostname)) {
-        context.flags.push(SecurityFlags.HTTP_ERROR);
+        context.flags.add(SecurityFlags.HTTP_ERROR);
         applyThreatPenalty(context, ThreatLevel.HIGH);
         context.metadata.http_error = `Host ${hostname} is not in allowlist`;
         return next();
       }
 
       if (!["http:", "https:"].includes(parsedUrl.protocol)) {
-        context.flags.push(SecurityFlags.HTTP_ERROR);
+        context.flags.add(SecurityFlags.HTTP_ERROR);
         applyThreatPenalty(context, ThreatLevel.HIGH);
         context.metadata.http_error = "Only HTTP/HTTPS protocols are allowed";
         return next();
       }
     } catch {
-      context.flags.push(SecurityFlags.HTTP_ERROR);
+      context.flags.add(SecurityFlags.HTTP_ERROR);
       applyThreatPenalty(context, ThreatLevel.HIGH);
       context.metadata.http_error = "Invalid URL format";
       return next();
@@ -87,7 +87,7 @@ export function httpFetch(
 
       const contentLength = response.headers.get("content-length");
       if (contentLength && parseInt(contentLength) > maxResponseSize) {
-        context.flags.push(SecurityFlags.HTTP_ERROR);
+        context.flags.add(SecurityFlags.HTTP_ERROR);
         applyThreatPenalty(context, ThreatLevel.MEDIUM);
         context.metadata.http_error = `Response size ${contentLength} exceeds limit ${maxResponseSize}`;
         return next();
@@ -96,11 +96,11 @@ export function httpFetch(
       const data = await response.json();
 
       if (validateResponse && !validateResponse(response, data)) {
-        context.flags.push(SecurityFlags.HTTP_VALIDATION_FAILED);
+        context.flags.add(SecurityFlags.HTTP_VALIDATION_FAILED);
         applyThreatPenalty(context, ThreatLevel.HIGH);
         context.metadata.http_validation_error = "Response validation failed";
       } else {
-        context.flags.push(SecurityFlags.HTTP_SUCCESS);
+        context.flags.add(SecurityFlags.HTTP_SUCCESS);
         context.metadata.http_response = data;
 
         if (onSuccess) {
@@ -112,11 +112,11 @@ export function httpFetch(
 
       if (error instanceof Error) {
         if (error.name === "AbortError") {
-          context.flags.push(SecurityFlags.HTTP_TIMEOUT);
+          context.flags.add(SecurityFlags.HTTP_TIMEOUT);
           applyThreatPenalty(context, ThreatLevel.MEDIUM);
           context.metadata.http_error = `Request timed out after ${timeoutMs}ms`;
         } else {
-          context.flags.push(SecurityFlags.HTTP_ERROR);
+          context.flags.add(SecurityFlags.HTTP_ERROR);
           applyThreatPenalty(context, ThreatLevel.MEDIUM);
           context.metadata.http_error = error.message;
         }

@@ -21,7 +21,7 @@ export function telemetry(options: TelemetryOptions = {}): ChainmailRivet {
     logFn = (level, message, data) => {
       const logLevel =
         level === "error" ? "error" : level === "warn" ? "warn" : "info";
-      console[logLevel]("[Chainmail]", message, data);
+      console[logLevel]("[PromptChainmail]", message, data);
     },
     track_metrics = true,
     logErrors = true,
@@ -36,7 +36,7 @@ export function telemetry(options: TelemetryOptions = {}): ChainmailRivet {
 
     telemetryProvider?.addBreadcrumb("Processing started", {
       sessionId: context.session_id,
-      inputLength: context.input.length,
+      input_length: context.input.length,
     });
 
     try {
@@ -45,7 +45,7 @@ export function telemetry(options: TelemetryOptions = {}): ChainmailRivet {
 
       const telemetryData: TelemetryData = {
         session_id: context.session_id,
-        flags: context.flags,
+        flags: Array.from(context.flags),
         confidence: context.confidence,
         processing_time: processingTime,
         input_length: context.input.length,
@@ -56,25 +56,25 @@ export function telemetry(options: TelemetryOptions = {}): ChainmailRivet {
       if (telemetryProvider) {
         telemetryProvider.trackMetric("processing_time", processingTime, {
           success: result.success.toString(),
-          flags_count: context.flags.length.toString(),
+          flags_count: context.flags.size.toString(),
         });
 
-        if (!result.success || context.flags.length > 0) {
+        if (!result.success || context.flags.size > 0) {
           const threatLevel = getThreatLevelFromConfidenceScore(
             context.confidence
           );
           const eventType = context.blocked
             ? TelemetryEventType.THREAT_BLOCKED
-            : context.flags.length > 0
+            : context.flags.size > 0
               ? TelemetryEventType.THREAT_DETECTED
               : TelemetryEventType.SECURITY_SCAN;
 
           telemetryProvider.logSecurityEvent({
             type: eventType,
             threat_level: threatLevel,
-            message: `Security check ${result.success ? "passed" : "failed"}: ${context.flags.join(", ")}`,
+            message: `Security check ${result.success ? "passed" : "failed"}: ${Array.from(context.flags).join(", ")}`,
             context: telemetryData,
-            flags: context.flags as SecurityFlags[],
+            flags: Array.from(context.flags) as SecurityFlags[],
             risk_score: (context.metadata?.risk_score ?? undefined) as number,
             attack_types: (context.metadata?.attack_types ??
               undefined) as string[],
@@ -89,12 +89,12 @@ export function telemetry(options: TelemetryOptions = {}): ChainmailRivet {
           telemetryData
         );
 
-        if (!result.success || context.flags.length > 0) {
+        if (!result.success || context.flags.size > 0) {
           const level: LogLevel = getLogLevelFromConfidence(context.confidence);
 
           logFn(
             level,
-            `Security flags detected: ${context.flags.join(", ")}`,
+            `Security flags detected: ${Array.from(context.flags).join(", ")}`,
             telemetryData
           );
         }
@@ -106,7 +106,7 @@ export function telemetry(options: TelemetryOptions = {}): ChainmailRivet {
 
       const telemetryData: TelemetryData = {
         session_id: context.session_id,
-        flags: context.flags,
+        flags: Array.from(context.flags),
         confidence: context.confidence,
         processing_time: processingTime,
         input_length: context.input.length,

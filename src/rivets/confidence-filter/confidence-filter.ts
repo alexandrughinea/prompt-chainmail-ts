@@ -3,8 +3,17 @@ import { SecurityFlags } from "../rivets.types";
 
 /**
  * @description
- * Filters requests based on confidence thresholds, flagging content
- * with confidence scores outside the specified range.
+ * - Blocks requests based on confidence thresholds.
+ * - When only minThreshold is provided,
+ *   blocks content with confidence below the threshold (low confidence = suspicious).
+ * - When both thresholds are provided, blocks content within the range (confidence
+ *   between min and max is considered risky).
+ *
+ * - Sets `context.blocked` = true and adds
+ *   appropriate security flag (`LOW_CONFIDENCE` or `CONFIDENCE_RANGE) when blocking conditions are met.
+ *
+ * @param minThreshold Minimum confidence threshold (default: 0.5)
+ * @param maxThreshold Optional maximum confidence threshold for range filtering
  */
 export function confidenceFilter(
   minThreshold = 0.5,
@@ -17,12 +26,12 @@ export function confidenceFilter(
         context.confidence <= maxThreshold
       ) {
         context.blocked = true;
-        context.flags.push(SecurityFlags.CONFIDENCE_RANGE);
+        context.flags.add(SecurityFlags.CONFIDENCE_RANGE);
       }
     } else {
       if (context.confidence < minThreshold) {
         context.blocked = true;
-        context.flags.push(SecurityFlags.LOW_CONFIDENCE);
+        context.flags.add(SecurityFlags.LOW_CONFIDENCE);
       }
     }
 

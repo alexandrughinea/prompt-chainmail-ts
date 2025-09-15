@@ -26,7 +26,7 @@ export function sanitize(maxLength = 8000): ChainmailRivet {
     }
 
     if (sanitizedHTML !== sanitized) {
-      context.flags.push(SecurityFlags.SANITIZED_HTML_TAGS);
+      context.flags.add(SecurityFlags.SUSPICIOUS_CHARACTERS);
       sanitized = sanitizedHTML;
     }
 
@@ -46,7 +46,7 @@ export function sanitize(maxLength = 8000): ChainmailRivet {
     }
 
     if (controlsRemoved !== sanitized) {
-      context.flags.push(SecurityFlags.SANITIZED_CONTROL_CHARS);
+      context.flags.add(SecurityFlags.SANITIZED_CONTROL_CHARS);
       sanitized = controlsRemoved;
     }
 
@@ -67,14 +67,14 @@ export function sanitize(maxLength = 8000): ChainmailRivet {
     sanitized = normalizedWhitespace.trim();
 
     if (sanitized !== beforeWhitespace) {
-      context.flags.push(SecurityFlags.SANITIZED_WHITESPACE);
+      context.flags.add(SecurityFlags.EXCESSIVE_WHITESPACE);
     }
 
     sanitized = sanitized.slice(0, maxLength);
 
     if (sanitized.length < originalLength) {
       if (sanitized.length < context.input.length) {
-        context.flags.push(SecurityFlags.TRUNCATED);
+        context.flags.add(SecurityFlags.CONTROL_CHARACTERS);
       }
 
       const sanitizationRatio =
@@ -84,6 +84,10 @@ export function sanitize(maxLength = 8000): ChainmailRivet {
       } else {
         applyThreatPenalty(context, ThreatLevel.LOW);
       }
+    }
+
+    if (sanitized.length < context.input.length) {
+      context.flags.add(SecurityFlags.TRUNCATED);
     }
 
     context.sanitized = sanitized;

@@ -15,7 +15,7 @@ export function condition(
 ): ChainmailRivet {
   return async (context, next) => {
     if (predicate(context)) {
-      context.flags.push(flagName);
+      context.flags.add(flagName);
       const penalty =
         confidenceMultiplier <= 0.5
           ? ThreatLevel.HIGH

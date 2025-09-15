@@ -31,7 +31,8 @@ export const SQL_INJECTION_PATTERNS = [
   /\bdbms_lock\.sleep\s*\(/i,
 
   // Stored procedures and system commands
-  /\b(?:exec|execute|sp_executesql)\s*[(\s]/i,
+  /\b(?:exec|execute|sp_executesql)\s*\(/i,
+  /\b(?:exec|execute)\s+(?:sp_|xp_)\w+/i,
   /\bxp_(?:cmdshell|regread|regwrite|dirtree|fileexist)/i,
   /\bsp_(?:oacreate|oamethod|oadestroy|makewebtask)/i,
   /\b(?:openrowset|opendatasource)\s*\(/i,

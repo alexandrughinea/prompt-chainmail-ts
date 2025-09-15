@@ -24,13 +24,19 @@ const MAX_CHUNK_SIZE = 4096; // 4KB
  * ```
  */
 export class PromptChainmail {
-  private rivets: ChainmailRivet[] = [];
+  private rivets: Set<ChainmailRivet> = new Set();
 
   /**
    * Forge a new rivet into the chainmail
    */
   forge(rivet: ChainmailRivet): this {
-    this.rivets.push(rivet);
+    if (this.rivets.has(rivet)) {
+      throw new Error(
+        "Duplicate rivet: This rivet has already been forged into the chainmail"
+      );
+    }
+
+    this.rivets.add(rivet);
     return this;
   }
 
@@ -45,21 +51,21 @@ export class PromptChainmail {
 
     if (input == null) {
       const processingTime = Date.now() - startTime;
-      return {
-        success: false,
-        context: {
-          input: "",
-          sanitized: "",
-          flags: ["invalid_input"],
-          blocked: true,
-          start_time: startTime,
-          session_id: sessionId,
-          confidence: 1,
-          metadata: {},
-        },
-        error: `Invalid input: ${input}`,
-        processing_time: processingTime,
+      const context: ChainmailContext = {
+        input: "",
+        sanitized: "",
+        flags: new Set(["invalid_input"]),
+        blocked: true,
+        start_time: startTime,
+        session_id: sessionId,
+        confidence: 1,
+        metadata: {},
       };
+      return this.createResult(
+        context,
+        processingTime,
+        `Invalid input: ${input}`
+      );
     }
 
     if (typeof input === "string") {
@@ -103,7 +109,7 @@ export class PromptChainmail {
     const context: ChainmailContext = {
       input,
       sanitized: input,
-      flags: [],
+      flags: new Set(),
       confidence: 1.0,
       metadata: {},
       blocked: false,
@@ -111,37 +117,32 @@ export class PromptChainmail {
       session_id: sessionId,
     };
 
-    if (this.rivets.length === 0) {
-      return {
-        success: true,
-        context,
-        processing_time: Date.now() - startTime,
-      };
+    if (this.rivets.size === 0) {
+      return this.createResult(context, Date.now() - startTime);
     }
 
     let index = 0;
+    const rivetArray = Array.from(this.rivets);
     const next = async (): Promise<ChainmailResult> => {
-      if (index >= this.rivets.length) {
-        return {
-          success: !context.blocked,
-          context,
-          processing_time: Date.now() - startTime,
-        };
+      if (index >= rivetArray.length) {
+        return this.createResult(context, Date.now() - startTime);
       }
 
-      const rivet = this.rivets[index++];
-      return rivet(context, next);
+      const rivet = rivetArray[index++];
+      const protectedContext = this.createContext(context);
+
+      return await rivet(protectedContext, next);
     };
 
     try {
       return await next();
     } catch (error) {
-      return {
-        success: false,
+      context.blocked = true;
+      return this.createResult(
         context,
-        error: error instanceof Error ? error.message : "Unknown error",
-        processing_time: Date.now() - startTime,
-      };
+        Date.now() - startTime,
+        error instanceof Error ? error.message : "Unknown error"
+      );
     }
   }
 
@@ -156,7 +157,7 @@ export class PromptChainmail {
     let chunkCount = 0;
     let totalLength = 0;
     const streamFlagsSet = new Set<string>();
-    const streamMetadata: Record<string, unknown> = {};
+    const streamMetadata: Record<string, unknown> = Object.create(null);
     let minConfidence = 1.0;
 
     try {
@@ -166,7 +167,7 @@ export class PromptChainmail {
 
         if (totalLength > MAX_INPUT_SIZE_IN_MB) {
           streamFlagsSet.add("stream_size_exceeded");
-          streamMetadata.streamSizeLimit = MAX_INPUT_SIZE_IN_MB;
+          streamMetadata.stream_size_limit = MAX_INPUT_SIZE_IN_MB;
           return this.createStreamResult(
             true,
             chunkCount,
@@ -182,7 +183,7 @@ export class PromptChainmail {
         const chunkContext: ChainmailContext = {
           input: chunk,
           sanitized: chunk,
-          flags: [],
+          flags: new Set(),
           confidence: 1.0,
           metadata: {},
           blocked: false,
@@ -244,25 +245,19 @@ export class PromptChainmail {
     chunkContext: ChainmailContext,
     startTime: number
   ): Promise<ChainmailResult> {
-    if (this.rivets.length === 0) {
-      return {
-        success: true,
-        context: chunkContext,
-        processing_time: Date.now() - startTime,
-      };
+    if (this.rivets.size === 0) {
+      return this.createResult(chunkContext, Date.now() - startTime);
     }
 
+    const rivetArray = Array.from(this.rivets);
     let index = 0;
     const next = async (): Promise<ChainmailResult> => {
-      if (index >= this.rivets.length) {
-        return {
-          success: !chunkContext.blocked,
-          context: chunkContext,
-          processing_time: Date.now() - startTime,
-        };
+      if (index >= rivetArray.length) {
+        return this.createResult(chunkContext, Date.now() - startTime);
       }
-      const rivet = this.rivets[index++];
-      return rivet(chunkContext, next);
+      const rivet = rivetArray[index++];
+      const protectedContext = this.createContext(chunkContext);
+      return rivet(protectedContext, next);
     };
     return next();
   }
@@ -284,7 +279,7 @@ export class PromptChainmail {
     const finalContext: ChainmailContext = {
       input: streamDesc,
       sanitized: streamDesc,
-      flags: streamFlags.length > 0 ? [...new Set(streamFlags)] : [],
+      flags: new Set(streamFlags),
       confidence,
       metadata: streamMetadata,
       blocked,
@@ -292,11 +287,72 @@ export class PromptChainmail {
       session_id: sessionId,
     };
 
-    return {
-      success: !blocked,
-      context: finalContext,
-      processing_time: Date.now() - startTime,
+    return this.createResult(finalContext, Date.now() - startTime);
+  }
+
+  /**
+   * Create a protected context that prevents blocked property from being unset once locked
+   */
+  private createContext(context: ChainmailContext): ChainmailContext {
+    return new Proxy(context, {
+      set(target, prop, value) {
+        if (prop === "blocked" && target.blocked && value === false) {
+          throw new Error(
+            "Cannot unblock: blocked property is locked once set to true"
+          );
+        }
+
+        if (["input", "start_time", "session_id"].includes(prop as string)) {
+          throw new Error(`Property '${String(prop)}' is readonly`);
+        }
+
+        (target as any)[prop] = value;
+
+        return true;
+      },
+    });
+  }
+
+  /**
+   * Create a secure result that derives success from blocked state
+   */
+  private createResult(
+    context: ChainmailContext,
+    processingTime: number,
+    error?: string
+  ): ChainmailResult {
+    const result = {
+      context: Object.freeze({ ...context }),
+      processing_time: processingTime,
+      ...(error && { error }),
     };
+
+    return new Proxy(result as ChainmailResult, {
+      get(target, prop) {
+        if (prop === "success") {
+          return !(target as ChainmailResult).context.blocked;
+        }
+        return (target as any)[prop];
+      },
+      set(target, prop, value) {
+        if (prop === "success") {
+          throw new Error("Cannot modify success: derived from blocked state");
+        }
+        if (prop === "context") {
+          throw new Error("Cannot modify context: immutable after creation");
+        }
+
+        (target as any)[prop] = value;
+
+        return true;
+      },
+      defineProperty() {
+        throw new Error("Cannot define properties on secure result");
+      },
+      deleteProperty() {
+        throw new Error("Cannot delete properties from secure result");
+      },
+    });
   }
 
   /**
@@ -304,7 +360,7 @@ export class PromptChainmail {
    */
   clone(): PromptChainmail {
     const chainmail = new PromptChainmail();
-    chainmail.rivets = [...this.rivets];
+    chainmail.rivets = new Set(this.rivets);
     return chainmail;
   }
 
@@ -312,6 +368,6 @@ export class PromptChainmail {
    * Get the number of rivets in the chainmail
    */
   get length(): number {
-    return this.rivets.length;
+    return this.rivets.size;
   }
 }

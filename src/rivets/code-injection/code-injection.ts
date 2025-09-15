@@ -12,7 +12,7 @@ export function codeInjection(): ChainmailRivet {
   return async (context, next) => {
     for (const pattern of CODE_INJECTION_REGEX) {
       if (pattern.test(context.sanitized)) {
-        context.flags.push(SecurityFlags.CODE_INJECTION);
+        context.flags.add(SecurityFlags.CODE_INJECTION);
         applyThreatPenalty(context, ThreatLevel.CRITICAL);
         context.metadata.code_pattern = pattern.toString();
         break;

@@ -14,7 +14,7 @@ describe("structureAnalysis()", () => {
     const manyLines = Array(60).fill("line").join("\n");
     const result = await chainmail.protect(manyLines);
 
-    expect(result.context.flags).toContain(SecurityFlags.EXCESSIVE_LINES);
+    expect(result.context.flags.has(SecurityFlags.EXCESSIVE_LINES)).toBe(true);
     expect(result.context.confidence).toBeLessThan(1.0);
   });
 
@@ -25,7 +25,9 @@ describe("structureAnalysis()", () => {
       "repeat repeat repeat repeat repeat repeat repeat repeat repeat repeat repeat";
     const result = await chainmail.protect(repetitive);
 
-    expect(result.context.flags).toContain(SecurityFlags.REPETITIVE_CONTENT);
+    expect(result.context.flags.has(SecurityFlags.REPETITIVE_CONTENT)).toBe(
+      true
+    );
     expect(result.context.confidence).toBeLessThan(1.0);
   });
 

@@ -23,7 +23,7 @@ describe("telemetry(...)", () => {
     await chainmail.protect("test input");
 
     expect(consoleSpy).toHaveBeenCalledWith(
-      "[Chainmail]",
+      "[PromptChainmail]",
       expect.stringContaining("Processing completed"),
       expect.objectContaining({
         session_id: expect.any(String),
@@ -76,7 +76,7 @@ describe("telemetry(...)", () => {
       "Processing started",
       expect.objectContaining({
         sessionId: expect.any(String),
-        inputLength: 10,
+        input_length: 10,
       })
     );
 
@@ -100,7 +100,7 @@ describe("telemetry(...)", () => {
 
     const chainmail = new PromptChainmail()
       .forge((context, next) => {
-        context.flags.push("test_flag");
+        context.flags.add("test_flag");
         context.confidence = 0.3;
         return next();
       })

@@ -127,7 +127,7 @@ export function roleConfusion(
         flagSet.add(SecurityFlags.ROLE_CONFUSION_SCRIPT_MIXING);
       }
 
-      context.flags = Array.from(flagSet);
+      flagSet.forEach((flag) => context.flags.add(flag));
 
       const threatLevel =
         maxConfidence > confidence_threshold

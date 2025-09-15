@@ -18,7 +18,7 @@ export function structureAnalysis(): ChainmailRivet {
     const lines = context.sanitized.split("\n");
 
     if (lines.length > excessiveLinesThreshold) {
-      context.flags.push(SecurityFlags.EXCESSIVE_LINES);
+      context.flags.add(SecurityFlags.EXCESSIVE_LINES);
       applyThreatPenalty(context, ThreatLevel.LOW);
     }
 
@@ -27,7 +27,7 @@ export function structureAnalysis(): ChainmailRivet {
       context.sanitized.length > 0 &&
       nonAscii / context.sanitized.length > nonAsciiThreshold
     ) {
-      context.flags.push(SecurityFlags.NON_ASCII_HEAVY);
+      context.flags.add(SecurityFlags.NON_ASCII_HEAVY);
       applyThreatPenalty(context, ThreatLevel.LOW);
     }
 
@@ -39,7 +39,7 @@ export function structureAnalysis(): ChainmailRivet {
       words.length > wordThreshold &&
       uniqueWords.size / words.length < uniqueWordsThreshold
     ) {
-      context.flags.push(SecurityFlags.REPETITIVE_CONTENT);
+      context.flags.add(SecurityFlags.REPETITIVE_CONTENT);
       applyThreatPenalty(context, ThreatLevel.LOW);
     }
 

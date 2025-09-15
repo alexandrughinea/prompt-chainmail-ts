@@ -22,9 +22,9 @@ export const Chainmails: Record<
   /**
    * Advanced protection chainmail with encoding detection
    */
-  advanced(): PromptChainmail {
+  advanced(maxLength = 8000, confidenceFilter = 0.6): PromptChainmail {
     return new PromptChainmail()
-      .forge(Rivets.sanitize())
+      .forge(Rivets.sanitize(maxLength))
       .forge(Rivets.patternDetection())
       .forge(Rivets.roleConfusion())
       .forge(Rivets.delimiterConfusion())
@@ -34,7 +34,7 @@ export const Chainmails: Record<
       .forge(Rivets.templateInjection())
       .forge(Rivets.encodingDetection())
       .forge(Rivets.structureAnalysis())
-      .forge(Rivets.confidenceFilter(0.3))
+      .forge(Rivets.confidenceFilter(confidenceFilter))
       .forge(Rivets.rateLimit());
   },
 

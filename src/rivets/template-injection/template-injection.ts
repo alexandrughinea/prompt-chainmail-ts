@@ -12,7 +12,7 @@ export function templateInjection(): ChainmailRivet {
   return async (context, next) => {
     for (const pattern of TEMPLATE_INJECTION_PATTERNS) {
       if (pattern.test(context.sanitized)) {
-        context.flags.push(SecurityFlags.TEMPLATE_INJECTION);
+        context.flags.add(SecurityFlags.TEMPLATE_INJECTION);
         applyThreatPenalty(context, ThreatLevel.HIGH);
         context.metadata.template_pattern = pattern.toString();
         break;

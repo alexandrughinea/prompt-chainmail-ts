@@ -19,6 +19,9 @@ export enum SecurityFlags {
   SANITIZED_CONTROL_CHARS = "sanitized_control_chars",
   SANITIZED_WHITESPACE = "sanitized_whitespace",
   UNTRUSTED_WRAPPED = "untrusted_wrapped",
+  SUSPICIOUS_CHARACTERS = "suspicious_characters",
+  EXCESSIVE_WHITESPACE = "excessive_whitespace",
+  CONTROL_CHARACTERS = "control_characters",
 
   // General pattern detection
   INJECTION_PATTERN = "injection_pattern",
@@ -27,6 +30,7 @@ export enum SecurityFlags {
   EXCESSIVE_LINES = "excessive_lines",
   NON_ASCII_HEAVY = "non_ascii_heavy",
   REPETITIVE_CONTENT = "repetitive_content",
+  NESTED_STRUCTURE = "nested_structure",
 
   // General encoding detection
   BASE64_ENCODING = "base64_encoding",

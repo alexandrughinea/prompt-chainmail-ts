@@ -23,7 +23,7 @@ export function encodingDetection(): ChainmailRivet {
     if (base64Match && typeof Buffer !== "undefined") {
       try {
         const decoded = Buffer.from(base64Match[0], "base64").toString("utf-8");
-        context.flags.push(SecurityFlags.BASE64_ENCODING);
+        context.flags.add(SecurityFlags.BASE64_ENCODING);
         applyThreatPenalty(context, ThreatLevel.MEDIUM);
         context.metadata.decoded_content = decoded.slice(0, 100);
       } catch {
@@ -33,7 +33,7 @@ export function encodingDetection(): ChainmailRivet {
 
     // Hex encoding detection
     if (ENCODING_PATTERNS.HEX_ESCAPE.test(context.sanitized)) {
-      context.flags.push(SecurityFlags.HEX_ENCODING);
+      context.flags.add(SecurityFlags.HEX_ENCODING);
       applyThreatPenalty(context, ThreatLevel.MEDIUM);
     }
 
@@ -44,7 +44,7 @@ export function encodingDetection(): ChainmailRivet {
     if (urlEncodedMatch) {
       try {
         const decoded = decodeURIComponent(urlEncodedMatch[0]);
-        context.flags.push(SecurityFlags.URL_ENCODING);
+        context.flags.add(SecurityFlags.URL_ENCODING);
         applyThreatPenalty(context, ThreatLevel.MEDIUM);
         context.metadata.url_decoded_content = decoded.slice(0, 100);
       } catch {
@@ -65,7 +65,7 @@ export function encodingDetection(): ChainmailRivet {
             String.fromCharCode(parseInt(match[1], 16))
           );
         }
-        context.flags.push(SecurityFlags.UNICODE_ENCODING);
+        context.flags.add(SecurityFlags.UNICODE_ENCODING);
         applyThreatPenalty(context, ThreatLevel.MEDIUM);
         context.metadata.unicode_decoded_content = decoded.slice(0, 100);
       } catch {
@@ -93,7 +93,7 @@ export function encodingDetection(): ChainmailRivet {
         .replace(HTML_ENTITIES.QUOT, '"')
         .replace(HTML_ENTITIES.APOS, "'");
 
-      context.flags.push(SecurityFlags.HTML_ENTITY_ENCODING);
+      context.flags.add(SecurityFlags.HTML_ENTITY_ENCODING);
       applyThreatPenalty(context, ThreatLevel.MEDIUM);
       context.metadata.html_decoded_content = decoded.slice(0, 100);
     }
@@ -114,7 +114,7 @@ export function encodingDetection(): ChainmailRivet {
           .map((byte) => String.fromCharCode(parseInt(byte, 2)))
           .join("");
 
-        context.flags.push(SecurityFlags.BINARY_ENCODING);
+        context.flags.add(SecurityFlags.BINARY_ENCODING);
         applyThreatPenalty(context, ThreatLevel.HIGH);
         context.metadata.binary_decoded_content = decoded.slice(0, 100);
       } catch {
@@ -135,7 +135,7 @@ export function encodingDetection(): ChainmailRivet {
             String.fromCharCode(parseInt(match[1], 8))
           );
         }
-        context.flags.push(SecurityFlags.OCTAL_ENCODING);
+        context.flags.add(SecurityFlags.OCTAL_ENCODING);
         applyThreatPenalty(context, ThreatLevel.MEDIUM);
         context.metadata.octal_decoded_content = decoded.slice(0, 100);
       } catch {
@@ -167,7 +167,7 @@ export function encodingDetection(): ChainmailRivet {
       hasNonWords || hasConsecutiveConsonants || context.sanitized.length > 50;
 
     if (rot13Decoded !== context.sanitized && isLikelyEncoded) {
-      context.flags.push(SecurityFlags.ROT13_ENCODING);
+      context.flags.add(SecurityFlags.ROT13_ENCODING);
       applyThreatPenalty(context, ThreatLevel.MEDIUM);
       context.metadata.rot13_decoded_content = rot13Decoded.slice(0, 100);
     }
@@ -190,7 +190,7 @@ export function encodingDetection(): ChainmailRivet {
     });
 
     if (mixedCaseWords.length > 2) {
-      context.flags.push(SecurityFlags.MIXED_CASE_OBFUSCATION);
+      context.flags.add(SecurityFlags.MIXED_CASE_OBFUSCATION);
       applyThreatPenalty(context, ThreatLevel.MEDIUM);
       context.metadata.mixed_case_words = mixedCaseWords.slice(0, 5);
     }

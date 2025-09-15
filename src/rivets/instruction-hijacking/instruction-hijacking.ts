@@ -85,7 +85,7 @@ export function instructionHijacking(
     const isAttack = attackTypesArray.length > 0;
 
     if (isAttack) {
-      const flagSet = new Set(context.flags);
+      const flagSet = new Set<SecurityFlags>();
 
       flagSet.add(SecurityFlags.INSTRUCTION_HIJACKING);
 
@@ -123,7 +123,7 @@ export function instructionHijacking(
         flagSet.add(SecurityFlags.INSTRUCTION_HIJACKING_LOOKALIKES);
       }
 
-      context.flags = Array.from(flagSet);
+      flagSet.forEach((flag) => context.flags.add(flag));
 
       const threatLevel =
         maxConfidence > instruction_hijacking_threshold

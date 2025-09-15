@@ -20,7 +20,7 @@ export function rateLimit(
     const now = Date.now();
 
     if (requests.size >= maxKeys && !requests.has(key)) {
-      context.flags.push(SecurityFlags.RATE_LIMITED);
+      context.flags.add(SecurityFlags.RATE_LIMITED);
       context.blocked = true;
       return {
         success: false,
@@ -41,7 +41,7 @@ export function rateLimit(
 
     if (timestamps.length >= maxRequests) {
       context.blocked = true;
-      context.flags.push(SecurityFlags.RATE_LIMITED);
+      context.flags.add(SecurityFlags.RATE_LIMITED);
       return {
         success: false,
         context,

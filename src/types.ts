@@ -9,7 +9,7 @@
  *   // Check confidence level
  *   if (context.confidence < 0.5) {
  *     context.blocked = true;
- *     context.flags.push('low_confidence');
+ *     context.flags.add('low_confidence');
  *     context.metadata.reason = 'Confidence below threshold';
  *   }
  *   return next();
@@ -22,7 +22,7 @@ export interface ChainmailContext {
   /** Current processed text after rivet transformations */
   sanitized: string;
   /** Security flags detected during processing (e.g., 'role_confusion', 'sql_injection') */
-  flags: string[];
+  flags: Set<string>;
   /**
    * Security confidence score (0.0 to 1.0):
    * - 1.0: No threats detected, completely safe
@@ -91,7 +91,7 @@ export interface ChainmailResult {
  * const customRivet: ChainmailRivet = async (context, next) => {
  *   // Pre-processing logic
  *   if (context.sanitized.includes('forbidden')) {
- *     context.flags.push('forbidden_content');
+ *     context.flags.add('forbidden_content');
  *     context.confidence *= 0.5;
  *   }
  *

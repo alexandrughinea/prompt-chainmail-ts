@@ -12,7 +12,7 @@ export function sqlInjection(): ChainmailRivet {
   return async (context, next) => {
     for (const pattern of SQL_INJECTION_PATTERNS) {
       if (pattern.test(context.sanitized)) {
-        context.flags.push(SecurityFlags.SQL_INJECTION);
+        context.flags.add(SecurityFlags.SQL_INJECTION);
         applyThreatPenalty(context, ThreatLevel.CRITICAL);
         context.metadata.sql_pattern = pattern.toString();
         break;
