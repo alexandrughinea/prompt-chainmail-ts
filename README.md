@@ -482,46 +482,7 @@ const enterpriseChain = Chainmails.strict()
 
 ## Contributing
 
-### Code of Conduct
-
-We are committed to fostering a welcoming and inclusive community. All contributors are expected to adhere to our code of conduct:
-
-#### Our Standards
-
-**Positive behaviors include:**
-
-- Using welcoming and inclusive language
-- Being respectful of differing viewpoints and experiences
-- Gracefully accepting constructive criticism
-- Focusing on what is best for the community
-- Showing empathy towards other community members
-- Contributing high-quality, well-tested security code
-- Following secure coding practices and security-first mindset
-
-**Unacceptable behaviors include:**
-
-- Harassment, trolling, or discriminatory language
-- Publishing others' private information without permission
-- Submitting code with known security vulnerabilities
-- Bypassing or weakening security measures
-- Any conduct that could compromise the security integrity of the project
-
-#### Security-First Development
-
-Given the security-critical nature of this project:
-
-- All contributions must include decent test coverage
-- Security vulnerabilities must be reported privately via email
-- Code reviews will include security analysis
-- Breaking changes require security impact assessment
-
-#### Enforcement
-
-Instances of unacceptable behavior may be reported to [Contact](mailto:alexandrughinea.dev+prompt-chainmail+codeofconduct@gmail.com). All complaints will be reviewed and investigated promptly and fairly.
-
-#### Attribution
-
-This Code of Conduct is adapted from the [Contributor Covenant](https://www.contributor-covenant.org/), version 2.1.
+We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details on how to get started, our code of conduct, and development practices.
 
 ## License
 
