@@ -14,8 +14,6 @@ Security middleware that shields AI applications from prompt injection, jailbrea
 [![TypeScript](https://img.shields.io/badge/%3C%2F%3E-TypeScript-%230074c1.svg)](http://www.typescriptlang.org/)
 [![Security Audit](https://img.shields.io/badge/security-audited-green.svg)](https://github.com/alexandrughinea/prompt-chainmail/actions/workflows/security.yml)
 [![License: BSL-1.1](https://img.shields.io/badge/license-BSL--1.1-blue.svg)](https://github.com/alexandrughinea/prompt-chainmail/blob/main/LICENSE)
-[![Commercial License](https://img.shields.io/badge/commercial-available-success.svg)](mailto:alexandrughinea.dev+prompt-chainmail@gmail.com)
-[![Enterprise Readiness](https://img.shields.io/badge/enterprise-pending-purple.svg)](https://github.com/alexandrughinea/prompt-chainmail#enterprise-edition)
 [![Beta](https://img.shields.io/badge/status-beta-orange.svg)](https://github.com/alexandrughinea/prompt-chainmail)
 
 ## Features
@@ -528,5 +526,3 @@ This Code of Conduct is adapted from the [Contributor Covenant](https://www.cont
 ## License
 
 Business Source License 1.1 - Free for non-production use, converts to Apache 2.0 on January 1, 2029.
-
-For commercial licensing: [Contact](mailto:alexandrughinea.dev+prompt-chainmail+commercial@gmail.com)
