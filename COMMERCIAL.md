@@ -71,5 +71,5 @@ const chainmail = new PromptChainmail().forge(Chainmails.pii());
 
 ## Contact
 
-- **Sales**: alexandrughinea.dev+prompt-chainmail@gmail.com
-- **Enterprise**: enterprise@prompt-chainmail.com
+- **Commercial Licensing**: [alexandrughinea.dev+prompt-chainmail+commercial@gmail.com](mailto:alexandrughinea.dev+prompt-chainmail+commercial@gmail.com)
+- **General Support**: [alexandrughinea.dev+prompt-chainmail@gmail.com](mailto:alexandrughinea.dev+prompt-chainmail@gmail.com)

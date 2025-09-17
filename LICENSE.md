@@ -20,6 +20,7 @@ Change License: Apache License, Version 2.0
 
 For information about alternative licensing arrangements for the Licensed Work,
 please visit: https://github.com/alexandrughinea/prompt-chainmail
+or contact: alexandrughinea.dev+prompt-chainmail+commercial@gmail.com
 
 ---
 
