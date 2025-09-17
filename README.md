@@ -1,7 +1,7 @@
 # Prompt Chainmail
 
 <div align="center">
-  <img src="src/logo.png" alt="Prompt Chainmail Logo" width="200" height="200">
+  <img src="src/logo.png" alt="Prompt Chainmail Logo" width="200" height="234">
 </div>
 
 **Security middleware for AI prompt protection**
