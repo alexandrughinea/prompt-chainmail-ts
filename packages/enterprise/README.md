@@ -57,4 +57,4 @@ const result = await chainmail.process("Enterprise input here");
 
 ## License
 
-Enterprise commercial license. Contact enterprise@prompt-chainmail.com for pricing and custom agreements.
+Enterprise commercial license. Contact [alexandrughinea.dev+prompt-chainmail+commercial@gmail.com](mailto:alexandrughinea.dev+prompt-chainmail+commercial@gmail.com) for pricing and custom agreements.
