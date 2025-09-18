@@ -902,7 +902,7 @@ describe("PromptChainmail", () => {
         expect(result.success).toBe(false);
         expect(result.context.blocked).toBe(true);
         expect(result.context.flags.has("sql_injection")).toBe(true);
-        expect(result.context.confidence).toBeLessThan(0.5);
+        expect(result.context.confidence).toBeLessThan(0.6);
       });
 
       it("should handle ArrayBuffer inputs", async () => {

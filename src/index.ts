@@ -1,9 +1,9 @@
-import { Rivets } from "./rivets/index";
+import { Rivets, applyThreatPenalty } from "./rivets/index";
 import { Chainmails } from "./chainmails/index";
 import { toChunks } from "./utils";
 import { ChainmailContext, ChainmailResult, ChainmailRivet } from "./types";
 
-export { Rivets, Chainmails };
+export { Rivets, Chainmails, applyThreatPenalty };
 export type { ChainmailRivet };
 
 const MAX_INPUT_SIZE_IN_MB = 1024 * 1024 * 2; // 2MB

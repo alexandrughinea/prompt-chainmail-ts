@@ -4,6 +4,8 @@
   <img src="src/logo.png" alt="Prompt Chainmail Logo" width="200" height="234">
 </div>
 
+<br/>
+
 **Security middleware for AI prompt protection**
 
 Security middleware that shields AI applications from prompt injection, jailbreaking, and obfuscated attacks through composable defense layers.
