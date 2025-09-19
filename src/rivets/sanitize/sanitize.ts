@@ -5,9 +5,9 @@ import {
   SANITIZE_HTML_TAG_PATTERN,
   SANITIZE_HTML_ENTITIES,
   SANITIZE_CONTROL_CHAR_PATTERN,
-  SANITIZE_WHITESPACE_PATTERN,
   SANITIZE_CONTROL_CHAR_REPLACEMENT,
 } from "./sanitize.const";
+import { COMMON_PATTERNS } from "../../@shared/regex-patterns/common.const";
 
 /**
  * @description
@@ -26,7 +26,7 @@ export function sanitize(maxLength = 8000): ChainmailRivet {
     }
 
     if (sanitizedHTML !== sanitized) {
-      context.flags.add(SecurityFlags.SUSPICIOUS_CHARACTERS);
+      context.flags.add(SecurityFlags.SANITIZED_HTML_TAGS);
       sanitized = sanitizedHTML;
     }
 
@@ -55,26 +55,27 @@ export function sanitize(maxLength = 8000): ChainmailRivet {
     let normalizedWhitespace = sanitized;
     let match;
     while (
-      (match = normalizedWhitespace.match(SANITIZE_WHITESPACE_PATTERN)) !==
-        null &&
+      (match = normalizedWhitespace.match(
+        COMMON_PATTERNS.WHITESPACE_MULTIPLE
+      )) !== null &&
       match[0].length > 1
     ) {
       normalizedWhitespace = normalizedWhitespace.replace(
-        SANITIZE_WHITESPACE_PATTERN,
+        COMMON_PATTERNS.WHITESPACE_MULTIPLE,
         " "
       );
     }
     sanitized = normalizedWhitespace.trim();
 
     if (sanitized !== beforeWhitespace) {
-      context.flags.add(SecurityFlags.EXCESSIVE_WHITESPACE);
+      context.flags.add(SecurityFlags.SANITIZED_WHITESPACE);
     }
 
     sanitized = sanitized.slice(0, maxLength);
 
     if (sanitized.length < originalLength) {
       if (sanitized.length < context.input.length) {
-        context.flags.add(SecurityFlags.CONTROL_CHARACTERS);
+        context.flags.add(SecurityFlags.SANITIZED_CONTROL_CHARS);
       }
 
       const sanitizationRatio =
