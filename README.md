@@ -248,65 +248,66 @@ const chainmail = new PromptChainmail()
 
 Prompt Chainmail uses standardized security flags to categorize detected threats and processing events. Each rivet can add one or more flags to indicate what security issues were found.
 
-| Flag                                        | Category            | Description                                        | Triggered By             | Threat Level |
-| ------------------------------------------- | ------------------- | -------------------------------------------------- | ------------------------ | ------------ |
+| Flag                                        | Category                               | Description                                        | Triggered By             | Threat Level |
+| ------------------------------------------- | -------------------------------------- | -------------------------------------------------- | ------------------------ | ------------ |
 | **General Content Processing**              |
-| `TRUNCATED`                                 | Content Processing  | Input was truncated due to length limits           | `sanitize()`             | Low          |
-| `SANITIZED_HTML_TAGS`                       | Content Processing  | HTML tags were sanitized                           | `sanitize()`             | Low          |
-| `SANITIZED_CONTROL_CHARS`                   | Content Processing  | Control characters were sanitized                  | `sanitize()`             | Low          |
-| `SANITIZED_WHITESPACE`                      | Content Processing  | Whitespace was normalized                          | `sanitize()`             | Low          |
-| `UNTRUSTED_WRAPPED`                         | Content Processing  | Content wrapped in security tags                   | `untrustedWrapper()`     | Info         |
+| `TRUNCATED`                                 | General Content Processing             | Input was truncated due to length limits           | `sanitize()`             | Low          |
+| `UNTRUSTED_WRAPPED`                         | General Content Processing             | Content wrapped in security tags                   | `untrustedWrapper()`     | Info         |
+| **Sanitization**                            |
+| `SANITIZED_HTML_TAGS`                       | Sanitization                           | HTML tags were sanitized                           | `sanitize()`             | Low          |
+| `SANITIZED_CONTROL_CHARS`                   | Sanitization                           | Control characters were sanitized                  | `sanitize()`             | Low          |
+| `SANITIZED_WHITESPACE`                      | Sanitization                           | Whitespace was normalized                          | `sanitize()`             | Low          |
 | **General Pattern Detection**               |
-| `INJECTION_PATTERN`                         | Attack Detection    | Common prompt injection patterns detected          | `patternDetection()`     | High         |
+| `INJECTION_PATTERN`                         | General Pattern Detection              | Common prompt injection patterns detected          | `patternDetection()`     | High         |
 | **General Structure Analysis**              |
-| `EXCESSIVE_LINES`                           | Structure Analysis  | Input contains too many lines (>50)                | `structureAnalysis()`    | Low          |
-| `NON_ASCII_HEAVY`                           | Structure Analysis  | High ratio of non-ASCII characters                 | `structureAnalysis()`    | Low          |
-| `REPETITIVE_CONTENT`                        | Structure Analysis  | Repetitive patterns detected                       | `structureAnalysis()`    | Low          |
+| `EXCESSIVE_LINES`                           | General Structure Analysis             | Input contains too many lines (>50)                | `structureAnalysis()`    | Low          |
+| `NON_ASCII_HEAVY`                           | General Structure Analysis             | High ratio of non-ASCII characters                 | `structureAnalysis()`    | Low          |
+| `REPETITIVE_CONTENT`                        | General Structure Analysis             | Repetitive patterns detected                       | `structureAnalysis()`    | Low          |
 | **General Encoding Detection**              |
-| `BASE64_ENCODING`                           | Encoding Detection  | Base64 encoded suspicious content found            | `encodingDetection()`    | Medium       |
-| `HEX_ENCODING`                              | Encoding Detection  | Hexadecimal encoded content detected               | `encodingDetection()`    | Medium       |
-| `URL_ENCODING`                              | Encoding Detection  | URL encoded suspicious content found               | `encodingDetection()`    | Medium       |
-| `UNICODE_ENCODING`                          | Encoding Detection  | Unicode escape sequences detected                  | `encodingDetection()`    | Medium       |
-| `HTML_ENTITY_ENCODING`                      | Encoding Detection  | HTML entity encoded content found                  | `encodingDetection()`    | Medium       |
-| `BINARY_ENCODING`                           | Encoding Detection  | Binary encoded content detected                    | `encodingDetection()`    | Medium       |
-| `OCTAL_ENCODING`                            | Encoding Detection  | Octal encoded content found                        | `encodingDetection()`    | Medium       |
-| `ROT13_ENCODING`                            | Encoding Detection  | ROT13 encoded suspicious content                   | `encodingDetection()`    | Medium       |
-| `MIXED_CASE_OBFUSCATION`                    | Encoding Detection  | Mixed case obfuscation patterns                    | `encodingDetection()`    | Medium       |
+| `BASE64_ENCODING`                           | General Encoding Detection             | Base64 encoded suspicious content found            | `encodingDetection()`    | Medium       |
+| `HEX_ENCODING`                              | General Encoding Detection             | Hexadecimal encoded content detected               | `encodingDetection()`    | Medium       |
+| `URL_ENCODING`                              | General Encoding Detection             | URL encoded suspicious content found               | `encodingDetection()`    | Medium       |
+| `UNICODE_ENCODING`                          | General Encoding Detection             | Unicode escape sequences detected                  | `encodingDetection()`    | Medium       |
+| `HTML_ENTITY_ENCODING`                      | General Encoding Detection             | HTML entity encoded content found                  | `encodingDetection()`    | Medium       |
+| `BINARY_ENCODING`                           | General Encoding Detection             | Binary encoded content detected                    | `encodingDetection()`    | Medium       |
+| `OCTAL_ENCODING`                            | General Encoding Detection             | Octal encoded content found                        | `encodingDetection()`    | Medium       |
+| `ROT13_ENCODING`                            | General Encoding Detection             | ROT13 encoded suspicious content                   | `encodingDetection()`    | Medium       |
+| `MIXED_CASE_OBFUSCATION`                    | General Encoding Detection             | Mixed case obfuscation patterns                    | `encodingDetection()`    | Medium       |
 | **General Confidence and Rate Control**     |
-| `CONFIDENCE_RANGE`                          | Confidence Control  | Confidence within specified range                  | `confidenceFilter()`     | Variable     |
-| `LOW_CONFIDENCE`                            | Confidence Control  | Confidence below minimum threshold                 | `confidenceFilter()`     | Variable     |
-| `RATE_LIMITED`                              | Rate Control        | Request rate limit exceeded                        | `rateLimit()`            | Medium       |
+| `CONFIDENCE_RANGE`                          | General Confidence and Rate Control    | Confidence within specified range                  | `confidenceFilter()`     | Variable     |
+| `LOW_CONFIDENCE`                            | General Confidence and Rate Control    | Confidence below minimum threshold                 | `confidenceFilter()`     | Variable     |
+| `RATE_LIMITED`                              | General Confidence and Rate Control    | Request rate limit exceeded                        | `rateLimit()`            | Medium       |
 | **General HTTP Operations**                 |
-| `HTTP_VALIDATION_FAILED`                    | HTTP Operations     | External validation failed                         | `httpFetch()`            | High         |
-| `HTTP_SUCCESS`                              | HTTP Operations     | External request succeeded                         | `httpFetch()`            | Info         |
-| `HTTP_ERROR`                                | HTTP Operations     | HTTP request error occurred                        | `httpFetch()`            | Medium       |
-| `HTTP_TIMEOUT`                              | HTTP Operations     | HTTP request timed out                             | `httpFetch()`            | Medium       |
+| `HTTP_VALIDATION_FAILED`                    | General HTTP Operations                | External validation failed                         | `httpFetch()`            | High         |
+| `HTTP_SUCCESS`                              | General HTTP Operations                | External request succeeded                         | `httpFetch()`            | Info         |
+| `HTTP_ERROR`                                | General HTTP Operations                | HTTP request error occurred                        | `httpFetch()`            | Medium       |
+| `HTTP_TIMEOUT`                              | General HTTP Operations                | HTTP request timed out                             | `httpFetch()`            | Medium       |
 | **Specific Injection Attacks**              |
-| `SQL_INJECTION`                             | Injection Detection | SQL injection patterns detected                    | `sqlInjection()`         | Critical     |
-| `CODE_INJECTION`                            | Injection Detection | Code execution attempts found                      | `codeInjection()`        | Critical     |
-| `TEMPLATE_INJECTION`                        | Injection Detection | Template injection patterns detected               | `templateInjection()`    | High         |
-| `DELIMITER_CONFUSION`                       | Attack Detection    | Context-breaking delimiter attempts                | `delimiterConfusion()`   | High         |
+| `SQL_INJECTION`                             | Specific Injection Attacks             | SQL injection patterns detected                    | `sqlInjection()`         | Critical     |
+| `CODE_INJECTION`                            | Specific Injection Attacks             | Code execution attempts found                      | `codeInjection()`        | Critical     |
+| `TEMPLATE_INJECTION`                        | Specific Injection Attacks             | Template injection patterns detected               | `templateInjection()`    | High         |
+| `DELIMITER_CONFUSION`                       | Specific Injection Attacks             | Context-breaking delimiter attempts                | `delimiterConfusion()`   | High         |
 | **Specific Role Confusion Attacks**         |
-| `ROLE_CONFUSION`                            | Attack Detection    | Role manipulation or confusion attempts            | `roleConfusion()`        | Medium/High  |
-| `ROLE_CONFUSION_ROLE_ASSUMPTION`            | Attack Detection    | Direct role assumption patterns                    | `roleConfusion()`        | High         |
-| `ROLE_CONFUSION_MODE_SWITCHING`             | Attack Detection    | Mode switching attempts                            | `roleConfusion()`        | High         |
-| `ROLE_CONFUSION_PERMISSION_ASSERTION`       | Attack Detection    | Permission assertion patterns                      | `roleConfusion()`        | High         |
-| `ROLE_CONFUSION_ROLE_INDICATOR`             | Attack Detection    | Role indicator patterns detected                   | `roleConfusion()`        | Medium       |
-| `ROLE_CONFUSION_SCRIPT_MIXING`              | Attack Detection    | Script mixing in role confusion                    | `roleConfusion()`        | High         |
-| `ROLE_CONFUSION_LOOKALIKE_CHARACTERS`       | Attack Detection    | Lookalike character substitution in role confusion | `roleConfusion()`        | High         |
-| `ROLE_CONFUSION_MULTILINGUAL_ATTACK`        | Attack Detection    | Multilingual role confusion attack                 | `roleConfusion()`        | High         |
-| `ROLE_CONFUSION_HIGH_RISK_ROLE`             | Attack Detection    | High-risk role assumption attempt                  | `roleConfusion()`        | Critical     |
+| `ROLE_CONFUSION`                            | Specific Role Confusion Attacks        | Role manipulation or confusion attempts            | `roleConfusion()`        | Medium/High  |
+| `ROLE_CONFUSION_ROLE_ASSUMPTION`            | Specific Role Confusion Attacks        | Direct role assumption patterns                    | `roleConfusion()`        | High         |
+| `ROLE_CONFUSION_MODE_SWITCHING`             | Specific Role Confusion Attacks        | Mode switching attempts                            | `roleConfusion()`        | High         |
+| `ROLE_CONFUSION_PERMISSION_ASSERTION`       | Specific Role Confusion Attacks        | Permission assertion patterns                      | `roleConfusion()`        | High         |
+| `ROLE_CONFUSION_ROLE_INDICATOR`             | Specific Role Confusion Attacks        | Role indicator patterns detected                   | `roleConfusion()`        | Medium       |
+| `ROLE_CONFUSION_SCRIPT_MIXING`              | Specific Role Confusion Attacks        | Script mixing in role confusion                    | `roleConfusion()`        | High         |
+| `ROLE_CONFUSION_LOOKALIKE_CHARACTERS`       | Specific Role Confusion Attacks        | Lookalike character substitution in role confusion | `roleConfusion()`        | High         |
+| `ROLE_CONFUSION_MULTILINGUAL_ATTACK`        | Specific Role Confusion Attacks        | Multilingual role confusion attack                 | `roleConfusion()`        | High         |
+| `ROLE_CONFUSION_HIGH_RISK_ROLE`             | Specific Role Confusion Attacks        | High-risk role assumption attempt                  | `roleConfusion()`        | Critical     |
 | **Specific Instruction Hijacking Attacks**  |
-| `INSTRUCTION_HIJACKING`                     | Attack Detection    | Instruction override attempts                      | `instructionHijacking()` | Critical     |
-| `INSTRUCTION_HIJACKING_OVERRIDE`            | Attack Detection    | Instruction override attack type                   | `instructionHijacking()` | Critical     |
-| `INSTRUCTION_HIJACKING_IGNORE`              | Attack Detection    | Instruction ignore attack type                     | `instructionHijacking()` | Critical     |
-| `INSTRUCTION_HIJACKING_RESET`               | Attack Detection    | System reset attack type                           | `instructionHijacking()` | Critical     |
-| `INSTRUCTION_HIJACKING_BYPASS`              | Attack Detection    | Security bypass attack type                        | `instructionHijacking()` | Critical     |
-| `INSTRUCTION_HIJACKING_REVEAL`              | Attack Detection    | Information extraction attack type                 | `instructionHijacking()` | Critical     |
-| `INSTRUCTION_HIJACKING_UNKNOWN`             | Attack Detection    | Unknown instruction hijacking pattern              | `instructionHijacking()` | High         |
-| `INSTRUCTION_HIJACKING_SCRIPT_MIXING`       | Attack Detection    | Script mixing in instruction hijacking             | `instructionHijacking()` | Critical     |
-| `INSTRUCTION_HIJACKING_LOOKALIKES`          | Attack Detection    | Lookalike characters in instruction hijacking      | `instructionHijacking()` | Critical     |
-| `INSTRUCTION_HIJACKING_MULTILINGUAL_ATTACK` | Attack Detection    | Multilingual instruction hijacking attack          | `instructionHijacking()` | Critical     |
+| `INSTRUCTION_HIJACKING`                     | Specific Instruction Hijacking Attacks | Instruction override attempts                      | `instructionHijacking()` | Critical     |
+| `INSTRUCTION_HIJACKING_OVERRIDE`            | Specific Instruction Hijacking Attacks | Instruction override attack type                   | `instructionHijacking()` | Critical     |
+| `INSTRUCTION_HIJACKING_IGNORE`              | Specific Instruction Hijacking Attacks | Instruction ignore attack type                     | `instructionHijacking()` | Critical     |
+| `INSTRUCTION_HIJACKING_RESET`               | Specific Instruction Hijacking Attacks | System reset attack type                           | `instructionHijacking()` | Critical     |
+| `INSTRUCTION_HIJACKING_BYPASS`              | Specific Instruction Hijacking Attacks | Security bypass attack type                        | `instructionHijacking()` | Critical     |
+| `INSTRUCTION_HIJACKING_REVEAL`              | Specific Instruction Hijacking Attacks | Information extraction attack type                 | `instructionHijacking()` | Critical     |
+| `INSTRUCTION_HIJACKING_UNKNOWN`             | Specific Instruction Hijacking Attacks | Unknown instruction hijacking pattern              | `instructionHijacking()` | High         |
+| `INSTRUCTION_HIJACKING_SCRIPT_MIXING`       | Specific Instruction Hijacking Attacks | Script mixing in instruction hijacking             | `instructionHijacking()` | Critical     |
+| `INSTRUCTION_HIJACKING_LOOKALIKES`          | Specific Instruction Hijacking Attacks | Lookalike characters in instruction hijacking      | `instructionHijacking()` | Critical     |
+| `INSTRUCTION_HIJACKING_MULTILINGUAL_ATTACK` | Specific Instruction Hijacking Attacks | Multilingual instruction hijacking attack          | `instructionHijacking()` | Critical     |
 
 > **Note:** In addition to security flags, the `context.metadata` object provides rich case-by-case details including detected languages, attack patterns, confidence breakdowns, and rivet-specific analysis data for threat intelligence and debugging.
 
