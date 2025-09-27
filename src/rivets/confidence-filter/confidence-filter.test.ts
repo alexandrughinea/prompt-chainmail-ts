@@ -2,7 +2,6 @@ import { describe, it, expect } from "vitest";
 import { PromptChainmail } from "../../index";
 import { patternDetection } from "../pattern-detection/pattern-detection";
 import { confidenceFilter } from "./confidence-filter";
-import { SecurityFlags } from "../rivets.types";
 import {
   measurePerformance,
   expectPerformance,
@@ -18,7 +17,6 @@ describe("confidenceFilter(...)", () => {
 
     expect(result.success).toBe(false);
     expect(result.context.blocked).toBe(true);
-    expect(result.context.flags).toContain(SecurityFlags.LOW_CONFIDENCE);
   });
 
   describe("Performance", () => {

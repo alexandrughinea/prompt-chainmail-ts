@@ -2,6 +2,8 @@
 
 <div align="center">
   <img src="src/logo.png" alt="Prompt Chainmail Logo" width="200" height="234">
+  <br/>
+  <img src="examples/example.gif" alt="Prompt Chainmail Demo" width="600">
 </div>
 
 <br/>
@@ -273,10 +275,8 @@ Prompt Chainmail uses standardized security flags to categorize detected threats
 | `OCTAL_ENCODING`                            | General Encoding Detection             | Octal encoded content found                        | `encodingDetection()`    | Medium       |
 | `ROT13_ENCODING`                            | General Encoding Detection             | ROT13 encoded suspicious content                   | `encodingDetection()`    | Medium       |
 | `MIXED_CASE_OBFUSCATION`                    | General Encoding Detection             | Mixed case obfuscation patterns                    | `encodingDetection()`    | Medium       |
-| **General Confidence and Rate Control**     |
-| `CONFIDENCE_RANGE`                          | General Confidence and Rate Control    | Confidence within specified range                  | `confidenceFilter()`     | Variable     |
-| `LOW_CONFIDENCE`                            | General Confidence and Rate Control    | Confidence below minimum threshold                 | `confidenceFilter()`     | Variable     |
-| `RATE_LIMITED`                              | General Confidence and Rate Control    | Request rate limit exceeded                        | `rateLimit()`            | Medium       |
+| **General Rate Control**                    |
+| `RATE_LIMITED`                              | General Rate Control                   | Request rate limit exceeded                        | `rateLimit()`            | Medium       |
 | **General HTTP Operations**                 |
 | `HTTP_VALIDATION_FAILED`                    | General HTTP Operations                | External validation failed                         | `httpFetch()`            | High         |
 | `HTTP_SUCCESS`                              | General HTTP Operations                | External request succeeded                         | `httpFetch()`            | Info         |

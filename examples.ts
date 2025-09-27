@@ -1,6 +1,18 @@
-import { ChainmailRivet, PromptChainmail } from "./src";
-import { Rivets } from "./src/rivets";
+import {
+  ChainmailRivet,
+  PromptChainmail,
+  Rivets,
+  sanitize,
+  patternDetection,
+  roleConfusion,
+  encodingDetection,
+  confidenceFilter,
+  structureAnalysis,
+  rateLimit,
+} from "./src";
 import { ChainmailContext } from "./src/types";
+import { ThreatLevel } from "./src/rivets/rivets.types";
+import { applyThreatPenalty } from "./src/rivets/rivets.utils";
 
 /**
  * Custom Rivet Examples for Prompt Chainmail
@@ -8,6 +20,46 @@ import { ChainmailContext } from "./src/types";
  * This file demonstrates how to create custom rivets for specific security needs.
  * Each rivet follows the pattern: (context, next) => Promise<ChainmailResult>
  */
+
+/**
+ * Modern Threat Assessment Rivet
+ * Demonstrates the new standardized threat penalty system with flag scaling
+ */
+export const modernThreatAssessment = (): ChainmailRivet => {
+  return async (context, next) => {
+    const threats = [
+      {
+        pattern: /\b(admin|root|sudo)\b/i,
+        level: ThreatLevel.HIGH,
+        flag: "privilege_escalation",
+      },
+      {
+        pattern: /\b(password|secret|key)\s*[:=]\s*\w+/i,
+        level: ThreatLevel.CRITICAL,
+        flag: "credential_exposure",
+      },
+      {
+        pattern: /\b(delete|drop|truncate)\s+(table|database)/i,
+        level: ThreatLevel.CRITICAL,
+        flag: "destructive_command",
+      },
+      {
+        pattern: /\b(eval|exec|system)\s*\(/i,
+        level: ThreatLevel.HIGH,
+        flag: "code_execution",
+      },
+    ];
+
+    for (const threat of threats) {
+      if (threat.pattern.test(context.sanitized)) {
+        context.flags.add(threat.flag);
+        applyThreatPenalty(context, threat.level);
+      }
+    }
+
+    return next();
+  };
+};
 
 /**
  * Detect credit card numbers in input
@@ -18,20 +70,13 @@ export const creditCardDetection = (): ChainmailRivet => {
 
     if (ccPattern.test(context.sanitized)) {
       context.flags.add("credit_card_detected");
-      context.confidence *= 0.3;
+      applyThreatPenalty(context, ThreatLevel.CRITICAL);
       context.metadata.sensitiveDataType = "credit_card";
     }
 
     return next();
   };
 };
-
-// Usage with PromptChainmail:
-// const chainmail = new PromptChainmail()
-//   .forge(Rivets.sanitize())
-//   .forge(creditCardDetection())
-//   .forge(Rivets.confidenceFilter(0.5));
-// const result = await chainmail.protect(userInput);
 
 /**
  * Filter profanity and inappropriate content
@@ -45,7 +90,7 @@ export const profanityFilter = (customWords: string[] = []): ChainmailRivet => {
     for (const word of badWords) {
       if (lower.includes(word)) {
         context.flags.add("profanity_detected");
-        context.confidence *= 0.6;
+        applyThreatPenalty(context, ThreatLevel.MEDIUM);
         context.metadata.detectedWord = word;
         break;
       }
@@ -71,7 +116,7 @@ export const businessHours = (startHour = 9, endHour = 17): ChainmailRivet => {
 
     if (hour < startHour || hour > endHour) {
       context.flags.add("outside_business_hours");
-      context.confidence *= 0.9;
+      applyThreatPenalty(context, ThreatLevel.LOW);
       context.metadata.currentHour = hour;
     }
 
@@ -101,14 +146,14 @@ export const domainWhitelist = (allowedDomains: string[]): ChainmailRivet => {
           const domain = new URL(url).hostname;
           if (!allowedDomains.some((allowed) => domain.includes(allowed))) {
             context.flags.add("unauthorized_domain");
-            context.confidence *= 0.4;
+            applyThreatPenalty(context, ThreatLevel.HIGH);
             context.metadata.blockedDomain = domain;
             break;
           }
         } catch {
           // Invalid URL
           context.flags.add("invalid_url");
-          context.confidence *= 0.7;
+          applyThreatPenalty(context, ThreatLevel.MEDIUM);
         }
       }
     }
@@ -139,7 +184,7 @@ export const personalInfoDetection = (): ChainmailRivet => {
     for (const [type, pattern] of Object.entries(patterns)) {
       if (pattern.test(context.sanitized)) {
         context.flags.add(`${type}_detected`);
-        context.confidence *= 0.4;
+        applyThreatPenalty(context, ThreatLevel.CRITICAL);
         context.metadata.personalInfoType = type;
         break;
       }
@@ -180,7 +225,7 @@ export const languageFilter = (allowedLanguages: string[]): ChainmailRivet => {
 
     if (detected_languages.length > 0 && !hasAllowedLanguage) {
       context.flags.add("unsupported_language");
-      context.confidence *= 0.7;
+      applyThreatPenalty(context, ThreatLevel.MEDIUM);
       context.metadata.detected_languages = detected_languages;
     }
 
@@ -208,14 +253,14 @@ export const contentLengthLimit = (
 
     if (length > maxLength) {
       context.flags.add("content_too_long");
-      context.confidence *= 0.8;
+      applyThreatPenalty(context, ThreatLevel.LOW);
       context.metadata.contentLength = length;
       context.metadata.maxAllowed = maxLength;
     }
 
     if (length < minLength) {
       context.flags.add("content_too_short");
-      context.confidence *= 0.9;
+      applyThreatPenalty(context, ThreatLevel.LOW);
       context.metadata.contentLength = length;
       context.metadata.minRequired = minLength;
     }
@@ -255,7 +300,15 @@ export const externalSecurityValidation = (
       context.metadata.securityScore = data.score;
       context.metadata.detectedThreats = data.threats || [];
       if (data.score < 0.9) {
-        context.confidence *= data.score;
+        const threatLevel =
+          data.score < 0.3
+            ? ThreatLevel.CRITICAL
+            : data.score < 0.6
+              ? ThreatLevel.HIGH
+              : data.score < 0.8
+                ? ThreatLevel.MEDIUM
+                : ThreatLevel.LOW;
+        applyThreatPenalty(context, threatLevel);
       }
     },
     onError: (context: ChainmailContext) => {
@@ -337,15 +390,27 @@ export const conditionalRivet = (
 // ============================================================================
 
 /**
- * Example: Basic Custom Chainmail
- * Shows how to build a chainmail with individual rivets
+ * Example: Basic Custom Chainmail (Namespace Style)
+ * Shows how to build a chainmail with namespace imports for backwards compatibility
  */
 export const basicCustomChainmail = () => {
   return new PromptChainmail()
-    .forge(Rivets.sanitize(5000)) // HTML sanitization
-    .forge(Rivets.patternDetection()) // Injection patterns
-    .forge(Rivets.roleConfusion()) // Role confusion
-    .forge(Rivets.encodingDetection()); // Encoded attacks
+    .forge(Rivets.sanitize(5000))
+    .forge(Rivets.patternDetection())
+    .forge(Rivets.roleConfusion())
+    .forge(Rivets.encodingDetection());
+};
+
+/**
+ * Example: Basic Custom Chainmail (Direct Import Style)
+ * Shows how to build a chainmail with direct function imports (modern approach)
+ */
+export const basicCustomChainmailDirect = () => {
+  return new PromptChainmail()
+    .forge(sanitize(5000))
+    .forge(patternDetection())
+    .forge(roleConfusion())
+    .forge(encodingDetection());
 };
 
 /**
@@ -471,17 +536,18 @@ export const minimalChainmail = () => {
 
 /**
  * Example: Advanced Custom Chainmail
- * Multi-layered protection
+ * Multi-layered protection with modern threat assessment
  */
 export const advancedCustomChainmail = () => {
   return new PromptChainmail()
     .forge(Rivets.sanitize(10000))
+    .forge(modernThreatAssessment())
     .forge(Rivets.patternDetection())
     .forge(Rivets.roleConfusion())
     .forge(Rivets.encodingDetection())
     .forge(Rivets.structureAnalysis())
     .forge(personalInfoDetection())
-    .forge(Rivets.rateLimit(100, 60000)); // 100 requests per minute
+    .forge(Rivets.rateLimit(100, 60000));
 };
 
 /**

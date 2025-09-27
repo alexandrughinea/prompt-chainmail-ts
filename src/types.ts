@@ -9,7 +9,6 @@
  *   // Check confidence level
  *   if (context.confidence < 0.5) {
  *     context.blocked = true;
- *     context.flags.add('low_confidence');
  *     context.metadata.reason = 'Confidence below threshold';
  *   }
  *   return next();
