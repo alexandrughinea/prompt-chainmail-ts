@@ -36,7 +36,10 @@
     "format": "prettier --write \"**/*.{ts,js,json,md}\"",
     "security": "semgrep --config=.semgrep.yml src/",
     "prepare": "husky",
-    "prepublishOnly": "npm run build && npm run test:ci"
+    "prepublishOnly": "npm run build && npm run test:ci",
+    "publish:npm": "npm publish",
+    "publish:jsr": "npx jsr publish",
+    "publish:all": "npm run publish:npm && npm run publish:jsr"
   },
   "keywords": [
     "prompt-injection",

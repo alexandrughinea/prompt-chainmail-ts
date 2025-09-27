@@ -2,8 +2,6 @@
 
 <div align="center">
   <img src="src/logo.png" alt="Prompt Chainmail Logo" width="200" height="234">
-  <br/>
-  <img src="examples/example.gif" alt="Prompt Chainmail Demo" width="600">
 </div>
 
 <br/>

@@ -1,4 +1,4 @@
-name: Publish to npm
+name: Publish to npm and JSR
 
 on:
   workflow_dispatch:
@@ -12,10 +12,22 @@ on:
           - patch
           - minor
           - major
+      registry:
+        description: "Registry to publish to"
+        required: true
+        default: "both"
+        type: choice
+        options:
+          - npm
+          - jsr
+          - both
 
 jobs:
   publish:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
 
     steps:
       - name: Checkout code
@@ -48,12 +60,27 @@ jobs:
         run: npm run build
 
       - name: Bump version
-        run: npm version ${{ github.event.inputs.version }}
+        run: |
+          npm version ${{ github.event.inputs.version }}
+          # Update JSR version to match package.json
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          sed -i "s/\"version\": \".*\"/\"version\": \"$NEW_VERSION\"/" jsr.json
 
       - name: Push changes
         run: git push --follow-tags
 
       - name: Publish to npm
+        if: github.event.inputs.registry == 'npm' || github.event.inputs.registry == 'both'
         run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Setup Deno for JSR
+        if: github.event.inputs.registry == 'jsr' || github.event.inputs.registry == 'both'
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+
+      - name: Publish to JSR
+        if: github.event.inputs.registry == 'jsr' || github.event.inputs.registry == 'both'
+        run: npx jsr publish
