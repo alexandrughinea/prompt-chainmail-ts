@@ -22,6 +22,43 @@ import { applyThreatPenalty } from "./src/rivets/rivets.utils";
  */
 
 /**
+ * Modern Threat Assessment Rivet
+ * Demonstrates the new standardized threat penalty system with flag scaling
+ */
+export const modernThreatAssessment = (): ChainmailRivet => {
+  return async (context, next) => {
+    const threats = [
+      {
+        pattern: /\b(admin|root|sudo)\b/i,
+        level: ThreatLevel.HIGH,
+        flag: "privilege_escalation",
+      },
+      {
+        pattern: /\b(password|secret|key)\s*[:=]\s*\w+/i,
+        level: ThreatLevel.CRITICAL,
+        flag: "credential_exposure",
+      },
+      {
+        pattern: /\b(delete|drop|truncate)\s+(table|database)/i,
+        level: ThreatLevel.CRITICAL,
+        flag: "destructive_command",
+      },
+      {
+        pattern: /\b(eval|exec|system)\s*\(/i,
+        level: ThreatLevel.HIGH,
+        flag: "code_execution",
+      },
+    ];
+
+    for (const threat of threats) {
+      if (threat.pattern.test(context.sanitized)) {
+        context.flags.add(threat.flag);
+        applyThreatPenalty(context, threat.level);
+      }
+    }
+
+    return next();
+  };
 };
 
 /**
