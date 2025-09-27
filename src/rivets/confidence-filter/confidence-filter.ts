@@ -1,5 +1,4 @@
 import { ChainmailRivet } from "../../index";
-import { SecurityFlags } from "../rivets.types";
 
 /**
  * @description
@@ -9,8 +8,7 @@ import { SecurityFlags } from "../rivets.types";
  * - When both thresholds are provided, blocks content within the range (confidence
  *   between min and max is considered risky).
  *
- * - Sets `context.blocked` = true and adds
- *   appropriate security flag (`LOW_CONFIDENCE` or `CONFIDENCE_RANGE) when blocking conditions are met.
+ * - Sets `context.blocked` = true when blocking conditions are met.
  *
  * @param minThreshold Minimum confidence threshold (default: 0.5)
  * @param maxThreshold Optional maximum confidence threshold for range filtering
@@ -20,19 +18,12 @@ export function confidenceFilter(
   maxThreshold?: number
 ): ChainmailRivet {
   return async (context, next) => {
-    if (maxThreshold) {
-      if (
-        context.confidence >= minThreshold &&
-        context.confidence <= maxThreshold
-      ) {
-        context.blocked = true;
-        context.flags.add(SecurityFlags.CONFIDENCE_RANGE);
-      }
-    } else {
-      if (context.confidence < minThreshold) {
-        context.blocked = true;
-        context.flags.add(SecurityFlags.LOW_CONFIDENCE);
-      }
+    const shouldBlock = maxThreshold
+      ? context.confidence >= minThreshold && context.confidence <= maxThreshold
+      : context.confidence < minThreshold;
+
+    if (shouldBlock) {
+      context.blocked = true;
     }
 
     return next();

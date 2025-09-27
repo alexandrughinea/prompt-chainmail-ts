@@ -7,12 +7,9 @@ import { ThreatLevel } from "./rivets.types";
  *
  * Steps:
  * 1. Get base penalty from threat type and current confidence
- * 2. Reduce penalty if content is long (less strict for longer text)
- * 3. Reduce penalty if many flags found (avoids over-penalizing)
+ * 2. Increase penalty if many flags found
+ * 3. Reduce penalty if content is long
  * 4. Apply final penalty and keep confidence above 0.0
- *
- * - Long content: up to 50% less penalty (reduces false positives)
- * - Multiple flags: up to 70% less penalty per extra flag
  */
 export function applyThreatPenalty(
   context: ChainmailContext,
@@ -27,7 +24,7 @@ export function applyThreatPenalty(
   let adjustedPenalty = basePenalty * globalSeverityMultiplier;
 
   const flagCount = context.flags.size;
-  const flagScaling = Math.max(0.3, 1 - flagCount * 0.1);
+  const flagScaling = Math.min(2.5, 1 + flagCount * 0.025);
   adjustedPenalty *= flagScaling;
 
   const contentLength = context.sanitized?.length || 0;

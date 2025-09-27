@@ -20,7 +20,7 @@ describe("condition(...)", () => {
     const result = await chainmail.protect("This contains a secret word");
 
     expect(result.context.flags).toContain("contains_secret");
-    expect(result.context.confidence).toBe(0.64);
+    expect(result.context.confidence).toBe(0.59);
   });
 
   describe("Performance", () => {

@@ -41,9 +41,7 @@ export enum SecurityFlags {
   ROT13_ENCODING = "rot13_encoding",
   MIXED_CASE_OBFUSCATION = "mixed_case_obfuscation",
 
-  // General confidence and rate control
-  CONFIDENCE_RANGE = "confidence_range",
-  LOW_CONFIDENCE = "low_confidence",
+  // General rate control
   RATE_LIMITED = "rate_limited",
 
   // General HTTP operations
