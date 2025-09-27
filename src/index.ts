@@ -1,14 +1,57 @@
-import { Rivets, applyThreatPenalty } from "./rivets/index";
+import {
+  Rivets,
+  applyThreatPenalty,
+  sanitize,
+  patternDetection,
+  roleConfusion,
+  encodingDetection,
+  languageDetection,
+  sqlInjection,
+  codeInjection,
+  delimiterConfusion,
+  instructionHijacking,
+  templateInjection,
+  structureAnalysis,
+  confidenceFilter,
+  rateLimit,
+  logger,
+  untrustedWrapper,
+  httpFetch,
+  condition,
+  telemetry,
+} from "./rivets/index";
 import { Chainmails } from "./chainmails/index";
 import { toChunks } from "./utils";
 import { ChainmailContext, ChainmailResult, ChainmailRivet } from "./types";
 
 export { Rivets, Chainmails, applyThreatPenalty };
+
+export {
+  sanitize,
+  patternDetection,
+  roleConfusion,
+  encodingDetection,
+  languageDetection,
+  sqlInjection,
+  codeInjection,
+  delimiterConfusion,
+  instructionHijacking,
+  templateInjection,
+  structureAnalysis,
+  confidenceFilter,
+  rateLimit,
+  logger,
+  untrustedWrapper,
+  httpFetch,
+  condition,
+  telemetry,
+};
+
 export type { ChainmailRivet };
 
-const MAX_INPUT_SIZE_IN_MB = 1024 * 1024 * 2; // 2MB
-const STRING_CHUNKING_THRESHOLD = 64 * 1024; // 64KB
-const MAX_CHUNK_SIZE = 4096; // 4KB
+const MAX_INPUT_SIZE_IN_MB = 1024 * 1024 * 2;
+const STRING_CHUNKING_THRESHOLD = 64 * 1024;
+const MAX_CHUNK_SIZE = 4096;
 
 /**
  * Core chainmail class for forging security rivets
