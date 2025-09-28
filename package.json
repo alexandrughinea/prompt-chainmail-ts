@@ -81,5 +81,8 @@
   },
   "dependencies": {
     "franc": "^6.2.0"
+  },
+  "publishConfig": {
+    "provenance": true
   }
 }
